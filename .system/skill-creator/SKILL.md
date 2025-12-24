@@ -209,7 +209,8 @@ Skill creation involves these steps:
 3. Initialize the skill (run init_skill.py)
 4. Edit the skill (implement resources and write SKILL.md)
 5. Package the skill (run package_skill.py)
-6. Iterate based on real usage
+6. Commit and push skill changes
+7. Iterate based on real usage
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -361,7 +362,16 @@ The packaging script will:
 
 If validation fails, the script will report the errors and exit without creating a package. Fix any validation errors and run the packaging command again.
 
-### Step 6: Iterate
+### Step 6: Commit and Push Skill Changes
+
+When you modify a skill in a versioned skills repo, commit and push the change so other Codex instances can pick it up:
+
+1. Confirm only intended files changed (`git status`)
+2. Stage changes (`git add -A` or `git add <paths>`)
+3. Commit with a specific message describing the skill change (`git commit -m "..."`)
+4. Push the branch (`git push`)
+
+### Step 7: Iterate
 
 After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
 
