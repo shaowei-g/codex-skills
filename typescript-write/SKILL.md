@@ -22,6 +22,7 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 - Keep changes small, focused, and easy to review; avoid drive-by refactors.
 - Treat type boundaries explicitly (API responses, `localStorage`, query params, event payloads).
   - Prefer `unknown` at the boundary, then validate/narrow with runtime checks.
+  - e.g. parsing API responses, `JSON.parse(localStorage.getItem(...))`, or `URLSearchParams`
 
 ## Type Rules
 
@@ -30,11 +31,32 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 - Prefer explicit return types on exported functions and public APIs.
 - Avoid widening: keep unions narrow and use discriminated unions when modeling variants.
 
+## State & Side Effects
+
+- Prefer colocating state as close as possible to where it is used.
+- Avoid introducing new global state unless absolutely necessary.
+- Keep side effects (data fetching, subscriptions, mutations) explicit and isolated.
+- Avoid hidden side effects inside utility functions.
+  - e.g. a helper that triggers a network request or mutates global state
+
 ## Testing
 
 - Prefer the project’s existing test runner and conventions; default to Jest + ts-jest when appropriate.
 - Add a failing test that demonstrates the bug/desired behavior before implementing the fix.
 - Prefer focused unit tests; add integration/e2e coverage only when the change requires it.
+
+## Comments & Documentation
+
+- Prefer self-documenting code over comments.
+- Add comments only when explaining non-obvious intent or trade-offs.
+- Avoid comments that restate what the code already says.
+
+## Anti-Patterns to Avoid
+
+- Introducing new abstractions without strong reuse justification.
+  - e.g. generic helpers created "for future use" with only one caller
+- Over-generalizing types or utilities "for future use".
+- Large, unrelated changes in a single diff.
 
 ## Linting and Formatting
 
