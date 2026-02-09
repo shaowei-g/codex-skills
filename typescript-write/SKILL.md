@@ -67,6 +67,13 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 - **Type Check:** `npm run type-check-pure`
   - Run TypeScript type checking.
 
+- **Code Organization & Structure**
+
+- All exported functions (including the main entry function) must be defined at the top of the file.
+- Helper functions should be defined as close as possible to where they are used.
+- Do not place all helper functions at the bottom of the file by default.
+- Prefer local proximity over grouping helpers together.
+
 ## Suggested Workflow (Checklist)
 
 1. Identify the closest existing implementation pattern in the codebase (similar module/component/test).
