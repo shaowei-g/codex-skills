@@ -1,0 +1,4 @@
+interface:
+  display_name: "TypeScript Postcheck"
+  short_description: "Run TypeScript post-implementation quality checks"
+  default_prompt: "Run typecheck, lint, and tests in order, triage failures, apply minimal fixes, and report gate-by-gate results."
