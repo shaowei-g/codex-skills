@@ -15,6 +15,7 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 - Run targeted tests, and lint continuously during development.
 - Prioritize understanding existing patterns before implementing.
 - Don't commit changes; leave it for the user to review and make commits.
+- After implementation is complete (tests passing), run **typescript-postcheck** skill and address any findings before finalizing.
 
 ## Implementation Principles
 
@@ -66,8 +67,9 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
   - Format code using Prettier.
 - **Type Check:** `npm run type-check-pure`
   - Run TypeScript type checking.
+- Prefer running these via **typescript-postcheck** after implementation so checks are executed consistently and in the expected order.
 
-- **Code Organization & Structure**
+## Code Organization & Structure
 
 - All exported functions (including the main entry function) must be defined at the top of the file.
 - Helper functions should be defined as close as possible to where they are used.
@@ -80,4 +82,6 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 2. Write a failing test (or update an existing one) proving the intended behavior.
 3. Implement the smallest fix that makes the test pass while matching existing style.
 4. Tighten types (remove broad types, model invariants, validate at boundaries).
-5. Run targeted tests, then `npm run lint --fix`, `npm run prettier --write .`, and `npm run type-check-pure`.
+5. Run targeted tests.
+6. Run **typescript-postcheck** skill.
+7. If postcheck reports issues, fix them, rerun relevant tests, then rerun **typescript-postcheck** until clean.
