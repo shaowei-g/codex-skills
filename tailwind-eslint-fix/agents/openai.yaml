@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tailwind ESLint Fix"
+  short_description: "Auto-fix better-tailwindcss warnings after frontend changes"
+  default_prompt: "Use $tailwind-eslint-fix to auto-fix and verify better-tailwindcss warnings in this frontend code."
