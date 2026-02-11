@@ -1,0 +1,4 @@
+interface:
+  display_name: "Conventional Commit Helper"
+  short_description: "Write semantic-release friendly Conventional Commits"
+  default_prompt: "Generate and validate a Conventional Commit message from staged changes, including type, scope, subject, body bullets, and footer references when needed."
