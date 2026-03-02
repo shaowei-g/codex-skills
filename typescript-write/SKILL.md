@@ -10,12 +10,28 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 ## Autonomous Development Workflow
 
 - Do not attempt to read or edit files outside the project folder.
+- **Before writing code, search the codebase for existing implementations to reuse** (components, hooks, utilities, patterns, tests).
 - Add failing tests first, then fix them.
 - Work autonomously in small, testable increments.
 - Run targeted tests, and lint continuously during development.
 - Prioritize understanding existing patterns before implementing.
 - Don't commit changes; leave it for the user to review and make commits.
 - After implementation is complete (tests passing), run **typescript-postcheck** skill and address any findings before finalizing.
+
+## Reuse-First Principle (Must Follow)
+
+Before creating new code, **attempt reuse in this order**:
+
+1. **Existing component/module** that already matches the UI/behavior (frontend: components first).
+2. **Existing hook/utility** that provides the same data transformation or side-effect handling.
+3. **Existing pattern** in a similar feature area (copy the shape, not the whole file).
+4. Only if no suitable option exists: create a **minimal, single-purpose** implementation consistent with existing patterns.
+
+Guidelines:
+
+- Prefer **extension/composition** over duplication (e.g., add a prop/option, wrap component, or extract a helper already used elsewhere).
+- Do not introduce “general-purpose” abstractions for hypothetical future use.
+- When reuse is not possible, explicitly state _why_ (API mismatch, missing variant, performance constraints, coupling, etc.) and then implement the smallest new code.
 
 ## Implementation Principles
 
@@ -56,17 +72,22 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 
 - Introducing new abstractions without strong reuse justification.
   - e.g. generic helpers created "for future use" with only one caller
+
 - Over-generalizing types or utilities "for future use".
 - Large, unrelated changes in a single diff.
+- Creating a new component when an existing one can be extended or composed.
 
 ## Linting and Formatting
 
 - **Lint:** `npm run lint --fix`
   - Run ESLint on the codebase and fix issues.
+
 - **Format:** `npm run prettier --write .`
   - Format code using Prettier.
+
 - **Type Check:** `npm run type-check-pure`
   - Run TypeScript type checking.
+
 - Prefer running these via **typescript-postcheck** after implementation so checks are executed consistently and in the expected order.
 
 ## Code Organization & Structure
@@ -79,9 +100,13 @@ Use this skill when implementing or refactoring TypeScript/JavaScript in a Metab
 ## Suggested Workflow (Checklist)
 
 1. Identify the closest existing implementation pattern in the codebase (similar module/component/test).
-2. Write a failing test (or update an existing one) proving the intended behavior.
-3. Implement the smallest fix that makes the test pass while matching existing style.
-4. Tighten types (remove broad types, model invariants, validate at boundaries).
-5. Run targeted tests.
-6. Run **typescript-postcheck** skill.
-7. If postcheck reports issues, fix them, rerun relevant tests, then rerun **typescript-postcheck** until clean.
+2. **Search for reusable code first**:
+   - Frontend: existing components (same UX), then hooks, then utilities.
+   - Backend: existing services/handlers, then shared libs, then utilities.
+
+3. Write a failing test (or update an existing one) proving the intended behavior.
+4. Implement the smallest fix that makes the test pass while matching existing style.
+5. Tighten types (remove broad types, model invariants, validate at boundaries).
+6. Run targeted tests.
+7. Run **typescript-postcheck** skill.
+8. If postcheck reports issues, fix them, rerun relevant tests, then rerun **typescript-postcheck** until clean.
