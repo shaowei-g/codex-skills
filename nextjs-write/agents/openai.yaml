@@ -1,0 +1,4 @@
+interface:
+  display_name: "Next.js Write"
+  short_description: "Write/refactor Next.js TypeScript React code"
+  default_prompt: "Use $nextjs-write to implement or refactor Next.js code with reuse-first patterns, next/image, and RHF + Zod forms."
