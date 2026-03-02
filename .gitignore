@@ -1,0 +1,16 @@
+# Ignore everything at the repository root
+/*
+
+# But keep this file itself
+!.gitignore
+
+# Allow the `skills` directory and all its contents
+!/skills/
+!/skills/**
+
+# Allow the top-level `config.toml`
+!/config.toml
+
+# Note: files already tracked by Git will remain tracked even if
+# they are now excluded by these rules. To stop tracking a file,
+# remove it from the index with `git rm --cached <file>`.

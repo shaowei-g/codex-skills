@@ -1,0 +1,30 @@
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp", "--api-key", "${CONTEXT_APIKEY}"]
+
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/har/repo"]
+
+[mcp_servers.git]
+command = "npx"
+args = ["-y", "@mseep/git-mcp-server"]
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp"]
+
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "mcp-server-mysql"]
+
+[mcp_servers.memory]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-memory"]
+
