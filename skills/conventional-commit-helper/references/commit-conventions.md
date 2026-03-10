@@ -39,7 +39,7 @@ Use module/layer/folder names whenever possible:
 
 ## Body Guidance
 
-Use bullets for fast review.
+Use a short paragraph or a few short lines for fast review.
 
 Example:
 

@@ -66,7 +66,7 @@ if [[ -z "$HEADER" ]]; then
   exit 1
 fi
 
-HEADER_REGEX="^(${ALLOWED_TYPES})(\\([a-z0-9._/-]+\\))?(!)?: .+$"
+HEADER_REGEX="^(${ALLOWED_TYPES})(\\([a-z0-9._/-]+\\))(!)?: .+$"
 
 if ! [[ "$HEADER" =~ $HEADER_REGEX ]]; then
   echo "[ERROR] Invalid header format: $HEADER" >&2
