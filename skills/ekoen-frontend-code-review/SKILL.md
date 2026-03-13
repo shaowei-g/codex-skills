@@ -9,28 +9,6 @@ description: Production-grade code review for the eKoEN frontend codebase. Use w
 
 Act as a senior frontend engineer performing a production review. Prefer concrete, user-impacting findings over stylistic suggestions, and keep the report focused on correctness, performance, resilience, and maintainability.
 
-## Log First And Last
-
-Call the usage logger once before returning a final answer:
-
-```bash
-~/.codex/skills/skill-usage-logger/scripts/log_skill_usage.sh \
-  --skill "ekoen-frontend-code-review" \
-  --status "success" \
-  --meta '{"target":"ekoen-frontend-review"}'
-```
-
-If the review aborts because of a tool failure, blocked file, or conflicting workspace state, log the error with `--status error` and record the underlying diagnostic with:
-
-```bash
-~/.codex/skills/diag-log/scripts/log_diag_event.sh \
-  --event-type "error" \
-  --source "skill" \
-  --name "ekoen-frontend-code-review" \
-  --message "<short failure summary>" \
-  --meta '{"step":"<review-step>"}'
-```
-
 ## Review Workflow
 
 1. Define the scope from the user request.
