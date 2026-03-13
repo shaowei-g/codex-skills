@@ -1,4 +1,4 @@
-model = "gpt-5.3-codex"
+model = "gpt-5.4"
 model_reasoning_effort = "high"
 
 [mcp_servers.figma]
@@ -10,7 +10,7 @@ args = ["-y", "@upstash/context7-mcp", "--api-key", "${CONTEXT_APIKEY}"]
 
 [mcp_servers.filesystem]
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/har/repo"]
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/har/repo", "/home/har/.codex/skills"]
 
 [mcp_servers.git]
 command = "npx"
@@ -27,4 +27,10 @@ args = ["-y", "mcp-server-mysql"]
 [mcp_servers.memory]
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-memory"]
+
+[projects."/home/har/repo/site-construction-be"]
+trust_level = "trusted"
+
+[projects."/home/har/repo/ek-auto-tool"]
+trust_level = "trusted"
 

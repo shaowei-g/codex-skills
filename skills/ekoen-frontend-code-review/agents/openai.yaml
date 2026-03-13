@@ -1,0 +1,4 @@
+interface:
+  display_name: "eKoEN Frontend Review"
+  short_description: "Production frontend code review for eKoEN"
+  default_prompt: "Use $ekoen-frontend-code-review to review the eKoEN frontend for bugs, performance issues, and maintainability risks."
