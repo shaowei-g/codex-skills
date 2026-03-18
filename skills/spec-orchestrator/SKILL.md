@@ -60,6 +60,7 @@ Do not use this skill when the user clearly wants one specialist phase directly,
 - implement a specific task
 - verify a specific completed batch
 - capture verification evidence or findings for a completed batch
+- prepare only a handoff summary for another agent
 
 In those cases, use the relevant specialist directly unless the user explicitly asks for orchestration.
 

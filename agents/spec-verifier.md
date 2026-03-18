@@ -28,7 +28,7 @@ Read in this order:
 Proceed when at least one is true:
 
 - code or artifacts changed and evidence is missing
-- the user asks for review or alignment checking
+- the user requests verification against acceptance criteria, regression review, or alignment checking
 - later artifacts appear to conflict with earlier ones
 - the orchestrator needs evidence to decide whether the workflow may advance
 
