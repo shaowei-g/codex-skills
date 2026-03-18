@@ -6,6 +6,7 @@ description: Detect and record drift between Spec Kit artifacts and implementati
 # Spec Drift Check
 
 Use this skill when scope alignment is the main question.
+Use `spec-verifier` instead when the main question is evidence, testing, or verification findings.
 
 ## Read First
 

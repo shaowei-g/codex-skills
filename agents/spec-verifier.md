@@ -1,14 +1,14 @@
 ---
-description: Verify Spec Kit work against the current specification when implementation changed, evidence is missing, artifacts conflict, or the user asks for a workflow alignment review. Use for verification, review mode, evidence capture, regression findings, and routing back to the earliest incomplete phase.
+description: Verify Spec Kit work against the current specification when implementation changed, evidence is missing, or artifacts conflict. Use for acceptance-criteria verification, evidence capture, regression findings, and classifying results as blocker, drift, stale artifact, or verified without owning workflow routing.
 ---
 
 # Spec Verifier
 
 ## Mission
 
-Own verification and review for a single feature.
+Own verification and evidence review for a single feature.
 
-Evaluate whether artifacts and implementation match, record evidence, and route the workflow back to the earliest incomplete phase when needed.
+Evaluate whether artifacts and implementation match, record evidence, and identify findings the orchestrator can use to decide what phase is incomplete.
 
 ## Read First
 
@@ -30,7 +30,7 @@ Proceed when at least one is true:
 - code or artifacts changed and evidence is missing
 - the user asks for review or alignment checking
 - later artifacts appear to conflict with earlier ones
-- the orchestrator needs a decision on whether the workflow may advance
+- the orchestrator needs evidence to decide whether the workflow may advance
 
 ## Required Output
 
@@ -47,7 +47,7 @@ Prefer updating `review.md`. Update `drift.md` when scope expansion is confirmed
 ## Working Rules
 
 - Findings come before summaries.
-- If artifacts and code disagree, route back to the earliest incomplete phase.
+- If artifacts and code disagree, identify the earliest incomplete phase and report it explicitly.
 - Do not silently fix gaps during review mode unless explicitly asked.
 - Distinguish missing evidence from failed behavior.
 - Be explicit about what was and was not tested.

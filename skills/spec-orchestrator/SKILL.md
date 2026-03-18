@@ -37,7 +37,7 @@ Use this skill when the request is about orchestration or workflow state, for ex
 
 - determine the next valid phase for a feature
 - continue an interrupted Spec Kit workflow
-- review whether artifacts and implementation are still aligned
+- decide whether the workflow can move forward or must loop back
 - decide what should happen next without skipping stages
 - prepare a handoff
 - coordinate specialist subagents across multiple phases
@@ -46,7 +46,7 @@ Examples:
 
 - "Continue feature `checkout-flow` from the correct phase."
 - "Figure out what phase this Spec Kit feature is in."
-- "Review whether spec, plan, tasks, and implementation still line up."
+- "Decide whether this feature can move forward or must loop back to an earlier phase."
 - "Resume this partially completed feature safely."
 - "Prepare a handoff for the next agent."
 
@@ -59,6 +59,7 @@ Do not use this skill when the user clearly wants one specialist phase directly,
 - decompose `plan.md` into tasks
 - implement a specific task
 - verify a specific completed batch
+- capture verification evidence or findings for a completed batch
 
 In those cases, use the relevant specialist directly unless the user explicitly asks for orchestration.
 
