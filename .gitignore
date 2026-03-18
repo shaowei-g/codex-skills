@@ -8,6 +8,10 @@
 !/skills/
 !/skills/**
 
+# Allow the `agents` directory and all its contents
+!/agents/
+!/agents/**
+
 # Allow the top-level `config.toml`
 !/config.toml
 

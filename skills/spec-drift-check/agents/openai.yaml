@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Drift Check'
+  short_description: 'Detect Spec Kit scope drift and alignment gaps'
+  default_prompt: 'Use $spec-drift-check to decide whether the latest changes exceed the current spec.'

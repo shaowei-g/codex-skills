@@ -16,10 +16,6 @@ args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/har/repo", "/hom
 command = "npx"
 args = ["-y", "@mseep/git-mcp-server"]
 
-[mcp_servers.playwright]
-command = "npx"
-args = ["-y", "@playwright/mcp"]
-
 [mcp_servers.mysql]
 command = "npx"
 args = ["-y", "mcp-server-mysql"]
@@ -28,9 +24,19 @@ args = ["-y", "mcp-server-mysql"]
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-memory"]
 
-[projects."/home/har/repo/site-construction-be"]
+[mcp_servers.playwright]
+args = ["@playwright/mcp@latest"]
+command = "npx"
+
+[projects."/home/har/repo"]
 trust_level = "trusted"
 
 [projects."/home/har/repo/ek-auto-tool"]
 trust_level = "trusted"
+
+[projects."/home/har"]
+trust_level = "trusted"
+
+[features]
+multi_agent = true
 
