@@ -1,4 +1,4 @@
 interface:
   display_name: 'Spec Handoff'
-  short_description: 'Package current phase state for safe continuation'
-  default_prompt: 'Use $spec-handoff to prepare a handoff for the current feature phase.'
+  short_description: 'Package current phase state with script-backed workflow and fixed schema'
+  default_prompt: 'Use $spec-handoff to prepare a structured handoff for the current feature phase.'

@@ -38,7 +38,7 @@ Return `blocked` when any of the following is true:
 
 ## Phase-Specific Prompt Expectations
 
-### spec-viewer
+### spec-viewer for inspection or routing
 
 Preferred prompt chain:
 
@@ -46,7 +46,7 @@ Preferred prompt chain:
 2. `.codex/prompts/speckit.constitution.md` when present
 3. local `spec-viewer` rules
 
-Return `rejected` if the request asks `spec-viewer` to author phase-owned artifacts, implement work, or perform verification instead of inspection.
+Return `rejected` if the request asks `spec-viewer` to author phase-owned artifacts, implement work, or perform verification instead of inspection or continuity packaging.
 Return `blocked` if the phase is inspection but the repository artifacts or code needed to determine current state are missing or unreadable.
 
 ### spec-analyst
@@ -122,7 +122,7 @@ Preferred prompt chain:
 Return `rejected` if the request is actually asking for new specification authoring rather than drift assessment.
 Return `blocked` if scope alignment cannot be determined from available artifacts and code evidence.
 
-### spec-handoff
+### spec-viewer for continuity
 
 Preferred prompt chain:
 
@@ -130,7 +130,7 @@ Preferred prompt chain:
 2. `.codex/prompts/speckit.checklist.md`
 3. `.codex/prompts/speckit.constitution.md` when present
 4. equivalent repository continuity or review prompt
-5. local `spec-handoff` rules
+5. local `spec-viewer` rules
 
 Return `rejected` if the request asks the handoff skill to decide architecture, implement tasks, or verify behavior.
 Return `blocked` if continuity notes cannot be prepared because the current phase, completed work, or blockers cannot be determined from repository state.

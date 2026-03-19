@@ -15,7 +15,7 @@ All paths are relative to the repository root.
 - Clarification before or during specification: `.codex/prompts/speckit.clarify.md`
 - Constitution or governing constraints: `.codex/prompts/speckit.constitution.md`
 - Task export to issue format when explicitly requested: `.codex/prompts/speckit.taskstoissues.md`
-- Feature state inspection and routing recommendation: repository-local workflow inspection prompt when available, otherwise local `spec-viewer` rules
+- Feature state inspection and routing recommendation: repository-local workflow inspection prompt when available, otherwise local `spec-handoff` rules
 
 ## Lookup Rule
 
@@ -31,7 +31,6 @@ For every subagent run:
 
 The existence of additional prompt files does not authorize extra phases.
 A subagent must still execute exactly one assigned scope in one run.
-
 
 ## Failure Classification Reference
 

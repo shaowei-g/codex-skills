@@ -28,19 +28,7 @@ The subagent must treat those reinjected instructions as mandatory for the curre
 
 ## Read First
 
-Read in this order:
-
-- `.codex/prompts/speckit.constitution.md` if present
-- repository-local workflow inspection or state-analysis prompt only if one exists
-
-- the user request or orchestrator handoff
-- `specs/<feature>/handoff.md` if present
-- `specs/<feature>/spec.md` if present
-- `specs/<feature>/plan.md` if present
-- `specs/<feature>/tasks.md` if present
-- `specs/<feature>/review.md` if present
-- `specs/<feature>/drift.md` if present
-- only the code and test artifacts needed to assess implementation presence, verification need, and visible drift
+- `../spec-handoff/SKILL.md`
 
 ## Entry Gate
 

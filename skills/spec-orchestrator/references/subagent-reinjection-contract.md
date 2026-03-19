@@ -27,7 +27,7 @@
 
 ### status keywords
 
-- `ok`
+- `completed`
 - `blocked`
 - `rejected`
 
@@ -90,6 +90,10 @@
 - Files-Read
 - Missing-Prerequisites
 - Contract-Violations
+- Blockers
+- Unresolved Questions
+- Drift
+- Evidence
 - Recommended-Next-Phase
 - Recommended-Next-Subagent
 - Notes
@@ -105,6 +109,12 @@
 - outside_ownership_modification = false
 - required_response_schema_used = true
 - terminating_now = true
+
+### advisory recommendation rule
+
+- `Recommended-Next-Phase` is advisory only
+- `Recommended-Next-Subagent` is advisory only
+- orchestrator keeps routing authority
 
 ### validator
 
