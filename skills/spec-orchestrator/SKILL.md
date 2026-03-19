@@ -1,11 +1,11 @@
 ---
 name: spec-orchestrator
-description: Orchestrate GitHub Spec Kit workflows across spec, plan, tasks, implementation, verification, review, drift control, continuation, and handoff. Use this skill to detect the earliest valid phase, enforce stage gates, and explicitly invoke the correct specialist subagent for exactly one bounded unit of work.
+description: Orchestrate feature delivery across spec, plan, tasks, implementation, verification, review, drift control, continuation, and handoff. Use this skill to detect the earliest valid phase, enforce stage gates, and explicitly invoke the correct specialist subagent for exactly one bounded unit of work.
 ---
 
 # Spec Orchestrator
 
-Coordinate GitHub Spec Kit feature delivery without collapsing all phases into one agent context.
+Coordinate feature delivery without collapsing all phases into one agent context.
 
 This skill owns:
 
@@ -66,7 +66,7 @@ Write the instruction as an explicit action: **use subagent X to do Y**.
 Use this skill when the request is about workflow orchestration, for example:
 
 - determine the next valid phase for a feature
-- continue an interrupted Spec Kit workflow
+- continue an interrupted feature workflow
 - route work back to an earlier phase when artifacts conflict
 - decide whether work may move forward
 - coordinate review, drift handling, or handoff
@@ -75,7 +75,7 @@ Use this skill when the request is about workflow orchestration, for example:
 Examples:
 
 - "Continue feature `checkout-flow` from the correct phase."
-- "Figure out what phase this Spec Kit feature is in."
+- "Figure out what phase this feature is in."
 - "Resume this partially completed feature safely."
 - "Route this feature to the correct subagent."
 - "Prepare a handoff for the next agent."
@@ -97,19 +97,30 @@ In those cases, use the relevant specialist subagent directly.
 
 ## Primary Artifact Convention
 
-Prefer this feature layout:
+Use this feature layout:
 
-- `.specify/specs/<feature>/spec.md`
-- `.specify/specs/<feature>/plan.md`
-- `.specify/specs/<feature>/tasks.md`
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md`
+- `specs/<feature>/tasks.md`
 
 Secondary notes:
 
-- `.specify/specs/<feature>/review.md`
-- `.specify/specs/<feature>/drift.md`
-- `.specify/specs/<feature>/handoff.md`
+- `specs/<feature>/review.md`
+- `specs/<feature>/drift.md`
+- `specs/<feature>/handoff.md`
 
-If the repository already uses a clearly established Spec Kit-compatible layout, follow repository convention.
+## Prompt Discovery Convention
+
+When routing a specialist phase, use the mapping at `./references/codex-prompt-mapping.md`.
+
+The orchestrator must:
+
+1. Check `.codex/prompts/` for the exact mapped prompt for the assigned phase.
+2. Also apply `.codex/prompts/speckit.constitution.md` when present.
+3. If the mapped prompt is missing, search other prompt locations in the repository for an equivalent prompt.
+4. If no repository prompt exists, continue using the assigned artifact contract and phase rules in this skill bundle.
+
+The orchestrator must prefer repository-local prompts over bundle-local prose.
 
 ## Core Rules
 
@@ -130,10 +141,11 @@ Follow this loop on every orchestration pass:
 2. Inspect feature artifacts and relevant code state.
 3. Determine the earliest incomplete or conflicting phase.
 4. Enforce the entry gate for that phase.
-5. Use the correct specialist subagent for exactly one bounded unit of work.
-6. Validate the subagent result against the exit gate.
-7. Write or update durable workflow notes.
-8. Either continue to the next valid phase or stop with blockers.
+5. Discover the applicable repository prompt or template.
+6. Use the correct specialist subagent for exactly one bounded unit of work.
+7. Validate the subagent result against the exit gate.
+8. Write or update durable workflow notes.
+9. Either continue to the next valid phase or stop with blockers.
 
 ## Step 1: Resolve the Target Feature
 
@@ -142,7 +154,7 @@ Resolve the feature before routing.
 Use this order:
 
 1. If the user names the feature slug, use it.
-2. Otherwise inspect `.specify/specs/`.
+2. Otherwise inspect `specs/`.
 3. If exactly one plausible active feature exists, use it.
 4. If multiple active candidates exist, stop and ask the user to choose.
 
@@ -182,16 +194,21 @@ Use these references instead:
 
 - lifecycle contract: `./references/subagent-lifecycle.md`
 - response schema: `./references/subagent-response-format.md`
+- prompt mapping: `./references/codex-prompt-mapping.md`
+- prompt fallback and failure classification: `./references/subagent-prompt-fallbacks.md`
 
 The orchestrator must delegate using those shared contracts rather than redefining them inline.
+When validating a `blocked` or `rejected` result, use `./references/subagent-prompt-fallbacks.md`.
 
 ## Required Delegation Payload Elements
 
 Every delegation payload must state all of the following:
 
 - target feature
+- artifact directory path
 - exactly one assigned scope
 - relevant artifact or bounded batch
+- repository prompt mapping instruction
 - explicit stop-after-completion instruction
 - required response schema reference
 
@@ -326,6 +343,7 @@ Whenever this orchestrator uses a specialist subagent, provide all of the follow
 - the single bounded unit or batch to complete
 - expected deliverable
 - exit criteria
+- repository prompt lookup order
 - explicit drift-handling instructions
 
 If the subagent is `spec-implementer`, also provide:
@@ -470,7 +488,7 @@ Stop and report blockers when:
 
 Trigger this skill:
 
-- "Use Spec Kit to resume feature `audit-log-export`."
+- "Resume feature `audit-log-export` from the correct phase."
 - "What is the next valid phase for this partially completed feature?"
 - "Review whether the plan and tasks still match the shipped code."
 - "Continue this feature without skipping required stages."

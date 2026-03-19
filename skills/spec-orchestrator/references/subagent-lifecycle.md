@@ -11,32 +11,42 @@ Every subagent run must follow this exact sequence:
    - Bind the run to exactly one phase-owned assignment.
    - Reject or return blocked if the request contains multiple unrelated scopes.
 
-2. **Load Context**
+2. **Load Prompt Context**
+   - Use the phase-to-prompt mapping in `./references/codex-prompt-mapping.md`.
+   - Search `.codex/prompts/` first for the exact phase prompt.
+   - Also load `.codex/prompts/speckit.constitution.md` when present as a governing constraint.
+   - If the mapped phase prompt is not found, search other prompt locations in the repository for an equivalent phase prompt.
+   - If no repository prompt exists, continue with the artifact contract and phase rules in this bundle.
+   - Prefer repository-local prompts over bundle-local prose whenever both exist.
+
+3. **Load Feature Context**
    - Read only the artifacts and code needed for the assigned scope.
    - Prefer the feature's durable workflow notes over chat history.
+   - Use `specs/<feature>/` as the feature artifact directory.
    - Do not assume ownership of later phases.
 
-3. **Validate Entry Gate**
+4. **Validate Entry Gate**
    - Check the subagent's documented entry gate.
    - If the gate fails, stop without doing adjacent-phase work.
    - Return a blocked result in the shared response format.
 
-4. **Execute Single Scope**
+5. **Execute Single Scope**
    - Perform only the assigned bounded unit of work.
+   - Follow the applicable repository prompt or template if one was found.
    - Do not expand into a second batch, second phase, or parallel scope.
    - Record blockers or drift instead of absorbing additional work.
 
-5. **Persist Durable Outputs**
+6. **Persist Durable Outputs**
    - Update only the files required by the assigned scope.
    - Write concrete artifact updates before returning whenever possible.
    - If no file change is safe, explain why in the return payload.
 
-6. **Return Fixed Response**
+7. **Return Fixed Response**
    - Return output using the shared response schema in `./references/subagent-response-format.md`.
    - Include scope, status, files touched, blockers, drift, evidence, and recommended next phase.
    - Do not return free-form summaries in place of the schema.
 
-7. **Shutdown**
+8. **Shutdown**
    - Stop immediately after returning the result.
    - Do not self-continue, monitor, or auto-invoke another phase.
    - Hand control back to the orchestrator.
@@ -68,9 +78,15 @@ The following are invalid for one subagent run:
 The orchestrator must delegate with all of the following made explicit:
 
 - target feature
+- artifact directory path
 - assigned scope
+- repository prompt mapping and lookup order
 - expected artifact or batch
 - stop-after-completion instruction
 - required response schema reference
 
 The orchestrator validates the returned payload and decides whether another subagent run is needed.
+
+## Prompt Failure and Classification
+
+Use `./subagent-prompt-fallbacks.md` for the required fallback chain and for deciding whether a prompt problem or missing prerequisite must return `blocked` or `rejected`.

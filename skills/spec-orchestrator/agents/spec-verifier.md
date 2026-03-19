@@ -1,5 +1,5 @@
 ---
-description: Verify Spec Kit work against the current specification when implementation changed, evidence is missing, or artifacts conflict. Use for acceptance-criteria verification, evidence capture, regression findings, and classifying results as blocker, drift, stale artifact, or verified without owning workflow routing.
+description: Verify spec work against the current specification when implementation changed, evidence is missing, or artifacts conflict. Use for acceptance-criteria verification, evidence capture, regression findings, and classifying results as blocker, drift, stale artifact, or verified without owning workflow routing.
 ---
 
 # Spec Verifier
@@ -12,17 +12,23 @@ Evaluate whether artifacts and implementation match, record evidence, and identi
 
 This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
 
+It must use `.codex/prompts/speckit.checklist.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
+
 ## Read First
 
 Read in this order:
 
+- `.codex/prompts/speckit.checklist.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- equivalent repository prompt locations only if the primary prompt is missing
+
 - the user request or orchestrator handoff
-- `.specify/specs/<feature>/spec.md`
-- `.specify/specs/<feature>/plan.md` if present
-- `.specify/specs/<feature>/tasks.md` if present
-- `.specify/specs/<feature>/review.md` if present
-- `.specify/specs/<feature>/drift.md` if present
-- `.specify/specs/<feature>/handoff.md` if present
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md` if present
+- `specs/<feature>/tasks.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
+- `specs/<feature>/handoff.md` if present
 - relevant changed code and available test output
 
 ## Entry Gate

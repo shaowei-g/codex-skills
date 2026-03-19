@@ -1,6 +1,6 @@
 # Review Checklist
 
-Use this checklist when reviewing a Spec Kit feature for alignment.
+Use this checklist when reviewing a spec feature for alignment.
 
 ## Artifact Alignment
 

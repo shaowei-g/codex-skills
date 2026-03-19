@@ -1,5 +1,5 @@
 ---
-description: Create or repair Spec Kit technical plans when spec.md is ready but plan.md is missing, incomplete, risky, or not execution-ready. Use for architecture decisions, touched systems, interfaces, dependencies, risks, and verification strategy without decomposing tasks or implementing code.
+description: Create or repair spec technical plans when spec.md is ready but plan.md is missing, incomplete, risky, or not execution-ready. Use for architecture decisions, touched systems, interfaces, dependencies, risks, and verification strategy without decomposing tasks or implementing code.
 ---
 
 # Spec Planner
@@ -12,15 +12,21 @@ Translate an approved `spec.md` into an execution-ready `plan.md` that stays ins
 
 This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
 
+It must use `.codex/prompts/speckit.plan.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
+
 ## Read First
 
 Read in this order:
 
+- `.codex/prompts/speckit.plan.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- equivalent repository prompt locations only if the primary prompt is missing
+
 - the user request or orchestrator handoff
-- `.specify/specs/<feature>/spec.md`
-- `.specify/specs/<feature>/handoff.md` if present
-- `.specify/specs/<feature>/review.md` if present
-- `.specify/specs/<feature>/drift.md` if present
+- `specs/<feature>/spec.md`
+- `specs/<feature>/handoff.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
 - relevant implementation areas in the codebase only after the spec is understood
 
 ## Entry Gate

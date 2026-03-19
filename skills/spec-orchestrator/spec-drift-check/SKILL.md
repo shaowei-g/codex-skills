@@ -1,6 +1,6 @@
 ---
 name: spec-drift-check
-description: Detect and record drift between Spec Kit artifacts and implementation when requests, code changes, plan changes, or task updates appear to exceed the current spec. Use for scope checks, artifact/code alignment reviews, drift.md updates, and deciding whether work must route back to specification or planning.
+description: Detect and record drift between spec artifacts and implementation when requests, code changes, plan changes, or task updates appear to exceed the current spec. Use for scope checks, artifact/code alignment reviews, drift.md updates, and deciding whether work must route back to specification or planning.
 ---
 
 # Spec Drift Check
@@ -12,16 +12,22 @@ Use `spec-verifier` instead when the main question is evidence, testing, or veri
 
 Read in this order:
 
-- `spec.md`
-- `plan.md` if present
-- `tasks.md` if present
-- `review.md` if present
-- `drift.md` if present
+- `.codex/prompts/speckit.analyze.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- equivalent repository prompt locations only if the primary prompt is missing
+
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md` if present
+- `specs/<feature>/tasks.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
 - changed code or requested changes that may exceed scope
 
 If the orchestrator bundle uses the standard layout, the shared template is at `../spec-orchestrator/references/drift-report-template.md`.
 
 This skill also follows the shared subagent lifecycle contract at `../references/subagent-lifecycle.md` and the shared response schema at `../references/subagent-response-format.md`.
+
+Use `.codex/prompts/speckit.analyze.md` as the primary repository prompt when that file exists. Also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, search other prompt locations in the repository before falling back to this bundle. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
 
 ## Goal
 

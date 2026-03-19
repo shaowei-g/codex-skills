@@ -1,5 +1,5 @@
 ---
-description: Execute one bounded Spec Kit implementation batch when spec.md, plan.md, and tasks.md are ready and the selected tasks are actionable. Use for small implementation slices, task-state updates, and immediate drift recording without replanning the feature or skipping verification.
+description: Execute one bounded spec implementation batch when spec.md, plan.md, and tasks.md are ready and the selected tasks are actionable. Use for small implementation slices, task-state updates, and immediate drift recording without replanning the feature or skipping verification.
 ---
 
 # Spec Implementer
@@ -12,17 +12,23 @@ Complete only the selected task slice, update task state to reflect reality, and
 
 This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
 
+It must use `.codex/prompts/speckit.implement.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
+
 ## Read First
 
 Read in this order:
 
+- `.codex/prompts/speckit.implement.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- equivalent repository prompt locations only if the primary prompt is missing
+
 - the user request or orchestrator handoff
-- `.specify/specs/<feature>/spec.md`
-- `.specify/specs/<feature>/plan.md`
-- `.specify/specs/<feature>/tasks.md`
-- `.specify/specs/<feature>/handoff.md` if present
-- `.specify/specs/<feature>/review.md` if present
-- `.specify/specs/<feature>/drift.md` if present
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md`
+- `specs/<feature>/tasks.md`
+- `specs/<feature>/handoff.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
 - only the code needed for the selected batch
 
 ## Entry Gate

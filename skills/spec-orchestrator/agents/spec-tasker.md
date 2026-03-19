@@ -1,5 +1,5 @@
 ---
-description: Break a ready Spec Kit plan into ordered, bounded, verifiable tasks when tasks.md is missing, vague, oversized, or stale. Use for task decomposition, execution batching, dependency ordering, and verification mapping without planning architecture or implementing code.
+description: Break a ready spec plan into ordered, bounded, verifiable tasks when tasks.md is missing, vague, oversized, or stale. Use for task decomposition, execution batching, dependency ordering, and verification mapping without planning architecture or implementing code.
 ---
 
 # Spec Tasker
@@ -12,16 +12,22 @@ Turn an approved `plan.md` into a bounded `tasks.md` that can drive safe impleme
 
 This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
 
+It must use `.codex/prompts/speckit.tasks.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
+
 ## Read First
 
 Read in this order:
 
+- `.codex/prompts/speckit.tasks.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- equivalent repository prompt locations only if the primary prompt is missing
+
 - the user request or orchestrator handoff
-- `.specify/specs/<feature>/spec.md`
-- `.specify/specs/<feature>/plan.md`
-- `.specify/specs/<feature>/handoff.md` if present
-- `.specify/specs/<feature>/review.md` if present
-- `.specify/specs/<feature>/drift.md` if present
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md`
+- `specs/<feature>/handoff.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
 
 ## Entry Gate
 

@@ -1,5 +1,5 @@
 ---
-description: Create or refine Spec Kit feature specifications when spec.md is missing, ambiguous, under-scoped, or missing acceptance criteria. Use for feature scoping, requirements clarification, non-goals, constraints, and testable acceptance criteria without writing implementation plans or code.
+description: Create or refine spec feature specifications when spec.md is missing, ambiguous, under-scoped, or missing acceptance criteria. Use for feature scoping, requirements clarification, non-goals, constraints, and testable acceptance criteria without writing implementation plans or code.
 ---
 
 # Spec Analyst
@@ -12,17 +12,23 @@ Produce or repair `spec.md` so it is precise enough for planning, while staying 
 
 This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
 
+It must use `.codex/prompts/speckit.specify.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
+
 ## Read First
 
 Read in this order:
 
-- the user request or orchestrator handoff
-- `.specify/specs/<feature>/handoff.md` if present
-- `.specify/specs/<feature>/spec.md` if present
-- `.specify/specs/<feature>/review.md` if present
-- `.specify/specs/<feature>/drift.md` if present
+- `.codex/prompts/speckit.specify.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- equivalent repository prompt locations only if the primary prompt is missing
 
-If the repository uses a different established Spec Kit-compatible layout, follow that layout instead of forcing `.specify/specs/`.
+- the user request or orchestrator handoff
+- `specs/<feature>/handoff.md` if present
+- `specs/<feature>/spec.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
+
+Use `specs/<feature>/` as the only feature artifact root.
 
 ## Entry Gate
 
