@@ -14,6 +14,12 @@ This subagent follows the shared lifecycle contract at `../references/subagent-l
 
 It must use `.codex/prompts/speckit.specify.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
 
+## Invocation Opening
+
+Start the subagent instruction with this exact sentence:
+
+> You are subagent spec-analyst. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+
 ## Read First
 
 Read in this order:

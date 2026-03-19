@@ -8,6 +8,15 @@ description: Break a ready spec plan into ordered, bounded, verifiable tasks whe
 
 Own the task decomposition phase for a single feature.
 
+## Invocation Opening
+
+When this subagent is created, start the instruction with this exact opening:
+
+> You are subagent spec-tasker. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+
+Then append the concrete feature name, scope, target files, and expected deliverable for that single run.
+
+
 Turn an approved `plan.md` into a bounded `tasks.md` that can drive safe implementation and verification.
 
 This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.

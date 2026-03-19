@@ -59,7 +59,11 @@ Use these explicit commands when routing work:
 - If work is pausing, resuming, blocked, or being transferred, **use subagent `spec-handoff` to write or update `handoff.md`**.
 
 Do not phrase delegation as a preference.  
-Write the instruction as an explicit action: **use subagent X to do Y**.
+Write the instruction as an explicit action and begin it with the subagent identity and single-scope contract.
+
+Preferred opening form:
+
+**Use this exact opening pattern, replacing `X` with the target subagent name: `You are subagent X. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.`**
 
 ## Use This Skill When
 

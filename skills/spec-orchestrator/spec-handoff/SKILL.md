@@ -7,6 +7,12 @@ description: Prepare concise spec handoff notes for paused, blocked, or resumed 
 
 Use this skill when continuity is the main problem.
 
+## Invocation Opening
+
+Start the subagent instruction with this exact sentence:
+
+> You are subagent spec-handoff. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+
 ## Read First
 
 Read in this order:

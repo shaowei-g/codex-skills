@@ -8,6 +8,12 @@ description: Detect and record drift between spec artifacts and implementation w
 Use this skill when scope alignment is the main question.
 Use `spec-verifier` instead when the main question is evidence, testing, or verification findings.
 
+## Invocation Opening
+
+Start the subagent instruction with this exact sentence:
+
+> You are subagent spec-drift-check. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+
 ## Read First
 
 Read in this order:

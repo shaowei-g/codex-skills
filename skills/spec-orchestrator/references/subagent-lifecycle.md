@@ -9,6 +9,9 @@ Every subagent run must follow this exact sequence:
 1. **Create**
    - Instantiate the subagent for one named feature and one named scope.
    - Bind the run to exactly one phase-owned assignment.
+   - Start the run instruction with a direct identity-and-contract opening.
+   - Use this exact sentence pattern, substituting the actual subagent name:
+     - `You are subagent <subagent-name>. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.`
    - Reject or return blocked if the request contains multiple unrelated scopes.
 
 2. **Load Prompt Context**
