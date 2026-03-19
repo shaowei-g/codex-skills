@@ -10,8 +10,8 @@ Coordinate feature delivery without collapsing all phases into one agent context
 This skill owns:
 
 - feature resolution
-- phase detection
-- routing
+- final orchestration authority
+- delegation sequencing
 - stage gating
 - bounded batch selection
 - review coordination
@@ -32,14 +32,16 @@ Do not keep full specialist execution inside the orchestrator when the correct s
 The orchestrator must stay responsible for:
 
 - identifying the target feature
-- determining the earliest unresolved phase
+- deciding when to invoke `spec-viewer` for state inspection and routing input
 - enforcing entry and exit gates
 - selecting one bounded unit of work
 - validating the returned result
+- making the final delegation decision
 - updating durable workflow notes
 
 The orchestrator must **not** silently absorb specialist work that belongs to:
 
+- `spec-viewer`
 - `spec-analyst`
 - `spec-planner`
 - `spec-tasker`
@@ -52,6 +54,7 @@ The orchestrator must **not** silently absorb specialist work that belongs to:
 
 Use these explicit commands when routing work:
 
+- If feature state, artifact inventory, earliest unresolved phase, readiness, routing recommendation, or drift signals must be established first, **use subagent `spec-viewer` to inspect exactly one feature and return a routing recommendation**.
 - If `spec.md` is missing, ambiguous, or incomplete, **use subagent `spec-analyst` to create or revise `spec.md`**.
 - If `plan.md` is missing, unresolved, or not execution-ready, **use subagent `spec-planner` to create or revise `plan.md`**.
 - If `tasks.md` is missing, vague, oversized, or not verifiable, **use subagent `spec-tasker` to create or revise `tasks.md`**.
@@ -72,6 +75,7 @@ Preferred opening form:
 Use this skill when the request is about workflow orchestration, for example:
 
 - determine the next valid phase for a feature
+- inspect current artifact and implementation state before delegation
 - continue an interrupted feature workflow
 - route work back to an earlier phase when artifacts conflict
 - decide whether work may move forward
@@ -146,7 +150,7 @@ The orchestrator must prefer repository-local prompts over bundle-local prose.
 Follow this flow exactly on every orchestration pass:
 
 1. Resolve the target feature.
-2. Inspect feature artifacts and relevant code state.
+2. Inspect feature artifacts and relevant code state directly or by using `spec-viewer` for one bounded inspection pass.
 3. Determine the **earliest unresolved phase**.
 4. If a later artifact exists while an earlier phase is unresolved, route **backward** to that earlier phase. Do not treat the later artifact as permission to continue.
 5. Enforce the entry gate for the earliest unresolved phase.
@@ -191,6 +195,7 @@ If `plan.md` exists but `spec.md` is missing, incomplete, or ambiguous, the work
 ## Subagent locations
 
 | Subagent | location |
+| `spec-viewer` | `./agents/spec-viewer.md` |
 | `spec-analyst` | `./agents/spec-analyst.md` |
 | `spec-planner` | `./agents/spec-planner.md` |
 | `spec-tasker` | `./agents/spec-tasker.md` |
@@ -243,6 +248,7 @@ Route to the earliest unresolved phase.
 
 | Condition                                               | Next valid phase       | Required subagent  |
 | ------------------------------------------------------- | ---------------------- | ------------------ |
+| feature state or readiness is unclear                  | Inspection / routing   | `spec-viewer`      |
 | `spec.md` missing                                       | Specification          | `spec-analyst`     |
 | `spec.md` incomplete or ambiguous                       | Specification          | `spec-analyst`     |
 | `spec.md` ready and `plan.md` missing                   | Technical planning     | `spec-planner`     |
@@ -250,8 +256,8 @@ Route to the earliest unresolved phase.
 | `spec.md` and `plan.md` ready, `tasks.md` missing       | Task decomposition     | `spec-tasker`      |
 | `tasks.md` vague, oversized, or not verifiable          | Task decomposition     | `spec-tasker`      |
 | actionable tasks remain and prerequisites are satisfied | Implementation         | `spec-implementer` |
-| code or artifact batch changed and evidence is missing  | Verification           | `spec-verifier`    |
-| the user asks whether artifacts and code are aligned    | Review                 | `spec-verifier`    |
+| latest implementation batch completed and evidence is missing | Verification      | `spec-verifier`    |
+| the user explicitly requests verification, acceptance review, or artifact/code alignment | Verification | `spec-verifier`    |
 | the main issue is scope mismatch or unexpected work     | Drift review           | `spec-drift-check` |
 | the user asks to pause, resume, or transfer work        | Handoff / continuation | `spec-handoff`     |
 
@@ -269,15 +275,33 @@ The existence of a later artifact never authorizes skipping the earliest unresol
 
 Apply these instructions exactly:
 
+- If inspection is required before safe routing, **use subagent `spec-viewer` to inspect one feature, report readiness, and recommend the next valid phase**.
 - If specification is the next valid phase, **use subagent `spec-analyst` to produce a complete, testable `spec.md`**.
 - If planning is the next valid phase, **use subagent `spec-planner` to produce an implementation-ready `plan.md` aligned to `spec.md`**.
 - If task decomposition is the next valid phase, **use subagent `spec-tasker` to produce bounded, ordered, verifiable tasks in `tasks.md`**.
 - If implementation is the next valid phase, **use subagent `spec-implementer` to complete one bounded task batch and update relevant files**.
-- If verification is the next valid phase, **use subagent `spec-verifier` to verify the latest completed batch against the spec and record evidence**.
+- If verification is the next valid phase after implementation, or the user explicitly asks for verification or alignment review, **use subagent `spec-verifier` to verify the latest completed batch against the spec and record evidence**.
 - If drift handling is required, **use subagent `spec-drift-check` to assess whether current work exceeds approved scope and write the result to `drift.md`**.
 - If handoff is required, **use subagent `spec-handoff` to package current workflow state in `handoff.md`**.
 
 ## Stage Gates
+
+### 0. Inspection / Routing
+
+Entry:
+
+- artifact inventory is unknown, stale, or disputed
+- earliest unresolved phase is not yet established
+- phase readiness must be checked before delegation
+- drift or stale-artifact signals must be classified before phase routing
+
+Exit:
+
+- artifact inventory is explicit
+- readiness for each known phase is explicit
+- earliest unresolved phase is identified
+- exactly one next valid phase is recommended
+- drift or stale-artifact signals are called out when present
 
 ### 1. Specification
 
@@ -381,6 +405,15 @@ If the subagent is `spec-implementer`, also provide:
 - exact files or modules owned in this batch
 - a warning not to revert unrelated edits
 - whether the batch is sequential or parallel-safe
+
+## Verification Trigger Rule
+
+Use `spec-verifier` only in either of these cases:
+
+- immediately after a bounded implementation batch completed and evidence is still missing
+- the user explicitly requests verification, acceptance review, checklist validation, artifact consistency review, or artifact/code alignment checking
+
+Do not use `spec-verifier` as the default discovery agent for phase detection. Use `spec-viewer` first when the main need is state inspection, readiness checking, routing recommendation, or earliest-unresolved-phase detection.
 
 ## Forbidden Orchestrator Actions
 

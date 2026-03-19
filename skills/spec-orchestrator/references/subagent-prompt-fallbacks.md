@@ -38,6 +38,17 @@ Return `blocked` when any of the following is true:
 
 ## Phase-Specific Prompt Expectations
 
+### spec-viewer
+
+Preferred prompt chain:
+
+1. repository-local workflow inspection or feature-state prompt
+2. `.codex/prompts/speckit.constitution.md` when present
+3. local `spec-viewer` rules
+
+Return `rejected` if the request asks `spec-viewer` to author phase-owned artifacts, implement work, or perform verification instead of inspection.
+Return `blocked` if the phase is inspection but the repository artifacts or code needed to determine current state are missing or unreadable.
+
 ### spec-analyst
 
 Preferred prompt chain:

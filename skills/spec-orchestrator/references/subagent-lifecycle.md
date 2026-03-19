@@ -67,6 +67,7 @@ A scope must be small enough to validate in one pass, for example:
 - create or revise one `spec.md`
 - create or revise one `plan.md`
 - create or revise one `tasks.md`
+- inspect one feature state and recommend one next valid phase
 - implement one bounded batch from `tasks.md`
 - verify one latest completed batch
 - assess one drift question
