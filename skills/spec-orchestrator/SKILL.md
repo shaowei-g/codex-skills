@@ -21,6 +21,8 @@ This skill owns:
 
 This skill does **not** own specialist phase execution when the corresponding specialist subagent exists.
 
+The orchestrator must never directly create, rewrite, or complete phase-owned artifacts such as `spec.md`, `plan.md`, `tasks.md`, implementation changes, or verification evidence when the corresponding specialist subagent exists. It may inspect, route, validate, and record coordination notes only.
+
 ## Required Delegation Rule
 
 When a specialist subagent exists for the next valid phase, **use that subagent explicitly**.
@@ -136,20 +138,26 @@ The orchestrator must prefer repository-local prompts over bundle-local prose.
 - Persist workflow state in files, not only in chat.
 - If artifacts and code disagree, treat the workflow as being at the earliest unresolved phase.
 - If multiple plausible features exist and no single target is clear, stop and ask the user to identify the feature.
+- The orchestrator must follow the routing flow in this file strictly and may not skip forward because a later artifact happens to exist.
+- The orchestrator may write coordination artifacts such as `review.md`, `drift.md`, or `handoff.md`, but phase-owned artifacts must be produced by the mapped specialist subagent.
 
-## Operating Loop
+## Operating Flow (Mandatory)
 
-Follow this loop on every orchestration pass:
+Follow this flow exactly on every orchestration pass:
 
 1. Resolve the target feature.
 2. Inspect feature artifacts and relevant code state.
-3. Determine the earliest incomplete or conflicting phase.
-4. Enforce the entry gate for that phase.
-5. Discover the applicable repository prompt or template.
-6. Use the correct specialist subagent for exactly one bounded unit of work.
-7. Validate the subagent result against the exit gate.
-8. Write or update durable workflow notes.
-9. Either continue to the next valid phase or stop with blockers.
+3. Determine the **earliest unresolved phase**.
+4. If a later artifact exists while an earlier phase is unresolved, route **backward** to that earlier phase. Do not treat the later artifact as permission to continue.
+5. Enforce the entry gate for the earliest unresolved phase.
+6. Discover the applicable repository prompt or template for that phase.
+7. Delegate **exactly one bounded unit of work** to the mapped specialist subagent for that phase.
+8. Do not perform that phase's work inside the orchestrator.
+9. Validate the returned result against the exit gate.
+10. Update coordination notes only when needed.
+11. Stop after validation unless the user explicitly asked for continued orchestration across another bounded pass.
+
+The orchestrator must not skip step 7 by directly editing a phase artifact itself.
 
 ## Step 1: Resolve the Target Feature
 
@@ -169,12 +177,15 @@ Do not guess between multiple active features.
 Inspect at least:
 
 - whether `spec.md`, `plan.md`, and `tasks.md` exist
+- whether any later artifact exists without its required earlier artifact
 - whether `review.md`, `drift.md`, and `handoff.md` exist
 - whether current code reflects completed or partial implementation
 - whether `tasks.md` is actionable and bounded
 - whether code changes exist that have not been verified
 
 If available, read `handoff.md` first when resuming.
+
+If `plan.md` exists but `spec.md` is missing, incomplete, or ambiguous, the workflow is still in **Specification**. The orchestrator must route to `spec-analyst`; it must not route to handoff, planning, or direct artifact editing.
 
 ## Subagent locations
 
@@ -238,6 +249,14 @@ Route to the earliest unresolved phase.
 | the user asks to pause, resume, or transfer work        | Handoff / continuation | `spec-handoff`     |
 
 If a later artifact exists while an earlier artifact is incomplete, route backward and record the mismatch in `review.md`.
+
+Examples of mandatory backward routing:
+
+- `plan.md` exists but `spec.md` is missing or incomplete → route to `spec-analyst`
+- `tasks.md` exists but `plan.md` is missing or incomplete → route to `spec-planner`
+- implementation exists but `tasks.md` is missing or not bounded → route to `spec-tasker` or earlier if needed
+
+The existence of a later artifact never authorizes skipping the earliest unresolved phase.
 
 ## Explicit Routing Instructions
 
@@ -336,7 +355,7 @@ Exit:
 
 ## Delegation Payload Contract
 
-Whenever this orchestrator uses a specialist subagent, provide all of the following:
+Whenever this orchestrator uses a specialist subagent, provide all of the following. If a mapped specialist subagent exists, the orchestrator must delegate rather than perform the phase work itself:
 
 - feature slug
 - artifact directory path
@@ -355,6 +374,19 @@ If the subagent is `spec-implementer`, also provide:
 - exact files or modules owned in this batch
 - a warning not to revert unrelated edits
 - whether the batch is sequential or parallel-safe
+
+## Forbidden Orchestrator Actions
+
+The orchestrator must not do any of the following when the mapped specialist subagent exists:
+
+- create or rewrite `spec.md` itself
+- create or rewrite `plan.md` itself
+- create or rewrite `tasks.md` itself
+- implement task batches itself
+- generate verification evidence itself
+- choose handoff as the next phase when an earlier required phase is unresolved
+
+If the orchestrator observes a missing or stale artifact, it must route to the correct specialist subagent instead of patching that artifact directly.
 
 ## Required Return Contract
 
@@ -429,12 +461,21 @@ In continuation mode:
 3. inspect current code and task state
 4. determine the earliest incomplete phase again
 5. use the correct subagent for that phase
+6. do not invoke `spec-handoff` unless the user asked to pause, transfer, summarize, or package continuity notes
 
-Do not resume from the latest file that happens to exist.
+Do not resume from the latest file that happens to exist. Resume from the earliest unresolved phase.
 
 ## Handoff Behavior
 
-At the end of any bounded orchestration pass, use subagent `spec-handoff` to update `handoff.md`.
+Use subagent `spec-handoff` only when at least one of the following is true:
+
+- the user explicitly asks to pause, resume, transfer, or prepare a handoff
+- the current pass ends in a blocked state and continuity notes are needed for the next agent
+- work is intentionally being packaged for another agent or a later session
+
+Do **not** choose handoff as the next phase merely because `handoff.md` is missing.
+Do **not** use handoff to bypass a missing earlier artifact such as `spec.md`.
+Do **not** invoke handoff automatically after every orchestration pass.
 
 Minimum `handoff.md` structure:
 
@@ -446,12 +487,12 @@ Minimum `handoff.md` structure:
 
 ## Durable Output Rule
 
-Each orchestration pass must leave at least one durable update, such as:
+Each orchestration pass should leave a durable update when one is needed and safe, such as:
 
 - task state update in `tasks.md`
 - review note in `review.md`
 - drift note in `drift.md`
-- handoff summary in `handoff.md`
+- handoff summary in `handoff.md` when handoff behavior is explicitly triggered
 
 ## Fallback Rules
 
@@ -486,6 +527,7 @@ Stop and report blockers when:
 - implementation would exceed approved scope
 - the target feature cannot be identified safely
 - a required earlier artifact is missing or contradicted by later work
+- the only available later artifact would tempt the workflow to skip the earliest unresolved phase
 - the specialist result is too incomplete to validate
 
 ## Trigger Examples
@@ -504,3 +546,10 @@ Do not trigger this skill:
 - "Decompose this plan into tasks."
 - "Implement task 4 from `tasks.md`."
 - "Run verification on the latest implementation batch."
+
+## Precision Examples
+
+- `plan.md` exists and `spec.md` does not exist → next valid phase is **Specification**; use `spec-analyst`; do not use `spec-handoff`; do not edit `spec.md` inside the orchestrator.
+- `tasks.md` exists and `plan.md` is stale → next valid phase is **Technical planning**; use `spec-planner`; do not continue implementation.
+- implementation files changed and no verification evidence exists → next valid phase is **Verification**; use `spec-verifier`.
+- the user only asks to package current status for another agent → use `spec-handoff`, but do not change phase-owned artifacts.
