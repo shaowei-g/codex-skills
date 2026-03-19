@@ -160,23 +160,38 @@ Inspect at least:
 
 If available, read `handoff.md` first when resuming.
 
+## Subagent locations
+
+| Subagent | location |
+| `spec-analyst` | `.codex/skills/spec-orchestrator/agents/spec-analyst.md` |
+| `spec-planner` | `.codex/skills/spec-orchestrator/agents/spec-planner.md` |
+| `spec-tasker` | `.codex/skills/spec-orchestrator/agents/spec-tasker.md` |
+| `spec-implementer` | `.codex/skills/spec-orchestrator/agents/spec-implementer.md` |
+| `spec-verifier` | `.codex/skills/spec-orchestrator/agents/spec-verifier.md` |
+
+## Spec Skill locations
+
+| Skill | location |
+| `spec-drift-check` | `.codex/skills/spec-orchestrator/spec-drift-check/SKILL.md` |
+| `spec-handoff` | `.codex/skills/spec-orchestrator/spec-handoff/SKILL.md` |
+
 ## Routing Rules
 
 Route to the earliest unresolved phase.
 
-| Condition | Next valid phase | Required subagent |
-|---|---|---|
-| `spec.md` missing | Specification | `spec-analyst` |
-| `spec.md` incomplete or ambiguous | Specification | `spec-analyst` |
-| `spec.md` ready and `plan.md` missing | Technical planning | `spec-planner` |
-| `plan.md` incomplete or not execution-ready | Technical planning | `spec-planner` |
-| `spec.md` and `plan.md` ready, `tasks.md` missing | Task decomposition | `spec-tasker` |
-| `tasks.md` vague, oversized, or not verifiable | Task decomposition | `spec-tasker` |
-| actionable tasks remain and prerequisites are satisfied | Implementation | `spec-implementer` |
-| code or artifact batch changed and evidence is missing | Verification | `spec-verifier` |
-| the user asks whether artifacts and code are aligned | Review | `spec-verifier` |
-| the main issue is scope mismatch or unexpected work | Drift review | `spec-drift-check` |
-| the user asks to pause, resume, or transfer work | Handoff / continuation | `spec-handoff` |
+| Condition                                               | Next valid phase       | Required subagent  |
+| ------------------------------------------------------- | ---------------------- | ------------------ |
+| `spec.md` missing                                       | Specification          | `spec-analyst`     |
+| `spec.md` incomplete or ambiguous                       | Specification          | `spec-analyst`     |
+| `spec.md` ready and `plan.md` missing                   | Technical planning     | `spec-planner`     |
+| `plan.md` incomplete or not execution-ready             | Technical planning     | `spec-planner`     |
+| `spec.md` and `plan.md` ready, `tasks.md` missing       | Task decomposition     | `spec-tasker`      |
+| `tasks.md` vague, oversized, or not verifiable          | Task decomposition     | `spec-tasker`      |
+| actionable tasks remain and prerequisites are satisfied | Implementation         | `spec-implementer` |
+| code or artifact batch changed and evidence is missing  | Verification           | `spec-verifier`    |
+| the user asks whether artifacts and code are aligned    | Review                 | `spec-verifier`    |
+| the main issue is scope mismatch or unexpected work     | Drift review           | `spec-drift-check` |
+| the user asks to pause, resume, or transfer work        | Handoff / continuation | `spec-handoff`     |
 
 If a later artifact exists while an earlier artifact is incomplete, route backward and record the mismatch in `review.md`.
 
