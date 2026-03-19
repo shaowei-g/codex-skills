@@ -21,6 +21,8 @@ Read in this order:
 
 If the orchestrator bundle uses the standard layout, the shared template is at `../spec-orchestrator/references/drift-report-template.md`.
 
+This skill also follows the shared subagent lifecycle contract at `../references/subagent-lifecycle.md` and the shared response schema at `../references/subagent-response-format.md`.
+
 ## Goal
 
 Decide whether a request, artifact, or implementation change stays within the current spec contract.
@@ -55,22 +57,11 @@ Decide whether a request, artifact, or implementation change stays within the cu
 - If drift exists, say whether it routes back to specification or planning.
 - Name the affected artifacts and code paths explicitly.
 
-## Return Shape
+## Return Contract
 
-```markdown
-Result:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- in scope | clarification | drift
+Additional rule for this skill:
 
-Affected Files:
-
-- ...
-
-Reason:
-
-- ...
-
-Recommended Phase:
-
-- specification | planning | implementation
-```
+- `Scope` must name exactly one drift assessment.
+- `Recommended Next Phase` must contain exactly one orchestrator-facing next step.

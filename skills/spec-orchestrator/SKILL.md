@@ -175,55 +175,28 @@ If available, read `handoff.md` first when resuming.
 | `spec-drift-check` | `./spec-drift-check/SKILL.md` |
 | `spec-handoff` | `./spec-handoff/SKILL.md` |
 
-## Single-Run Delegation Rule
+## Shared Subagent Contracts
 
-Every subagent invocation must be a single-run bounded assignment.
+Keep shared lifecycle and response rules out of this main orchestrator skill file.
+Use these references instead:
 
-Use a subagent only to complete one clearly scoped task and return a structured result.
+- lifecycle contract: `./references/subagent-lifecycle.md`
+- response schema: `./references/subagent-response-format.md`
 
-Do not delegate open-ended ownership such as:
+The orchestrator must delegate using those shared contracts rather than redefining them inline.
 
-- continue working until done
-- keep monitoring this phase
-- own the workflow
-- wait for follow-up instructions
-- coordinate the next phase automatically
+## Required Delegation Payload Elements
 
-Instead, delegate only one bounded unit with a required return payload.
+Every delegation payload must state all of the following:
 
-After the subagent finishes its assigned deliverable, it must stop.
+- target feature
+- exactly one assigned scope
+- relevant artifact or bounded batch
+- explicit stop-after-completion instruction
+- required response schema reference
 
-The orchestrator is responsible for deciding whether to invoke another subagent afterward.
-
-## No Self-Continuation Rule
-
-A subagent must not automatically continue into another phase after finishing its assigned task.
-
-Examples:
-
-- `spec-analyst` must not start planning
-- `spec-planner` must not start task decomposition
-- `spec-tasker` must not start implementation
-- `spec-implementer` must not start verification
-- `spec-verifier` must not revise the spec unless explicitly assigned
-- `spec-handoff` must not reopen implementation work
-
-The subagent must return its result and stop.
-Only the orchestrator may decide the next phase and whether another subagent should be invoked.
-
-## Required Termination Instruction
-
-Every delegation payload must include an explicit stop instruction.
-
-Include wording equivalent to:
-
-- Complete only the assigned bounded task.
-- Return the required structured result.
-- Do not continue into another phase.
-- Do not wait for more work.
-- Stop after returning the result.
-
-If the task cannot be completed, return blockers and stop.
+The orchestrator validates the returned payload and decides the next phase.
+If the task cannot be completed, the subagent must return a blocked or rejected result and stop.
 
 ## Routing Rules
 

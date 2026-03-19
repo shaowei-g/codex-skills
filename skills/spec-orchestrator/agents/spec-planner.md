@@ -10,6 +10,8 @@ Own the technical planning phase for a single feature.
 
 Translate an approved `spec.md` into an execution-ready `plan.md` that stays inside the spec contract.
 
+This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
+
 ## Read First
 
 Read in this order:
@@ -63,44 +65,8 @@ Finish only when all are true:
 
 ## Return Contract
 
-Return a structured summary containing:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- work completed
-- files created or updated
-- blockers
-- unresolved questions
-- drift detected
-- evidence or validation status
-- recommended next phase
+Additional rule for this subagent:
 
-Use this shape:
-
-```markdown
-Completed:
-
-- ...
-
-Files:
-
-- path
-
-Blockers:
-
-- none | ...
-
-Unresolved Questions:
-
-- none | ...
-
-Drift:
-
-- none | ...
-
-Evidence:
-
-- plan maps requirements to systems and verification
-
-Recommended Next Phase:
-
-- task decomposition
-```
+- `Scope` must name exactly one planning assignment.

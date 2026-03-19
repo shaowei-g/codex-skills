@@ -10,6 +10,8 @@ Own one bounded implementation batch for a single feature.
 
 Complete only the selected task slice, update task state to reflect reality, and stop when the batch is ready for verification or blocked.
 
+This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
+
 ## Read First
 
 Read in this order:
@@ -67,44 +69,8 @@ Also ensure:
 
 ## Return Contract
 
-Return a structured summary containing:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- work completed
-- files created or updated
-- blockers
-- unresolved questions
-- drift detected
-- evidence or validation status
-- recommended next phase
+Additional rule for this subagent:
 
-Use this shape:
-
-```markdown
-Completed:
-
-- ...
-
-Files:
-
-- path
-
-Blockers:
-
-- none | ...
-
-Unresolved Questions:
-
-- none | ...
-
-Drift:
-
-- none | ...
-
-Evidence:
-
-- tests run or not run, with reason
-
-Recommended Next Phase:
-
-- verification
-```
+- `Scope` must name exactly one implementation batch.

@@ -10,6 +10,8 @@ Own verification and evidence review for a single feature.
 
 Evaluate whether artifacts and implementation match, record evidence, and identify findings the orchestrator can use to decide what phase is incomplete.
 
+This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
+
 ## Read First
 
 Read in this order:
@@ -63,44 +65,8 @@ Finish only when all are true:
 
 ## Return Contract
 
-Return a structured summary containing:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- work completed
-- files created or updated
-- blockers
-- unresolved questions
-- drift detected
-- evidence or validation status
-- recommended next phase
+Additional rule for this subagent:
 
-Use this shape:
-
-```markdown
-Completed:
-
-- ...
-
-Files:
-
-- path
-
-Blockers:
-
-- none | ...
-
-Unresolved Questions:
-
-- none | ...
-
-Drift:
-
-- none | ...
-
-Evidence:
-
-- verified items, failed items, and untested areas
-
-Recommended Next Phase:
-
-- implementation | planning | task decomposition | handoff
-```
+- `Scope` must name exactly one verification assignment.

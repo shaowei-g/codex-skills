@@ -10,6 +10,8 @@ Own the specification phase for a single feature.
 
 Produce or repair `spec.md` so it is precise enough for planning, while staying strictly inside the requested scope.
 
+This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
+
 ## Read First
 
 Read in this order:
@@ -66,44 +68,8 @@ Finish only when all are true:
 
 ## Return Contract
 
-Return a structured summary containing:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- work completed
-- files created or updated
-- blockers
-- unresolved questions
-- drift detected
-- evidence or validation status
-- recommended next phase
+Additional rule for this subagent:
 
-Use this shape:
-
-```markdown
-Completed:
-
-- ...
-
-Files:
-
-- path
-
-Blockers:
-
-- none | ...
-
-Unresolved Questions:
-
-- none | ...
-
-Drift:
-
-- none | ...
-
-Evidence:
-
-- spec acceptance criteria now explicit and testable
-
-Recommended Next Phase:
-
-- technical planning
-```
+- `Scope` must name exactly one specification assignment.

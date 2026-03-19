@@ -21,6 +21,8 @@ Read in this order:
 
 If the orchestrator bundle uses the standard layout, the shared template is at `../spec-orchestrator/references/handoff-template.md`.
 
+This skill also follows the shared subagent lifecycle contract at `../references/subagent-lifecycle.md` and the shared response schema at `../references/subagent-response-format.md`.
+
 ## Goal
 
 Leave the feature in a state where the next agent can continue safely without relying on chat history.
@@ -54,26 +56,11 @@ Leave the feature in a state where the next agent can continue safely without re
 - Do not restate the entire feature history.
 - If the workflow should route backward, say so clearly.
 
-## Return Shape
+## Return Contract
 
-```markdown
-Current Phase:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- ...
+Additional rule for this skill:
 
-Completed Work:
-
-- ...
-
-Pending Work:
-
-- ...
-
-Blockers:
-
-- none | ...
-
-Recommended Next Step:
-
-- ...
-```
+- `Scope` must name exactly one handoff update.
+- `Recommended Next Phase` must contain exactly one orchestrator-facing next step.

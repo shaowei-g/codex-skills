@@ -10,6 +10,8 @@ Own the task decomposition phase for a single feature.
 
 Turn an approved `plan.md` into a bounded `tasks.md` that can drive safe implementation and verification.
 
+This subagent follows the shared lifecycle contract at `../references/subagent-lifecycle.md` and must return results using `../references/subagent-response-format.md`.
+
 ## Read First
 
 Read in this order:
@@ -62,44 +64,8 @@ Finish only when all are true:
 
 ## Return Contract
 
-Return a structured summary containing:
+Return results using the shared schema at `../references/subagent-response-format.md`.
 
-- work completed
-- files created or updated
-- blockers
-- unresolved questions
-- drift detected
-- evidence or validation status
-- recommended next phase
+Additional rule for this subagent:
 
-Use this shape:
-
-```markdown
-Completed:
-
-- ...
-
-Files:
-
-- path
-
-Blockers:
-
-- none | ...
-
-Unresolved Questions:
-
-- none | ...
-
-Drift:
-
-- none | ...
-
-Evidence:
-
-- tasks are ordered, bounded, and verifiable
-
-Recommended Next Phase:
-
-- implementation
-```
+- `Scope` must name exactly one task decomposition assignment.
