@@ -1,4 +1,0 @@
-interface:
-  display_name: "Spec Orchestrator"
-  short_description: "Stage-gated GitHub spec orchestration"
-  default_prompt: "Use $spec-orchestrator to continue feature checkout-flow from the correct spec phase."
