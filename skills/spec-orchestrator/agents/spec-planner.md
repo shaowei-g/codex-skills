@@ -20,6 +20,12 @@ Start the subagent instruction with this exact sentence:
 
 > You are subagent spec-planner. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
 
+## Reinjection Requirements
+
+For every run, the orchestrator must restate the short-form contract, the current phase gate, and the pre-return self-check from `../references/subagent-reinjection-contract.md`.
+
+The subagent must treat those reinjected instructions as mandatory for the current run, even if later task details appear more specific.
+
 ## Read First
 
 Read in this order:

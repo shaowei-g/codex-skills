@@ -151,11 +151,12 @@ Follow this flow exactly on every orchestration pass:
 4. If a later artifact exists while an earlier phase is unresolved, route **backward** to that earlier phase. Do not treat the later artifact as permission to continue.
 5. Enforce the entry gate for the earliest unresolved phase.
 6. Discover the applicable repository prompt or template for that phase.
-7. Delegate **exactly one bounded unit of work** to the mapped specialist subagent for that phase.
-8. Do not perform that phase's work inside the orchestrator.
-9. Validate the returned result against the exit gate.
-10. Update coordination notes only when needed.
-11. Stop after validation unless the user explicitly asked for continued orchestration across another bounded pass.
+7. Reinject the short-form subagent contract, the current phase gate, and the required pre-return self-check.
+8. Delegate **exactly one bounded unit of work** to the mapped specialist subagent for that phase.
+9. Do not perform that phase's work inside the orchestrator.
+10. Validate the returned result against the exit gate and against the reinjection contract.
+11. Update coordination notes only when needed.
+12. Stop after validation unless the user explicitly asked for continued orchestration across another bounded pass.
 
 The orchestrator must not skip step 7 by directly editing a phase artifact itself.
 
@@ -211,9 +212,11 @@ Use these references instead:
 - response schema: `./references/subagent-response-format.md`
 - prompt mapping: `./references/codex-prompt-mapping.md`
 - prompt fallback and failure classification: `./references/subagent-prompt-fallbacks.md`
+- reinjection contract: `./references/subagent-reinjection-contract.md`
 
 The orchestrator must delegate using those shared contracts rather than redefining them inline.
 When validating a `blocked` or `rejected` result, use `./references/subagent-prompt-fallbacks.md`.
+At every delegated pass, also reinject the short-form contract defined in `./references/subagent-reinjection-contract.md`.
 
 ## Required Delegation Payload Elements
 
@@ -226,9 +229,13 @@ Every delegation payload must state all of the following:
 - repository prompt mapping instruction
 - explicit stop-after-completion instruction
 - required response schema reference
+- short-form reinjection contract
+- phase gate stating allowed and forbidden artifact ownership
+- pre-return self-check instruction
 
 The orchestrator validates the returned payload and decides the next phase.
 If the task cannot be completed, the subagent must return a blocked or rejected result and stop.
+The orchestrator must not rely on the opening sentence alone; it must restate the reinjection contract for every delegated run.
 
 ## Routing Rules
 
@@ -387,6 +394,18 @@ The orchestrator must not do any of the following when the mapped specialist sub
 - choose handoff as the next phase when an earlier required phase is unresolved
 
 If the orchestrator observes a missing or stale artifact, it must route to the correct specialist subagent instead of patching that artifact directly.
+
+## Reinjection Requirement
+
+At every critical step, the orchestrator must reinject the governing contract instead of assuming the subagent still prioritizes the earlier skill context.
+
+Critical steps:
+
+- immediately before delegation
+- immediately before task details
+- immediately before the subagent returns
+
+Use `./references/subagent-reinjection-contract.md`.
 
 ## Required Return Contract
 

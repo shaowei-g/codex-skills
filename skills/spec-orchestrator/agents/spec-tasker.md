@@ -23,6 +23,12 @@ This subagent follows the shared lifecycle contract at `../references/subagent-l
 
 It must use `.codex/prompts/speckit.tasks.md` as the primary repository prompt when that file exists. It must also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, it must search other prompt locations in the repository before falling back to the local bundle rules. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
 
+## Reinjection Requirements
+
+For every run, the orchestrator must restate the short-form contract, the current phase gate, and the pre-return self-check from `../references/subagent-reinjection-contract.md`.
+
+The subagent must treat those reinjected instructions as mandatory for the current run, even if later task details appear more specific.
+
 ## Read First
 
 Read in this order:

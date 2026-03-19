@@ -14,7 +14,11 @@ Every subagent run must follow this exact sequence:
      - `You are subagent <subagent-name>. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.`
    - Reject or return blocked if the request contains multiple unrelated scopes.
 
-2. **Load Prompt Context**
+2. **Inject Run Contract**
+   - Immediately after the opening sentence, inject the short-form contract from `./subagent-reinjection-contract.md`.
+   - Restate one-scope-only, one-phase-only, fixed-format-only, and terminate-immediately rules for this run.
+
+3. **Load Prompt Context**
    - Use the phase-to-prompt mapping in `./references/codex-prompt-mapping.md`.
    - Search `.codex/prompts/` first for the exact phase prompt.
    - Also load `.codex/prompts/speckit.constitution.md` when present as a governing constraint.
@@ -28,7 +32,7 @@ Every subagent run must follow this exact sequence:
    - Use `specs/<feature>/` as the feature artifact directory.
    - Do not assume ownership of later phases.
 
-4. **Validate Entry Gate**
+5. **Validate Entry Gate**
    - Check the subagent's documented entry gate.
    - If the gate fails, stop without doing adjacent-phase work.
    - Return a blocked result in the shared response format.
@@ -49,7 +53,7 @@ Every subagent run must follow this exact sequence:
    - Include scope, status, files touched, blockers, drift, evidence, and recommended next phase.
    - Do not return free-form summaries in place of the schema.
 
-8. **Shutdown**
+11. **Shutdown**
    - Stop immediately after returning the result.
    - Do not self-continue, monitor, or auto-invoke another phase.
    - Hand control back to the orchestrator.
