@@ -163,17 +163,67 @@ If available, read `handoff.md` first when resuming.
 ## Subagent locations
 
 | Subagent | location |
-| `spec-analyst` | `.codex/skills/spec-orchestrator/agents/spec-analyst.md` |
-| `spec-planner` | `.codex/skills/spec-orchestrator/agents/spec-planner.md` |
-| `spec-tasker` | `.codex/skills/spec-orchestrator/agents/spec-tasker.md` |
-| `spec-implementer` | `.codex/skills/spec-orchestrator/agents/spec-implementer.md` |
-| `spec-verifier` | `.codex/skills/spec-orchestrator/agents/spec-verifier.md` |
+| `spec-analyst` | `./agents/spec-analyst.md` |
+| `spec-planner` | `./agents/spec-planner.md` |
+| `spec-tasker` | `./agents/spec-tasker.md` |
+| `spec-implementer` | `./agents/spec-implementer.md` |
+| `spec-verifier` | `./agents/spec-verifier.md` |
 
 ## Spec Skill locations
 
 | Skill | location |
-| `spec-drift-check` | `.codex/skills/spec-orchestrator/spec-drift-check/SKILL.md` |
-| `spec-handoff` | `.codex/skills/spec-orchestrator/spec-handoff/SKILL.md` |
+| `spec-drift-check` | `./spec-drift-check/SKILL.md` |
+| `spec-handoff` | `./spec-handoff/SKILL.md` |
+
+## Single-Run Delegation Rule
+
+Every subagent invocation must be a single-run bounded assignment.
+
+Use a subagent only to complete one clearly scoped task and return a structured result.
+
+Do not delegate open-ended ownership such as:
+
+- continue working until done
+- keep monitoring this phase
+- own the workflow
+- wait for follow-up instructions
+- coordinate the next phase automatically
+
+Instead, delegate only one bounded unit with a required return payload.
+
+After the subagent finishes its assigned deliverable, it must stop.
+
+The orchestrator is responsible for deciding whether to invoke another subagent afterward.
+
+## No Self-Continuation Rule
+
+A subagent must not automatically continue into another phase after finishing its assigned task.
+
+Examples:
+
+- `spec-analyst` must not start planning
+- `spec-planner` must not start task decomposition
+- `spec-tasker` must not start implementation
+- `spec-implementer` must not start verification
+- `spec-verifier` must not revise the spec unless explicitly assigned
+- `spec-handoff` must not reopen implementation work
+
+The subagent must return its result and stop.
+Only the orchestrator may decide the next phase and whether another subagent should be invoked.
+
+## Required Termination Instruction
+
+Every delegation payload must include an explicit stop instruction.
+
+Include wording equivalent to:
+
+- Complete only the assigned bounded task.
+- Return the required structured result.
+- Do not continue into another phase.
+- Do not wait for more work.
+- Stop after returning the result.
+
+If the task cannot be completed, return blockers and stop.
 
 ## Routing Rules
 
