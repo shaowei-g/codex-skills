@@ -292,10 +292,13 @@ After a subagent returns, the orchestrator must follow this sequence exactly:
 3. If validation fails because of a format-only defect, allow exactly one repair pass.
 4. The repair pass may correct only schema shape, heading order, required `none` placeholders, enum spelling, or self-check formatting.
 5. The repair pass must not change the assigned scope, assigned phase, delegated subagent, claimed file changes, or phase conclusions.
-6. If the repaired response passes validation, continue to phase-gate validation.
-7. If the repaired response still fails, or the first failure is semantic, classify the violation and reject the result.
-8. For a rejected malformed result, emit a controlled failure record with `./scripts/print_subagent_response_schema.sh` instead of trusting the invalid payload.
-9. Only after schema validation passes may the orchestrator use the response for routing, continuity, or stage-gate decisions.
+6. If artifacts were successfully written but the schema response is missing or structurally unusable, allow exactly one read-only reconstruction repair.
+7. Reconstruction repair may use only existing artifacts, current repository state, git diff, and execution logs as evidence sources.
+8. Reconstruction repair must not perform new phase work, create new feature artifacts, or widen the delegated scope.
+9. If the repaired or reconstructed response passes validation, continue to phase-gate validation.
+10. If the repaired or reconstructed response still fails, or the first failure is semantic, classify the violation and reject the result.
+11. For a rejected malformed result, emit a controlled failure record with `./scripts/print_subagent_response_schema.sh` instead of trusting the invalid payload.
+12. Only after schema validation passes may the orchestrator use the response for routing, continuity, or stage-gate decisions.
 
 ## Validation outcomes
 
@@ -306,6 +309,26 @@ The orchestrator has only three allowed outcomes for a delegated response:
 - reject and replace: semantically invalid, contract-breaking, or still invalid after one repair pass
 
 Use the existing violation taxonomy in `./references/subagent-reinjection-contract.md` when recording why a result was rejected or replaced.
+
+## Response reconstruction policy
+
+If durable artifacts were successfully written but the delegated schema response is missing, truncated, or structurally unusable, the orchestrator may perform exactly one read-only reconstruction repair.
+
+Reconstruction sources are limited to:
+
+- existing artifacts
+- current repository state
+- git diff
+- execution logs
+
+Reconstruction limits:
+
+- do not add new phase work
+- do not create new durable feature artifacts
+- do not widen scope
+- do not infer completed work that is not supported by repository evidence
+
+The reconstructed payload must still pass `bash ./scripts/validate_subagent_response.sh` before it is accepted.
 
 ## Bounded execution rules
 

@@ -74,6 +74,10 @@ Use this validator failure taxonomy:
 - `semantic contract break`: wrong feature, wrong assigned phase, wrong assigned subagent, multi-scope output, extra undeclared work, ownership violation, routing override attempt, or a second failed repair pass
 - `artifact/response divergence`: the delegated response claims files changed, artifacts updated, or durable work completed that do not match repository state or the actual outputs written in this run
 
+Special case:
+
+- if artifacts were successfully written but the schema response is missing or unusable, the orchestrator may attempt one read-only reconstruction repair before classifying the failure as unrecoverable
+
 Handling rules:
 
 - the orchestrator may allow one repair pass only for `format-only defect`
@@ -81,3 +85,26 @@ Handling rules:
 - `transport failure` must be classified as `blocked` unless a workflow-level replacement rule says otherwise
 - `semantic contract break` must be rejected or replaced with a controlled failure record
 - `artifact/response divergence` must be treated as a semantic integrity failure and rejected or replaced with a controlled failure record
+
+## Response reconstruction repair
+
+Reconstruction repair is allowed only when all of the following are true:
+
+- durable artifacts appear to have been written successfully
+- the schema response is missing, truncated, or structurally unusable
+- the orchestrator can reconstruct the response from repository evidence without doing new phase work
+
+Allowed evidence sources:
+
+- written artifacts
+- current repository state
+- git diff
+- execution logs
+
+Reconstruction constraints:
+
+- perform it at most once
+- keep it read-only with respect to phase work
+- do not create additional feature artifacts
+- do not infer unsupported completed work
+- validate the reconstructed payload before accepting it

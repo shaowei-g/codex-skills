@@ -45,6 +45,12 @@ codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_fi
 
 `exec_log` may be used for debugging transport failures, but it must never be treated as the delegated answer.
 
+Exception for reconstruction repair:
+
+If workflow artifacts were already written successfully and only the schema response payload is missing or unusable, the calling workflow may perform one read-only reconstruction repair using repository evidence, git diff, and `exec_log` as evidence sources.
+
+In that case, `exec_log` remains a diagnostic evidence source only and does not become authoritative output.
+
 ## Workflow integration rule
 
 When another workflow skill references this skill, that workflow must still enforce its own:
