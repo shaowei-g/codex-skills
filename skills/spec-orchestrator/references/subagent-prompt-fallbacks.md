@@ -39,17 +39,7 @@ Return `blocked` when any of the following is true:
 
 ## Delegation transport fallback
 
-If native subagent support is unavailable, use Codex CLI as the delegation transport.
-
-Use this standard transport only:
-
-```bash
-cat > "$prompt_file" <<'EOF'
-<delegation prompt>
-EOF
-
-codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_file" - < "$prompt_file" > "$exec_log" 2>&1
-```
+If native subagent support is unavailable, use the transport contract in `~/.codex/skills/codex-cli-subagent-transport/SKILL.md`.
 
 Transport interpretation rules:
 

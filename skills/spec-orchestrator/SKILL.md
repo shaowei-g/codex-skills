@@ -266,39 +266,9 @@ Delegations should be narrow enough that the specialist can complete one coheren
 
 ## Standard Codex delegation transport
 
-When native subagent capability is unavailable, use Codex CLI as the only recommended delegation transport.
+When native subagent capability is unavailable, load and apply the skill at `~/.codex/skills/codex-cli-subagent-transport/SKILL.md`.
 
-Required model settings:
-
-- model: `gpt-5.4-mini`
-- reasoning effort: `low`
-
-Required transport shape:
-
-1. Write the delegated subagent prompt to a fixed temporary prompt file.
-2. Invoke Codex CLI by piping stdin from that prompt file.
-3. Write the delegated result to a fixed response file.
-4. Capture stdout and stderr from the Codex execution into a fixed execution log.
-5. Treat only the response file as the authoritative subagent result.
-6. Do not parse the execution log as subagent output.
-
-Use this exact recommended form:
-
-```bash
-cat > "$prompt_file" <<'EOF'
-<delegation prompt>
-EOF
-
-codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_file" - < "$prompt_file" > "$exec_log" 2>&1
-```
-
-Transport rules:
-
-- `prompt_file` contains the full delegated prompt and nothing else.
-- `response_file` is the only file whose contents may be validated with `bash ./scripts/validate_subagent_response.sh`.
-- `exec_log` is for diagnostics only and must not be treated as the delegated answer.
-- If Codex CLI transport is used, the orchestrator must still apply the same schema validation, repair-pass limit, and reject-or-replace rules.
-- If neither native subagents nor Codex CLI are available, stop and surface a blocker instead of absorbing specialist work.
+If neither native subagents nor Codex CLI are available, stop and surface a blocker instead of absorbing specialist work.
 
 ## Approved response contract
 
