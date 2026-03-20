@@ -15,23 +15,25 @@ All paths are relative to the repository root.
 - Clarification before or during specification: `.codex/prompts/speckit.clarify.md`
 - Constitution or governing constraints: `.codex/prompts/speckit.constitution.md`
 - Task export to issue format when explicitly requested: `.codex/prompts/speckit.taskstoissues.md`
-- Feature state inspection and routing recommendation: repository-local workflow inspection prompt when available, otherwise local `spec-handoff` rules
+- Feature state inspection and routing recommendation: repository-local workflow inspection prompt when available, otherwise local inspection rules
 
 ## Lookup Rule
 
-For every subagent run:
+For every delegated run:
 
 1. Check the primary prompt for the assigned phase.
 2. Also check `.codex/prompts/speckit.constitution.md` when present and apply it as a governing constraint.
 3. Use `.codex/prompts/speckit.clarify.md` only when clarification work is explicitly part of the assigned scope or the primary phase prompt instructs it.
-4. If the primary prompt is not present, search other repository prompt locations for an equivalent phase prompt.
-5. If no repository prompt exists, fall back to the local agent and reference rules in this bundle.
+4. If the primary prompt is not present, search other repository prompt locations for an equivalent prompt for the same phase.
+5. If no repository prompt exists, fall back to the assigned specialist skill and shared local references in this bundle.
 
 ## Scope Guard
 
-The existence of additional prompt files does not authorize extra phases.
-A subagent must still execute exactly one assigned scope in one run.
+- Additional prompt files do not authorize extra phases.
+- A delegated run still owns exactly one assigned scope in one assigned phase.
 
-## Failure Classification Reference
+## Related References
 
-Use `./subagent-prompt-fallbacks.md` to decide when prompt discovery failure is still recoverable as local fallback, when it is `blocked`, and when the request must be `rejected`.
+- lifecycle: `./subagent-lifecycle.md`
+- failure classification: `./subagent-prompt-fallbacks.md`
+- response schema: `./subagent-response-format.md`

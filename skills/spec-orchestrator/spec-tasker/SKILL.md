@@ -5,7 +5,19 @@ description: Use when `plan.md` is ready but `tasks.md` is missing, vague, overs
 
 # Spec Tasker
 
-## Use This Skill When
+Use this skill when task decomposition is the current phase for one feature.
+
+## Shared Contracts
+
+Load and follow these shared references first:
+
+- `../references/subagent-lifecycle.md`
+- `../references/subagent-reinjection-contract.md`
+- `../references/subagent-response-format.md`
+- `../references/codex-prompt-mapping.md`
+- `../references/subagent-prompt-fallbacks.md`
+
+## Purpose
 
 Use this skill when at least one is true:
 
@@ -14,24 +26,19 @@ Use this skill when at least one is true:
 - task ordering or dependencies are unclear
 - implementation cannot proceed safely because the work is not decomposed into bounded batches
 
-## Required Chat Opening Rule
+## Read Order
 
-The subagent's chat must begin with this exact opening sentence:
+- `.codex/prompts/speckit.tasks.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md`
+- `specs/<feature>/tasks.md` if present
 
-> You are subagent spec-tasker. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
+## Owned Outputs
 
-Treat that opening sentence as binding for the current run.
-
-Use a compact `Load and follow:` list and point to these paths:
-
-- `.codex/prompts/speckit.tasks.md`
-- `../references/subagent-response-format.md`
-
-If the primary prompt is not found at the expected path, search the repository by prompt name before proceeding. Search for these names in this order:
-
-- `speckit.tasks.md`
-
-The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the referenced prompt rules you loaded first.
+- `tasks.md`
+- ordered bounded task batches
+- dependency and verification notes required for safe implementation
 
 ## Phase-Specific Rejected Criteria
 

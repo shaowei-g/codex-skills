@@ -1,186 +1,81 @@
-# Core Goal
+# Subagent Reinjection Contract
 
-This reference defines the contract that path-referenced delegation prompts rely on.
-The orchestrator should usually reference this file indirectly through the specialist skill and lifecycle contract instead of pasting the whole checklist into every prompt.
+This reference defines the compact delegation contract that the orchestrator should rely on when using path references.
 
-## Compact delegation rule
+## Compact Delegation Rule
 
 - prefer required fields plus path references
-- reference this contract instead of restating it inline
-- restate only run-specific values that the referenced files cannot infer
-- keep delegated prompts short enough to scan in one screen
+- reference shared contracts instead of restating them inline
+- restate only run-specific values that referenced files cannot infer
+- keep delegated prompts short enough to scan quickly
 - expand the full checklist only when the runtime cannot reliably load referenced files
 
-- orchestrator authority
-- prevent subagent drift
-- multi-step delegation control
-- validator-friendly
-- weak-model robust
+## Required Delegated Fields
 
-### subagent limits
-
-- one bounded scope
-- one assigned phase
-- no next-phase decision
-- no next-subagent decision
-- no unauthorized handoff
-- no cross-phase execution
-- no implicit continuation
-- terminate after return
-
-### artifact modification rules
-
-- explicit ownership set
-- allowed artifact updates only
-- forbidden artifact updates
-- no out-of-scope file change
-- declare all file changes
-
-### status keywords
-
-- `completed`
-- `blocked`
-- `rejected`
-
-### blocked keywords
-
-- missing prerequisite
-- missing input
-- missing artifact
-- missing permission
-- ambiguous ownership
-- cannot proceed safely
-
-### rejected keywords
-
-- invalid scope
-- multi-scope task
-- phase violation
-- routing violation
-- ownership violation
-- unauthorized handoff
-- malformed schema
-- contract breach
-
-### reinjection layers
-
-- delegation opening
-- phase gate
-- pre-return self-check
-
-### delegation opening
-
-- one scope
-- one phase
-- no routing authority
-- no handoff authority
-- schema-only return
-- approved headings only
-- approved enum values only
-- stop immediately
-
-### phase gate
+Every delegated run should make these values explicit:
 
 - Feature-Slug
+- Artifact-Directory
 - Earliest-Unresolved-Phase
 - Assigned-Phase
 - Assigned-Subagent
 - Scope
+- Specialist-Skill
+- Repository-Prompt
 - Allowed-Ownership
 - Forbidden-Artifact-Updates
-- Blocked-Handling
-- Rejected-Handling
+- Response-Schema
+- Response-Validator
+- Stop-After-Return
 
-### response schema
+## Authority Limits
 
-- Status
-- Feature-Slug
-- Assigned-Phase
-- Assigned-Subagent
-- Scope
-- Summary
-- Files-Changed
-- Files-Read
-- Missing-Prerequisites
-- Contract-Violations
-- Blockers
-- Unresolved Questions
-- Drift
-- Evidence
-- Recommended-Next-Phase
-- Recommended-Next-Subagent
-- Notes
-- Self-Check
+A delegated subagent may own exactly one bounded scope.
 
-### validator assets
+A delegated subagent must not:
 
-- `bash ../scripts/validate_subagent_response.sh`
-- `bash ../scripts/print_subagent_response_schema.sh`
+- choose the next phase
+- choose the next subagent
+- perform unauthorized handoff
+- perform cross-phase execution
+- continue implicitly after return
+- modify files outside the allowed ownership set
 
-### approved output enforcement
-
-- validate before accept
-- one repair pass for format-only defects
-- reject semantic violations immediately
-- replace unrecoverable malformed output with controlled failure record
-
-### self-check
-
-- one_bounded_scope
-- assigned_phase_only
-- chose_next_phase = false
-- chose_next_subagent = false
-- unauthorized_handoff = false
-- outside_ownership_modification = false
-- required_response_schema_used = true
-- terminating_now = true
-
-### advisory recommendation rule
+## Advisory Recommendation Rule
 
 - `Recommended-Next-Phase` is advisory only
 - `Recommended-Next-Subagent` is advisory only
-- orchestrator keeps routing authority
+- the orchestrator keeps routing authority
 
-### validator
+## Self-Check Contract
 
-- valid status
-- valid heading count and order
-- single bounded scope
-- feature match
-- assigned phase match
-- assigned subagent match
-- ownership compliance
-- no forbidden updates
-- no silent cross-phase work
-- no silent handoff
-- schema completeness
-- self-check completeness
-- self-check values fixed
-- advisory not treated as authority
+The delegated response must keep these values explicit:
 
-### violation taxonomy
+- `one_bounded_scope = true`
+- `assigned_phase_only = true`
+- `chose_next_phase = false`
+- `chose_next_subagent = false`
+- `unauthorized_handoff = false`
+- `outside_ownership_modification = false`
+- `required_response_schema_used = true`
+- `terminating_now = true`
 
-- format_violation
-- missing_required_field
-- invalid_status
-- multi_scope_violation
-- cross_phase_drift
-- routing_override_attempt
-- unauthorized_handoff
-- ownership_violation
-- forbidden_artifact_update
-- undeclared_file_change
-- self_check_incomplete
-- self_check_noncompliant
-- advisory_as_authority
-- prerequisite_bypass
+## Violation Taxonomy
 
-### recovery rules
+Use these labels when classifying semantic contract failures:
 
-- validate before continue
-- allow one structure-only repair pass
-- discard invalid routing authority
-- classify violation
-- reject repeated malformed output
-- replace unrecoverable malformed output with schema printer
-- reroute from earliest unresolved phase
+- `multi_scope_violation`
+- `cross_phase_drift`
+- `routing_override_attempt`
+- `unauthorized_handoff`
+- `ownership_violation`
+- `forbidden_artifact_update`
+- `undeclared_file_change`
+- `advisory_as_authority`
+- `prerequisite_bypass`
+
+## Related References
+
+- lifecycle: `./subagent-lifecycle.md`
+- response schema: `./subagent-response-format.md`
+- failure classification and repair: `./subagent-prompt-fallbacks.md`

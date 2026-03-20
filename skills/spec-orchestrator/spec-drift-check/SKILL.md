@@ -5,29 +5,33 @@ description: Detect and record drift between spec artifacts and implementation w
 
 # Spec Drift Check
 
-Use this skill when scope alignment is the main question.
-Use `spec-verifier` instead when the main question is evidence, testing, or verification findings.
+Use this skill when drift assessment is the current phase for one feature.
 
-## Invocation Opening
+## Shared Contracts
 
-Start the subagent instruction with this exact sentence:
+Load and follow these shared references first:
 
-> You are subagent spec-drift-check. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
+- `../references/subagent-lifecycle.md`
+- `../references/subagent-reinjection-contract.md`
+- `../references/subagent-response-format.md`
+- `../references/codex-prompt-mapping.md`
+- `../references/subagent-prompt-fallbacks.md`
 
-## Reinjection Requirements
+## Purpose
 
-For every run, the orchestrator should use a compact `Load and follow:` list and point to the relevant contract paths instead of restating the full short-form contract inline.
+Decide whether a request, artifact, or implementation change stays within the current spec contract.
 
-The subagent must treat those referenced instructions as mandatory for the current run, even if later task details appear more specific.
+Use this skill for:
 
-## Read First
+- checking whether implementation has moved ahead of artifacts
+- checking whether a new request exceeds `spec.md`
+- deciding whether a discrepancy is clarification or true drift
+- updating `drift.md` with a concise structured note
 
-Read in this order:
+## Read Order
 
 - `.codex/prompts/speckit.analyze.md` first
 - `.codex/prompts/speckit.constitution.md` if present
-- equivalent repository prompt locations only if the primary prompt is missing
-
 - `specs/<feature>/spec.md`
 - `specs/<feature>/plan.md` if present
 - `specs/<feature>/tasks.md` if present
@@ -35,29 +39,15 @@ Read in this order:
 - `specs/<feature>/drift.md` if present
 - changed code or requested changes that may exceed scope
 
-If the orchestrator bundle uses the standard layout, the shared template is at `../spec-orchestrator/references/drift-report-template.md`.
+Shared template:
 
-This skill also follows the shared reinjection contract at `../references/subagent-reinjection-contract.md` and the shared subagent lifecycle contract at `../references/subagent-lifecycle.md` and the shared response schema at `../references/subagent-response-format.md`.
+- `../references/drift-report-template.md`
 
-Use `.codex/prompts/speckit.analyze.md` as the primary repository prompt when that file exists. Also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, search other prompt locations in the repository before falling back to this bundle. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
+## Owned Outputs
 
-## Goal
-
-Decide whether a request, artifact, or implementation change stays within the current spec contract.
-
-## Use This Skill For
-
-- checking whether implementation has moved ahead of artifacts
-- checking whether a new request exceeds `spec.md`
-- deciding whether a discrepancy is clarification or true drift
-- updating `drift.md` with a concise structured note
-
-## Do Not Use This Skill For
-
-- writing a new specification from scratch
-- creating the implementation plan
-- decomposing tasks
-- doing a full code implementation pass
+- one drift assessment
+- `drift.md` updates when drift is confirmed
+- advisory route-back recommendation when scope has been exceeded
 
 ## Phase-Specific Rejected Criteria
 
@@ -69,25 +59,9 @@ Return `blocked` if scope alignment cannot be determined from available artifact
 
 ## Procedure
 
-1. Identify the current scope boundary from `spec.md`.
-2. Compare the proposed or implemented behavior against that boundary.
-3. Treat clarifications that do not expand behavior as in-scope.
-4. Treat new behavior, new integrations, new surfaces, or materially broader scope as drift.
-5. Update `drift.md` using the shared template when drift is confirmed.
-6. Recommend the earliest phase that must be revisited.
-
-## Output Rules
-
-- Prefer short structured notes over long prose.
-- State whether the result is `in scope`, `clarification`, or `drift`.
-- If drift exists, say whether it routes back to specification or planning.
-- Name the affected artifacts and code paths explicitly.
-
-## Return Contract
-
-Return results using the shared schema at `../references/subagent-response-format.md`.
-
-Additional rule for this skill:
-
-- `Scope` must name exactly one drift assessment.
-- `Recommended Next Phase` must contain exactly one orchestrator-facing next step.
+1. identify the current scope boundary from `spec.md`
+2. compare proposed or implemented behavior against that boundary
+3. treat clarifications that do not expand behavior as in scope
+4. treat new behavior, new integrations, new surfaces, or materially broader scope as drift
+5. update `drift.md` using the shared template when drift is confirmed
+6. recommend the earliest phase that must be revisited

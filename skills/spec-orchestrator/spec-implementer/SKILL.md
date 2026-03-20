@@ -5,7 +5,19 @@ description: Use when `spec.md`, `plan.md`, and `tasks.md` are ready and one bou
 
 # Spec Implementer
 
-## Use This Skill When
+Use this skill when implementation is the current phase for one feature.
+
+## Shared Contracts
+
+Load and follow these shared references first:
+
+- `../references/subagent-lifecycle.md`
+- `../references/subagent-reinjection-contract.md`
+- `../references/subagent-response-format.md`
+- `../references/codex-prompt-mapping.md`
+- `../references/subagent-prompt-fallbacks.md`
+
+## Purpose
 
 Use this skill when at least one is true:
 
@@ -14,23 +26,19 @@ Use this skill when at least one is true:
 - prerequisites for the selected batch are satisfied
 - the next valid phase is implementation for exactly one bounded batch
 
-## Required Chat Opening Rule
-
-The subagent's chat must begin with this exact opening sentence:
-
-> You are subagent spec-implementer. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
-
-Treat that opening sentence as binding for the current run.
-
-Use a compact `Load and follow:` list and point to these paths:
+## Read Order
 
 - `.codex/prompts/speckit.implement.md` first
+- `.codex/prompts/speckit.constitution.md` if present
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md`
+- `specs/<feature>/tasks.md`
+- only the code and tests needed for the assigned batch
 
-If the primary prompt is not found at the expected path, search the repository by prompt name before proceeding. Search for these names in this order:
+## Owned Outputs
 
-- `speckit.implement.md`
-
-The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the referenced prompt rules you loaded first.
+- code and tests for one bounded implementation batch
+- minimal required workflow artifact updates for the completed batch
 
 ## Phase-Specific Rejected Criteria
 

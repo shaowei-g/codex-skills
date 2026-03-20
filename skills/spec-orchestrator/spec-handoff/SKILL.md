@@ -5,78 +5,61 @@ description: Prepare structured spec handoff state for paused, blocked, resumed,
 
 # Spec Handoff
 
-Use this skill for continuity, inspection, and handoff packaging.
+Use this skill when handoff or continuity packaging is the current phase for one feature.
 
-## Script Assets
+## Shared Contracts
 
-- Workflow executor: `./scripts/prepare_handoff.sh`
-- Handoff markdown renderer: `./scripts/render_handoff_template.sh`
-- Fixed response formatter: `./scripts/print_handoff_response_schema.sh`
-- Response validator: `./scripts/validate_handoff_response.sh`
+Load and follow these shared references first:
 
-These scripts do the real work: read feature artifacts, derive handoff state, classify review and drift findings, optionally write `handoff.md`, emit the fixed schema, and validate the result.
+- `../references/subagent-lifecycle.md`
+- `../references/subagent-reinjection-contract.md`
+- `../references/subagent-response-format.md`
+- `../references/codex-prompt-mapping.md`
+- `../references/subagent-prompt-fallbacks.md`
 
-## Invocation Opening
+## Helper Scripts
 
-Start the subagent instruction with this exact sentence:
+- workflow executor: `./scripts/prepare_handoff.sh`
+- handoff markdown renderer: `./scripts/render_handoff_template.sh`
+- fixed response formatter: `./scripts/print_handoff_response_schema.sh`
+- helper validator: `./scripts/validate_handoff_response.sh`
 
-> You are subagent spec-handoff. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
+These scripts can assist with deriving handoff state and rendering `handoff.md`, but the orchestrator still treats the shared response schema and shared validator as the final transport contract.
 
-## Read First
+## Purpose
 
-- equivalent repository prompt locations only if the primary prompt is missing
+Use this skill for:
+
+- ending a bounded orchestration pass
+- pausing partially completed work
+- summarizing blockers before stopping
+- preparing resumption context for another agent
+- packaging continuity state so the next agent can continue without chat history
+
+## Read Order
+
 - `specs/<feature>/handoff.md` if present
 - `specs/<feature>/spec.md` if present
 - `specs/<feature>/plan.md` if present
 - `specs/<feature>/tasks.md` if present
 - `specs/<feature>/review.md` if present
 - `specs/<feature>/drift.md` if present
+- current code or task state only when resuming work
 
-Read current code or task state only when resuming work.
+Shared template:
 
-Shared references:
+- `../references/handoff-template.md`
 
-- template: `../references/handoff-template.md`
-- reinjection contract: `../references/subagent-reinjection-contract.md`
-- lifecycle contract: `../references/subagent-lifecycle.md`
-- response schema: `../references/subagent-response-format.md`
-- fallback rules: `../references/subagent-prompt-fallbacks.md`
+## Owned Outputs
 
-## Goal
+- `handoff.md`
+- concise current-phase summary
+- pending work, blockers, and exact recommended next reading path
 
-Leave the feature in a state where the next agent can continue safely without relying on chat history.
+## Phase-Specific Rejected Criteria
 
-## Use This Skill For
+Return `rejected` if the request actually asks for architecture design, implementation, or verification instead of continuity packaging.
 
-- feature-state inspection when legacy inspection flows still point at `spec-viewer`
-- routing recommendations derived from durable artifacts
-- ending a bounded orchestration pass
-- pausing partially completed work
-- summarizing blockers before stopping
-- preparing resumption context for another agent
+## Phase-Specific Blocked Criteria
 
-## Do Not Use This Skill For
-
-- deciding the full technical approach
-- replacing verification or drift analysis
-- implementing new feature work
-
-## Procedure
-
-1. Run `./scripts/prepare_handoff.sh` with one feature slug and one bounded handoff scope.
-2. Let it derive current phase, completed work, pending work, blockers, unresolved questions, review evidence, finding classes, drift findings, and the advisory next step.
-3. When a durable continuity note is required, let `./scripts/prepare_handoff.sh --write` call `./scripts/render_handoff_template.sh` to update `handoff.md`.
-4. Validate the final response with `./scripts/validate_handoff_response.sh`.
-5. Return the exact field order emitted by `./scripts/print_handoff_response_schema.sh`.
-
-## Output Rules
-
-- Keep it concise and scannable.
-- Prefer bullets and short phrases.
-  [text](../references)- Do not restate the entire feature history.
-- If the workflow should route backward, say so clearly.
-- Do not improvise section names or field order in the final response.
-
-## Return Contract
-
-Return results using `../references/subagent-response-format.md` and the exact field order from `./scripts/print_handoff_response_schema.sh`.
+Return `blocked` if the current phase, completed work, or blockers cannot be determined from repository state.

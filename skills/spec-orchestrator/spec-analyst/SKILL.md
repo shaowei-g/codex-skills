@@ -5,29 +5,46 @@ description: Use when `spec.md` is missing, ambiguous, under-scoped, or missing 
 
 # Spec Analyst
 
-## Required Chat Opening Rule
+Use this skill when specification is the current phase for one feature.
 
-The subagent's chat must begin with this exact opening sentence:
+## Shared Contracts
 
-> You are subagent spec-analyst. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
+Load and follow these shared references first:
 
-Treat that opening sentence as binding for the current run.
+- `../references/subagent-lifecycle.md`
+- `../references/subagent-reinjection-contract.md`
+- `../references/subagent-response-format.md`
+- `../references/codex-prompt-mapping.md`
+- `../references/subagent-prompt-fallbacks.md`
 
-Use a compact `Load and follow:` list and point to these paths before doing the assigned work:
+## Purpose
+
+Use this skill when at least one is true:
+
+- `spec.md` is missing
+- `spec.md` is ambiguous, incomplete, or stale
+- acceptance criteria are not testable
+- scope boundaries are unclear
+- a new feature request must be turned into a bounded specification
+
+## Read Order
 
 - `.codex/prompts/speckit.specify.md` first
-- `../references/subagent-response-format.md`
+- `.codex/prompts/speckit.constitution.md` if present
+- `.codex/prompts/speckit.clarify.md` only when clarification is part of the assigned scope
+- `specs/<feature>/spec.md` if present
+- adjacent workflow artifacts only when needed to preserve alignment
 
-If the primary prompt is not found at the expected path, search the repository by prompt name before proceeding. Search for these names in this order:
+## Owned Outputs
 
-- `speckit.specify.md`
-
-The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the referenced prompt rules you loaded first.
+- `spec.md`
+- clarified scope boundaries
+- explicit acceptance criteria and constraints for the assigned feature
 
 ## Phase-Specific Rejected Criteria
 
-Return `rejected` if specification work is requested but the actual need is planning, tasks, implementation, or verification.
+Return `rejected` if specification work is requested but the actual need is planning, tasking, implementation, or verification.
 
 ## Phase-Specific Blocked Criteria
 
-Return `blocked` if essential product intent is missing and clarification is required but cannot be resolved from artifacts or the assigned scope.
+Return `blocked` if essential product intent is missing and clarification cannot be resolved from artifacts or the assigned scope.

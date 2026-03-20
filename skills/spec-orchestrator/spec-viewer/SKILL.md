@@ -5,7 +5,19 @@ description: Use when one feature must be inspected to determine inventory, read
 
 # Spec Viewer
 
-## Use This Skill When
+Use this skill when inspection is the current phase for one feature.
+
+## Shared Contracts
+
+Load and follow these shared references first:
+
+- `../references/subagent-lifecycle.md`
+- `../references/subagent-reinjection-contract.md`
+- `../references/subagent-response-format.md`
+- `../references/codex-prompt-mapping.md`
+- `../references/subagent-prompt-fallbacks.md`
+
+## Purpose
 
 Use this skill when at least one is true:
 
@@ -15,27 +27,27 @@ Use this skill when at least one is true:
 - one routing recommendation is needed for the next bounded pass
 - drift or stale-artifact signals must be identified from current artifacts or code
 
-## Required Chat Opening Rule
+## Read Order
 
-The subagent's chat must begin with this exact opening sentence:
+- repository-local workflow inspection prompt when available
+- `specs/<feature>/handoff.md` if present
+- `specs/<feature>/spec.md` if present
+- `specs/<feature>/plan.md` if present
+- `specs/<feature>/tasks.md` if present
+- `specs/<feature>/review.md` if present
+- `specs/<feature>/drift.md` if present
+- changed code only when artifact state alone is insufficient
 
-> You are subagent spec-viewer. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
+## Owned Outputs
 
-Use a compact `Load and follow:` list and point to these paths:
-
-- `../spec-handoff/SKILL.md`
-- `../references/subagent-response-format.md`
-
-The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the referenced prompt rules you loaded first.
+- inspection summary in the shared schema
+- advisory next-phase recommendation
+- minimal continuity notes only when the assigned scope explicitly asks for them
 
 ## Phase-Specific Rejected Criteria
 
-Return `rejected` if the request asks `spec-viewer` to author phase-owned artifacts, implement work, or perform verification instead of inspection or continuity packaging.
-
-Return `rejected` if the request asks the handoff skill to decide architecture, implement tasks, or verify behavior.
+Return `rejected` if the request asks this skill to author phase-owned artifacts, implement work, or perform verification instead of inspection.
 
 ## Phase-Specific Blocked Criteria
 
-Return `blocked` if the phase is inspection but the repository artifacts or code needed to determine current state are missing or unreadable.
-
-Return `blocked` if continuity notes cannot be prepared because the current phase, completed work, or blockers cannot be determined from repository state.
+Return `blocked` if the repository artifacts or code needed to determine current state are missing or unreadable.
