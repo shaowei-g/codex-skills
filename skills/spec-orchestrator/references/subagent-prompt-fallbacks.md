@@ -67,11 +67,17 @@ When a subagent returns `blocked` or `rejected`, it must still complete the shar
 
 ## Malformed output classification
 
-Treat response-shape failures using these rules:
+Use this validator failure taxonomy:
 
-- format-only and repairable: heading order mismatch, missing `none` placeholder, enum spelling drift, or self-check formatting defect when the delegated meaning is still clear
-- semantic and rejectable: wrong feature, wrong assigned phase, wrong assigned subagent, multi-scope output, extra undeclared work, ownership violation, routing override attempt, or a second failed repair pass
+- `format-only defect`: heading order mismatch, missing `none` placeholder, enum spelling drift, or self-check formatting defect when the delegated meaning is still clear
+- `transport failure`: Codex CLI or another delegation transport fails, `response_file` is missing, or no authoritative delegated payload is produced
+- `semantic contract break`: wrong feature, wrong assigned phase, wrong assigned subagent, multi-scope output, extra undeclared work, ownership violation, routing override attempt, or a second failed repair pass
+- `artifact/response divergence`: the delegated response claims files changed, artifacts updated, or durable work completed that do not match repository state or the actual outputs written in this run
 
-The orchestrator may allow one repair pass only for the format-only class.
-The repair prompt must preserve the delegated scope and must not ask for new work.
-Semantic failures must be rejected or replaced with a controlled failure record.
+Handling rules:
+
+- the orchestrator may allow one repair pass only for `format-only defect`
+- the repair prompt must preserve the delegated scope and must not ask for new work
+- `transport failure` must be classified as `blocked` unless a workflow-level replacement rule says otherwise
+- `semantic contract break` must be rejected or replaced with a controlled failure record
+- `artifact/response divergence` must be treated as a semantic integrity failure and rejected or replaced with a controlled failure record
