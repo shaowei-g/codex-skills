@@ -12,6 +12,7 @@ Use this skill when specification is the current phase for one feature.
 Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
+- `../references/artifact-acceptance-markers.md`
 - `../references/subagent-response-format.md`
 - `../references/specialist-status-semantics.md`
 
@@ -35,7 +36,7 @@ Use this skill when at least one is true:
 
 ## Owned Outputs
 
-- `spec.md`
+- `spec.md` with markerized front matter when safe to add or preserve
 - clarified scope boundaries
 - explicit acceptance criteria and constraints for the assigned feature
 

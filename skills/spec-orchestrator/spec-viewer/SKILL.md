@@ -12,6 +12,7 @@ Use this skill when inspection is the current phase for one feature.
 Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
+- `../references/artifact-acceptance-markers.md`
 - `../references/subagent-response-format.md`
 - `../references/specialist-status-semantics.md`
 
@@ -19,7 +20,7 @@ Load and follow these shared references first:
 
 Use this skill when at least one is true:
 
-- artifact inventory or current feature-state inspection is needed
+- artifact inventory, acceptance-marker inspection, or current feature-state inspection is needed
 - the earliest unresolved phase must be identified
 - phase readiness must be checked before delegation
 - one routing recommendation is needed for the next bounded pass
@@ -29,9 +30,10 @@ Use this skill when at least one is true:
 
 - repository-local workflow inspection prompt when available
 - `specs/<feature>/handoff.md` if present
-- `specs/<feature>/spec.md` if present
-- `specs/<feature>/plan.md` if present
-- `specs/<feature>/tasks.md` if present
+- `specs/<feature>/spec.md` if present and inspect front matter markers when present
+- `specs/<feature>/plan.md` if present and inspect front matter markers when present
+- `specs/<feature>/tasks.md` if present and inspect front matter markers when present
+- `specs/<feature>/implementation-status.md` if present
 - `specs/<feature>/review.md` if present
 - `specs/<feature>/drift.md` if present
 - changed code only when artifact state alone is insufficient
@@ -39,7 +41,7 @@ Use this skill when at least one is true:
 ## Owned Outputs
 
 - inspection summary in the shared schema
-- advisory next-phase recommendation
+- advisory next-phase recommendation based on accepted markers when available
 - minimal continuity notes only when the assigned scope explicitly asks for them
 
 ## Phase-Specific Rejected Criteria

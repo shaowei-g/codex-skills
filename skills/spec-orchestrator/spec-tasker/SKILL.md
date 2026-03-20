@@ -12,6 +12,7 @@ Use this skill when task decomposition is the current phase for one feature.
 Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
+- `../references/artifact-acceptance-markers.md`
 - `../references/subagent-response-format.md`
 - `../references/specialist-status-semantics.md`
 
@@ -34,7 +35,7 @@ Use this skill when at least one is true:
 
 ## Owned Outputs
 
-- `tasks.md`
+- `tasks.md` with markerized front matter when safe to add or preserve
 - ordered bounded task batches
 - dependency and verification notes required for safe implementation
 

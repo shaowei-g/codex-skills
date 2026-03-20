@@ -22,6 +22,14 @@ This reference defines the minimal execution rules that every specialist skill m
 - Do not claim file changes, checks, or evidence that did not occur.
 - Keep `Self-Check` explicit and truthful.
 
+## Artifact Marker Discipline
+
+- When writing or updating markerized workflow artifacts, preserve the YAML front matter contract from `./artifact-acceptance-markers.md`.
+- Keep marker blocks validator-compatible with `../scripts/validate_artifact_markers.sh`; do not emit malformed or partial front matter.
+- Specialists may initialize or update `status: draft` or `status: ready` when that reflects the real artifact state.
+- Specialists must not self-promote artifacts to formal acceptance; `approved_by_orchestrator: true` and `status: accepted` are orchestrator-owned.
+- `completed` in the response schema does not automatically mean the artifact is formally accepted for the next phase.
+
 ## Status Semantics
 
 - Interpret `completed`, `blocked`, and `rejected` using `./specialist-status-semantics.md`.

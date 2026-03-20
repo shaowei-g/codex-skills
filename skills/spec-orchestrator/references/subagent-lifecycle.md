@@ -22,6 +22,7 @@ Every delegated run should follow this sequence:
    - resolve repository prompts using `./codex-prompt-mapping.md`
    - load only the feature artifacts and repository context needed for the assigned scope
    - prefer durable workflow artifacts over chat history
+- when markerized artifacts exist, inspect formal acceptance using `./artifact-acceptance-markers.md` before routing forward
 
 4. **Check Entry Gate**
    - consult the assigned specialist skill for phase-local entry expectations
@@ -48,6 +49,14 @@ Every delegated run should follow this sequence:
 ## Related References
 
 - prompt lookup: `./codex-prompt-mapping.md`
+- artifact acceptance: `./artifact-acceptance-markers.md`
 - delegated prompt contract and authority checks: `./subagent-reinjection-contract.md`
 - fallback and repair: `./orchestrator-fallback.md`
 - response schema: `./subagent-response-format.md`
+
+## Acceptance Checkpoint
+
+If the delegated run updates or relies on markerized phase artifacts for formal acceptance or continuation, validate them before treating the phase as accepted:
+
+- `bash ./scripts/validate_artifact_markers.sh specs/<feature>`
+- use `--require-markers` when the updated artifacts are expected to carry front matter markers

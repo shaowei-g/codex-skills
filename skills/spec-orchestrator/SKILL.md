@@ -32,6 +32,7 @@ If neither is provided, stop and return:
 ### Routing rule
 
 - Always route to the earliest unresolved phase.
+- When markerized workflow artifacts exist, determine phase acceptance from `./references/artifact-acceptance-markers.md` rather than file existence or summary text alone.
 - Later artifacts never justify skipping an earlier unresolved phase.
 - If artifacts, implementation, or workflow notes disagree, route backward to the earliest unresolved phase.
 - If the user explicitly requests a new feature, start at specification with `spec-analyst`.
@@ -70,11 +71,12 @@ Phase prompt lookup follows:
 
 - `./references/codex-prompt-mapping.md`
 
-Phase-specific entry, blocked, rejected, and owned-output rules live in the assigned specialist skill.
+Phase-specific entry, blocked, rejected, owned-output, and artifact-marker rules live in the assigned specialist skill and the shared artifact marker reference.
 
 Specialists share these thin common contracts:
 
 - `./references/specialist-execution-contract.md`
+- `./references/artifact-acceptance-markers.md`
 - `./references/subagent-response-format.md`
 - `./references/specialist-status-semantics.md`
 
@@ -82,9 +84,13 @@ Specialists share these thin common contracts:
 
 - Every delegated response must match the approved schema in:
   - `./references/subagent-response-format.md`
-- `./references/specialist-status-semantics.md`
+- Delegated status interpretation must remain consistent with:
+  - `./references/specialist-status-semantics.md`
 - Every delegated response must be validated with:
   - `bash ./scripts/validate_subagent_response.sh`
+- When phase acceptance is claimed through markerized workflow artifacts, validate them with:
+  - `bash ./scripts/validate_artifact_markers.sh specs/<feature>`
+- Use `--require-markers` after a phase-owned update that is expected to create or preserve markerized artifacts.
 - Always invoke the validator as `bash <script>`.
 - One repair pass is allowed only for format-only defects.
 - Semantic violations must be rejected, not normalized.
@@ -121,5 +127,7 @@ Stop and surface the blocker when any of the following is true:
 ## Continuity rule
 
 - Record only minimal durable coordination notes when continuity is needed.
-- Prefer existing workflow artifacts over chat history when resuming.
+- Prefer existing workflow artifacts and their acceptance markers over chat history when resuming.
+- When markerized artifacts are used as the basis for routing or continuation, require them to pass `bash ./scripts/validate_artifact_markers.sh` before treating them as authoritative.
+- Treat formal acceptance as an artifact marker decision, not just a prior summary statement.
 - Handoff packaging belongs to `spec-handoff`, not the orchestrator by default.

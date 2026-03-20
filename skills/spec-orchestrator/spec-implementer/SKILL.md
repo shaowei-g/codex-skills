@@ -12,6 +12,7 @@ Use this skill when implementation is the current phase for one feature.
 Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
+- `../references/artifact-acceptance-markers.md`
 - `../references/subagent-response-format.md`
 - `../references/specialist-status-semantics.md`
 
@@ -36,6 +37,7 @@ Use this skill when at least one is true:
 ## Owned Outputs
 
 - code and tests for one bounded implementation batch
+- `specs/<feature>/implementation-status.md` updates for completed task IDs and verification commands when that record is in scope
 - minimal required workflow artifact updates for the completed batch
 
 ## Phase-Specific Rejected Criteria

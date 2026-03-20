@@ -79,5 +79,13 @@ Use these labels when classifying semantic contract failures:
 ## Related References
 
 - lifecycle sequence: `./subagent-lifecycle.md`
+- artifact acceptance: `./artifact-acceptance-markers.md`
 - fallback and repair: `./orchestrator-fallback.md`
 - response schema: `./subagent-response-format.md`
+
+## Artifact Marker Reference
+
+When a delegated result includes phase-owned artifact updates that are intended to support formal phase acceptance or continuation, the orchestrator should validate the artifact markers with the artifact marker validator before accepting the run as authoritative.
+
+- `bash ./scripts/validate_artifact_markers.sh specs/<feature>`
+- use `--require-markers` when the updated artifacts are expected to carry front matter markers

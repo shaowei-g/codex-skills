@@ -12,6 +12,7 @@ Use this skill when verification is the current phase for one feature.
 Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
+- `../references/artifact-acceptance-markers.md`
 - `../references/subagent-response-format.md`
 - `../references/specialist-status-semantics.md`
 
@@ -28,9 +29,10 @@ Use this skill when at least one is true:
 
 - `.codex/prompts/speckit.checklist.md` first
 - `.codex/prompts/speckit.constitution.md` if present
-- `specs/<feature>/spec.md`
-- `specs/<feature>/plan.md` if present
-- `specs/<feature>/tasks.md` if present
+- `specs/<feature>/spec.md` and its marker state
+- `specs/<feature>/plan.md` if present and its marker state
+- `specs/<feature>/tasks.md` if present and its marker state
+- `specs/<feature>/implementation-status.md` if present
 - changed code, tests, and review artifacts needed for the assigned verification scope
 
 ## Owned Outputs

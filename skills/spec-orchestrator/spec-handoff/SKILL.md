@@ -12,6 +12,7 @@ Use this skill when handoff or continuity packaging is the current phase for one
 Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
+- `../references/artifact-acceptance-markers.md`
 - `../references/subagent-response-format.md`
 - `../references/specialist-status-semantics.md`
 
@@ -37,9 +38,10 @@ Use this skill for:
 ## Read Order
 
 - `specs/<feature>/handoff.md` if present
-- `specs/<feature>/spec.md` if present
-- `specs/<feature>/plan.md` if present
-- `specs/<feature>/tasks.md` if present
+- `specs/<feature>/spec.md` if present and its marker state
+- `specs/<feature>/plan.md` if present and its marker state
+- `specs/<feature>/tasks.md` if present and its marker state
+- `specs/<feature>/implementation-status.md` if present
 - `specs/<feature>/review.md` if present
 - `specs/<feature>/drift.md` if present
 - current code or task state only when resuming work
@@ -51,7 +53,7 @@ Shared template:
 ## Owned Outputs
 
 - `handoff.md`
-- concise current-phase summary
+- concise current-phase summary with accepted-vs-ready artifact distinctions when available
 - pending work, blockers, and exact recommended next reading path
 
 ## Phase-Specific Rejected Criteria
