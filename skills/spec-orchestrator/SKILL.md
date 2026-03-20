@@ -72,6 +72,11 @@ Phase prompt lookup follows:
 
 Phase-specific entry, blocked, rejected, and owned-output rules live in the assigned specialist skill.
 
+Specialists share these thin common contracts:
+
+- `./references/specialist-execution-contract.md`
+- `./references/subagent-response-format.md`
+
 ## Validation policy
 
 - Every delegated response must match the approved schema in:

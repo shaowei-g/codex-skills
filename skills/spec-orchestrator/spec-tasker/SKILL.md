@@ -11,11 +11,8 @@ Use this skill when task decomposition is the current phase for one feature.
 
 Load and follow these shared references first:
 
-- `../references/subagent-lifecycle.md`
-- `../references/subagent-reinjection-contract.md`
+- `../references/specialist-execution-contract.md`
 - `../references/subagent-response-format.md`
-- `../references/codex-prompt-mapping.md`
-- `../references/subagent-prompt-fallbacks.md`
 
 ## Purpose
 
