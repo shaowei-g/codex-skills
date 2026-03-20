@@ -35,105 +35,41 @@ Return `blocked` when any of the following is true:
 - the mapped prompt exists but is internally inconsistent with governing constraints and the conflict cannot be resolved from repository artifacts
 - the assigned work depends on a missing user decision, missing secret, missing environment, missing dependency, or missing external system access
 - the assigned scope is valid but cannot be completed without expanding spec-approved scope
+- native subagent support is unavailable and Codex CLI fallback transport is also unavailable
+
+## Delegation transport fallback
+
+If native subagent support is unavailable, use Codex CLI as the delegation transport.
+
+Use this standard transport only:
+
+```bash
+cat > "$prompt_file" <<'EOF'
+<delegation prompt>
+EOF
+
+codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_file" - < "$prompt_file" > "$exec_log" 2>&1
+```
+
+Transport interpretation rules:
+
+- `response_file` is the only authoritative delegated output
+- `exec_log` is diagnostic only
+- the orchestrator must validate `response_file` with `bash ./scripts/validate_subagent_response.sh`
+- if the CLI command fails or `response_file` is missing, classify the run as `blocked` rather than improvising specialist work
 
 ## Phase-Specific Prompt Expectations
 
-### spec-viewer for inspection or routing
+Phase-specific prompt order and phase-specific `blocked` / `rejected` criteria now live in each specialist skill file.
 
-Preferred prompt chain:
+Use the relevant specialist skill as the source of truth for:
 
-1. repository-local workflow inspection or feature-state prompt
-2. `.codex/prompts/speckit.constitution.md` when present
-3. local `spec-viewer` rules
+- preferred prompt chain for that phase
+- phase-specific `blocked` criteria
+- phase-specific `rejected` criteria
+- any extra scope constraints that apply only to that specialist
 
-Return `rejected` if the request asks `spec-viewer` to author phase-owned artifacts, implement work, or perform verification instead of inspection or continuity packaging.
-Return `blocked` if the phase is inspection but the repository artifacts or code needed to determine current state are missing or unreadable.
-
-### spec-analyst
-
-Preferred prompt chain:
-
-1. `.codex/prompts/speckit.specify.md`
-2. `.codex/prompts/speckit.constitution.md` when present
-3. `.codex/prompts/speckit.clarify.md` only when clarification work is explicitly assigned or required
-4. equivalent repository specification prompt
-5. local `spec-analyst` rules
-
-Return `rejected` if specification work is requested but the actual need is planning, tasks, implementation, or verification.
-Return `blocked` if essential product intent is missing and clarification is required but cannot be resolved from artifacts or the assigned scope.
-
-### spec-planner
-
-Preferred prompt chain:
-
-1. `.codex/prompts/speckit.plan.md`
-2. `.codex/prompts/speckit.constitution.md` when present
-3. equivalent repository planning prompt
-4. local `spec-planner` rules
-
-Return `rejected` if `spec.md` is missing, materially ambiguous, or not approved enough to support planning.
-Return `blocked` if the phase is planning but technical constraints, interfaces, or dependencies required to produce a viable plan are unavailable.
-
-### spec-tasker
-
-Preferred prompt chain:
-
-1. `.codex/prompts/speckit.tasks.md`
-2. `.codex/prompts/speckit.constitution.md` when present
-3. equivalent repository task decomposition prompt
-4. local `spec-tasker` rules
-
-Return `rejected` if `plan.md` is missing or not execution-ready.
-Return `blocked` if the plan exists but cannot be decomposed into verifiable bounded tasks without unresolved architectural decisions.
-
-### spec-implementer
-
-Preferred prompt chain:
-
-1. `.codex/prompts/speckit.implement.md`
-2. `.codex/prompts/speckit.constitution.md` when present
-3. equivalent repository implementation prompt
-4. local `spec-implementer` rules
-
-Return `rejected` if `tasks.md` is missing, the selected task slice is not bounded, or the requested work would combine multiple implementation batches.
-Return `blocked` if the selected implementation slice is valid but cannot be completed because of missing environment setup, secrets, dependencies, or unresolved drift.
-
-### spec-verifier
-
-Preferred prompt chain:
-
-1. `.codex/prompts/speckit.checklist.md`
-2. `.codex/prompts/speckit.constitution.md` when present
-3. equivalent repository verification or review prompt
-4. local `spec-verifier` rules
-
-Return `rejected` if there is nothing concrete to verify or if the request is actually asking for implementation rather than verification.
-Return `blocked` if verification is the correct phase but evidence cannot be gathered because artifacts, code, test commands, fixtures, or runtime access are missing.
-
-### spec-drift-check
-
-Preferred prompt chain:
-
-1. `.codex/prompts/speckit.analyze.md`
-2. `.codex/prompts/speckit.constitution.md` when present
-3. equivalent repository analysis prompt
-4. local `spec-drift-check` rules
-
-Return `rejected` if the request is actually asking for new specification authoring rather than drift assessment.
-Return `blocked` if scope alignment cannot be determined from available artifacts and code evidence.
-
-### spec-viewer for continuity
-
-Preferred prompt chain:
-
-1. repository handoff-oriented prompt if one exists
-2. `.codex/prompts/speckit.checklist.md`
-3. `.codex/prompts/speckit.constitution.md` when present
-4. equivalent repository continuity or review prompt
-5. local `spec-viewer` rules
-
-Return `rejected` if the request asks the handoff skill to decide architecture, implement tasks, or verify behavior.
-Return `blocked` if continuity notes cannot be prepared because the current phase, completed work, or blockers cannot be determined from repository state.
+This shared reference keeps only global fallback and global classification rules.
 
 ## Output Rule
 

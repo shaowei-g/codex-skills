@@ -31,3 +31,11 @@ If the primary prompt is not found at the expected path, search the repository b
 - `speckit.implement.md`
 
 The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.
+
+## Phase-Specific Rejected Criteria
+
+Return `rejected` if `tasks.md` is missing, the selected task slice is not bounded, or the requested work would combine multiple implementation batches.
+
+## Phase-Specific Blocked Criteria
+
+Return `blocked` if the selected implementation slice is valid but cannot be completed because of missing environment setup, secrets, dependencies, or unresolved drift.

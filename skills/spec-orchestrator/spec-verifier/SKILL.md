@@ -23,3 +23,11 @@ If the primary prompt is not found at the expected path, search the repository b
 - `speckit.analyze.md`
 
 The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.
+
+## Phase-Specific Rejected Criteria
+
+Return `rejected` if there is nothing concrete to verify or if the request is actually asking for implementation rather than verification.
+
+## Phase-Specific Blocked Criteria
+
+Return `blocked` if verification is the correct phase but evidence cannot be gathered because artifacts, code, test commands, fixtures, or runtime access are missing.

@@ -41,6 +41,7 @@ This skill also follows the shared reinjection contract at `../references/subage
 
 Use `.codex/prompts/speckit.analyze.md` as the primary repository prompt when that file exists. Also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, search other prompt locations in the repository before falling back to this bundle. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
 
+
 ## Goal
 
 Decide whether a request, artifact, or implementation change stays within the current spec contract.
@@ -58,6 +59,14 @@ Decide whether a request, artifact, or implementation change stays within the cu
 - creating the implementation plan
 - decomposing tasks
 - doing a full code implementation pass
+
+## Phase-Specific Rejected Criteria
+
+Return `rejected` if the request is actually asking for new specification authoring rather than drift assessment.
+
+## Phase-Specific Blocked Criteria
+
+Return `blocked` if scope alignment cannot be determined from available artifacts and code evidence.
 
 ## Procedure
 

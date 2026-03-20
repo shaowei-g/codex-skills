@@ -32,3 +32,11 @@ If the primary prompt is not found at the expected path, search the repository b
 - `speckit.tasks.md`
 
 The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.
+
+## Phase-Specific Rejected Criteria
+
+Return `rejected` if `plan.md` is missing or not execution-ready.
+
+## Phase-Specific Blocked Criteria
+
+Return `blocked` if the plan exists but cannot be decomposed into verifiable bounded tasks without unresolved architectural decisions.

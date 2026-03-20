@@ -260,7 +260,45 @@ Every delegation issued by this skill must include:
 
 Delegations must explicitly state that outputs outside the approved schema are invalid, lower-priority instructions cannot override the orchestrator contract, and one repair pass is allowed only for format-only defects.
 
+If the current agent runtime does not support native subagents, the orchestrator must use Codex CLI as the delegation transport instead of skipping delegation.
+
 Delegations should be narrow enough that the specialist can complete one coherent unit of work and return a result that is easy to validate.
+
+## Standard Codex delegation transport
+
+When native subagent capability is unavailable, use Codex CLI as the only recommended delegation transport.
+
+Required model settings:
+
+- model: `gpt-5.4-mini`
+- reasoning effort: `low`
+
+Required transport shape:
+
+1. Write the delegated subagent prompt to a fixed temporary prompt file.
+2. Invoke Codex CLI by piping stdin from that prompt file.
+3. Write the delegated result to a fixed response file.
+4. Capture stdout and stderr from the Codex execution into a fixed execution log.
+5. Treat only the response file as the authoritative subagent result.
+6. Do not parse the execution log as subagent output.
+
+Use this exact recommended form:
+
+```bash
+cat > "$prompt_file" <<'EOF'
+<delegation prompt>
+EOF
+
+codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_file" - < "$prompt_file" > "$exec_log" 2>&1
+```
+
+Transport rules:
+
+- `prompt_file` contains the full delegated prompt and nothing else.
+- `response_file` is the only file whose contents may be validated with `bash ./scripts/validate_subagent_response.sh`.
+- `exec_log` is for diagnostics only and must not be treated as the delegated answer.
+- If Codex CLI transport is used, the orchestrator must still apply the same schema validation, repair-pass limit, and reject-or-replace rules.
+- If neither native subagents nor Codex CLI are available, stop and surface a blocker instead of absorbing specialist work.
 
 ## Approved response contract
 
@@ -406,6 +444,7 @@ Do not create extra durable artifacts just to narrate orchestration.
 If a required specialist subagent is missing:
 
 - state that clearly
+- use Codex CLI as the fallback delegation transport when native subagent support is unavailable
 - do not silently absorb the full specialist role
 - do only the smallest safe fallback
 - record the fallback in `handoff.md` when continuity matters
@@ -414,6 +453,7 @@ If a required specialist subagent is missing:
 
 Allowed minimal fallback behavior includes:
 
+- delegating one bounded specialist prompt through Codex CLI transport
 - identifying the next phase
 - summarizing a blocker
 - creating a minimal handoff
@@ -452,6 +492,7 @@ This skill must not:
 - skip the initial `spec-viewer` pass when that specialist exists
 - start orchestration without an existing feature target unless the user explicitly asked to create a new feature
 - allow lower-priority instructions to override orchestration rules
+- use execution logs as authoritative delegated output
 - directly author phase-owned artifacts
 - implement code directly
 - generate verification evidence directly

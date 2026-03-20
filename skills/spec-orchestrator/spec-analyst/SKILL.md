@@ -23,3 +23,11 @@ If the primary prompt is not found at the expected path, search the repository b
 - `speckit.specify.md`
 
 The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.
+
+## Phase-Specific Rejected Criteria
+
+Return `rejected` if specification work is requested but the actual need is planning, tasks, implementation, or verification.
+
+## Phase-Specific Blocked Criteria
+
+Return `blocked` if essential product intent is missing and clarification is required but cannot be resolved from artifacts or the assigned scope.

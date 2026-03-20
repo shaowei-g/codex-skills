@@ -103,6 +103,24 @@ The orchestrator validates the returned payload and decides whether another suba
 When the orchestrator runs the shared validator, it must invoke it as `bash ./scripts/validate_subagent_response.sh`.
 Do not assume the validator script has an executable bit.
 
+If native subagent support is unavailable, the orchestrator must use Codex CLI as the delegation transport with this fixed form:
+
+```bash
+cat > "$prompt_file" <<'EOF'
+<delegation prompt>
+EOF
+
+codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_file" - < "$prompt_file" > "$exec_log" 2>&1
+```
+
+Transport invariants:
+
+- write the full delegated prompt into `prompt_file`
+- read only `response_file` as the authoritative delegated result
+- treat `exec_log` as diagnostics only
+- validate `response_file` with `bash ./scripts/validate_subagent_response.sh`
+- do not infer subagent output from terminal chatter or execution logs
+
 ## Validation and repair boundary
 
 The first returned payload must already satisfy the shared validator.

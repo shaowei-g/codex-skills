@@ -27,3 +27,15 @@ Tell subagent to read these repository prompts in order:
 - `../references/subagent-response-format.md`
 
 The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.
+
+## Phase-Specific Rejected Criteria
+
+Return `rejected` if the request asks `spec-viewer` to author phase-owned artifacts, implement work, or perform verification instead of inspection or continuity packaging.
+
+Return `rejected` if the request asks the handoff skill to decide architecture, implement tasks, or verify behavior.
+
+## Phase-Specific Blocked Criteria
+
+Return `blocked` if the phase is inspection but the repository artifacts or code needed to determine current state are missing or unreadable.
+
+Return `blocked` if continuity notes cannot be prepared because the current phase, completed work, or blockers cannot be determined from repository state.
