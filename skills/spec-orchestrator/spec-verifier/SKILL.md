@@ -25,12 +25,12 @@ Treat that opening sentence as binding for the current run.
 
 Before doing the assigned work, read and follow these repository prompts in order:
 
-- `.codex/prompts/speckit.checklist.md` first
+- `.codex/prompts/speckit.analyze.md` first
 - `.codex/prompts/speckit.constitution.md` when present
 
 If the primary prompt is not found at the expected path, search the repository by prompt name before proceeding. Search for these names in this order:
 
-- `speckit.checklist.md`
+- `speckit.analyze.md`
 - `speckit.constitution.md`
 
 The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.

@@ -6,7 +6,6 @@ description: Prepare structured spec handoff state for paused, blocked, resumed,
 # Spec Handoff
 
 Use this skill for continuity, inspection, and handoff packaging.
-Legacy `spec-viewer` references route here.
 
 ## Script Assets
 
@@ -25,11 +24,9 @@ Start the subagent instruction with this exact sentence:
 
 ## Read First
 
-- `.codex/prompts/speckit.checklist.md` first
-- `.codex/prompts/speckit.constitution.md` if present
 - equivalent repository prompt locations only if the primary prompt is missing
 - `specs/<feature>/handoff.md` if present
-- `specs/<feature>/spec.md`
+- `specs/<feature>/spec.md` if present
 - `specs/<feature>/plan.md` if present
 - `specs/<feature>/tasks.md` if present
 - `specs/<feature>/review.md` if present
@@ -76,14 +73,10 @@ Leave the feature in a state where the next agent can continue safely without re
 
 - Keep it concise and scannable.
 - Prefer bullets and short phrases.
-[text](../references)- Do not restate the entire feature history.
+  [text](../references)- Do not restate the entire feature history.
 - If the workflow should route backward, say so clearly.
 - Do not improvise section names or field order in the final response.
 
 ## Return Contract
 
 Return results using `../references/subagent-response-format.md` and the exact field order from `./scripts/print_handoff_response_schema.sh`.
-
-- `Scope` must name exactly one handoff update.
-- `Recommended-Next-Phase` must contain exactly one orchestrator-facing next step.
-- `Recommended-Next-Subagent` must be advisory only and must not claim routing authority.
