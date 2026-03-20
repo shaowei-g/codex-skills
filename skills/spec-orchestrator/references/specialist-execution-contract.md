@@ -22,11 +22,10 @@ This reference defines the minimal execution rules that every specialist skill m
 - Do not claim file changes, checks, or evidence that did not occur.
 - Keep `Self-Check` explicit and truthful.
 
-## Status Rule
+## Status Semantics
 
-- Return `completed` when the assigned bounded scope is fully done.
-- Return `blocked` when the assigned scope is valid but cannot be safely completed.
-- Return `rejected` when the request violates the phase boundary, entry gate, or bounded-scope rule.
+- Interpret `completed`, `blocked`, and `rejected` using `./specialist-status-semantics.md`.
+- Keep status selection consistent with the assigned phase, bounded scope, and repository evidence.
 
 ## Stop Rule
 

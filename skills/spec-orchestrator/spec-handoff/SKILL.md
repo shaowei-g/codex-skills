@@ -13,6 +13,7 @@ Load and follow these shared references first:
 
 - `../references/specialist-execution-contract.md`
 - `../references/subagent-response-format.md`
+- `../references/specialist-status-semantics.md`
 
 ## Helper Scripts
 

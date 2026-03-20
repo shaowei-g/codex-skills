@@ -35,5 +35,5 @@ For every delegated run:
 ## Related References
 
 - lifecycle: `./subagent-lifecycle.md`
-- failure classification: `./subagent-prompt-fallbacks.md`
+- orchestrator fallback and repair: `./orchestrator-fallback.md`
 - response schema: `./subagent-response-format.md`

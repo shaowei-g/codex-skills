@@ -76,11 +76,13 @@ Specialists share these thin common contracts:
 
 - `./references/specialist-execution-contract.md`
 - `./references/subagent-response-format.md`
+- `./references/specialist-status-semantics.md`
 
 ## Validation policy
 
 - Every delegated response must match the approved schema in:
   - `./references/subagent-response-format.md`
+- `./references/specialist-status-semantics.md`
 - Every delegated response must be validated with:
   - `bash ./scripts/validate_subagent_response.sh`
 - Always invoke the validator as `bash <script>`.
@@ -89,11 +91,11 @@ Specialists share these thin common contracts:
 - If an invalid response cannot be safely repaired, replace it with a controlled failure record using:
   - `bash ./scripts/print_subagent_response_schema.sh`
 
-Delegation and reinjection contract lives in:
+Delegated execution references:
 
-- `./references/subagent-lifecycle.md`
-- `./references/subagent-reinjection-contract.md`
-- `./references/subagent-prompt-fallbacks.md`
+- lifecycle sequence: `./references/subagent-lifecycle.md`
+- delegated prompt and authority checks: `./references/subagent-reinjection-contract.md`
+- fallback and repair: `./references/orchestrator-fallback.md`
 
 ## Transport contract
 

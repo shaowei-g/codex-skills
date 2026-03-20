@@ -1,72 +1,53 @@
-# Subagent Lifecycle Contract
+# Delegated Run Lifecycle
 
-This reference defines the required operating sequence for every specialist subagent delegated by `spec-orchestrator`.
+This reference defines only the operating sequence that `spec-orchestrator` should follow for one delegated specialist run.
+
+Scope ownership, required delegated fields, authority limits, and violation labels are defined in `./subagent-reinjection-contract.md`.
 
 ## Lifecycle
 
-Every delegated run must follow this sequence:
+Every delegated run should follow this sequence:
 
-1. **Create**
-   - instantiate one subagent for one named feature and one named bounded scope
-   - bind the run to one assigned phase and one assigned subagent
+1. **Prepare Assignment**
+   - determine the earliest unresolved phase
+   - select the mapped specialist
+   - define one bounded unit of work for the chosen run
 
 2. **Inject**
-   - begin with the direct identity-and-contract opening
-   - use the standard sentence pattern:
-     - `You are subagent <subagent-name>. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.`
-   - immediately provide a compact `Load and follow:` list
-   - reference shared contracts by path instead of pasting them inline whenever possible
+   - open with the delegated identity-and-stop instruction
+   - provide the run-specific assignment values
+   - prefer path references over pasted contracts when the runtime can load files reliably
 
-3. **Load Context**
-   - load prompt guidance using `./codex-prompt-mapping.md`
-   - read only the feature artifacts and code needed for the assigned scope
+3. **Load Prompt and Local Context**
+   - resolve repository prompts using `./codex-prompt-mapping.md`
+   - load only the feature artifacts and repository context needed for the assigned scope
    - prefer durable workflow artifacts over chat history
 
-4. **Validate Entry Gate**
-   - check the assigned specialist skill for entry expectations
+4. **Check Entry Gate**
+   - consult the assigned specialist skill for phase-local entry expectations
    - if the gate fails, stop without doing adjacent-phase work
-   - return `blocked` or `rejected` using the shared schema
+   - return only an allowed schema status
 
-5. **Execute Single Scope**
-   - perform only the assigned bounded unit of work
-   - do not expand into another batch, another feature, or another phase
-   - record blockers or drift instead of absorbing extra work
+5. **Execute Assigned Work**
+   - perform the delegated bounded unit of work only
+   - keep file updates within the assigned ownership set
+   - record blockers or drift instead of absorbing adjacent work
 
 6. **Persist Durable Outputs**
-   - update only the files owned by the assigned scope
-   - if no safe write is possible, explain why in the return payload
+   - write only the artifacts owned by the assigned specialist and scope
+   - if no safe write is possible, explain that in the delegated response
 
-7. **Return Fixed Response**
-   - return only the schema defined in `./subagent-response-format.md`
-   - include scope, files read, files changed, blockers, evidence, and advisory next-step fields
+7. **Collect Response**
+   - require the fixed schema in `./subagent-response-format.md`
+   - validate the returned payload before accepting it
 
 8. **Stop**
-   - stop immediately after returning the result
-   - do not self-continue, reroute, or invoke another phase
-
-9. **Clear**
-   - close subagent after validation of the returned result is passed
-
-## Delegation Expectations
-
-The orchestrator should make all of the following explicit:
-
-- target feature
-- artifact directory path
-- assigned scope
-- assigned phase
-- assigned subagent
-- specialist skill reference
-- repository prompt reference
-- required response schema reference
-- validator reference
-- allowed write set
-- forbidden write set
-- stop-after-completion instruction
+   - end the delegated run after the response is returned
+   - do not self-continue or route into another delegated pass from inside the same run
 
 ## Related References
 
 - prompt lookup: `./codex-prompt-mapping.md`
-- delegation contract: `./subagent-reinjection-contract.md`
-- fallback and classification: `./subagent-prompt-fallbacks.md`
+- delegated prompt contract and authority checks: `./subagent-reinjection-contract.md`
+- fallback and repair: `./orchestrator-fallback.md`
 - response schema: `./subagent-response-format.md`

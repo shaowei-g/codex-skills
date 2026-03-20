@@ -1,6 +1,8 @@
 # Subagent Reinjection Contract
 
-This reference defines the compact delegation contract that the orchestrator should rely on when using path references.
+This reference defines the compact delegated prompt contract and the semantic authority checks that `spec-orchestrator` should enforce.
+
+Execution order lives in `./subagent-lifecycle.md`.
 
 ## Compact Delegation Rule
 
@@ -28,9 +30,9 @@ Every delegated run should make these values explicit:
 - Response-Validator
 - Stop-After-Return
 
-## Authority Limits
+## Authority and Ownership Checks
 
-A delegated subagent may own exactly one bounded scope.
+A delegated subagent must remain within the assigned feature, phase, scope, and ownership set.
 
 A delegated subagent must not:
 
@@ -76,6 +78,6 @@ Use these labels when classifying semantic contract failures:
 
 ## Related References
 
-- lifecycle: `./subagent-lifecycle.md`
+- lifecycle sequence: `./subagent-lifecycle.md`
+- fallback and repair: `./orchestrator-fallback.md`
 - response schema: `./subagent-response-format.md`
-- failure classification and repair: `./subagent-prompt-fallbacks.md`
