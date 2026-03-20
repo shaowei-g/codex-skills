@@ -4,10 +4,10 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  validate_handoff_response.sh [--file <path>]
+  validate_subagent_response.sh [--file <path>] [--feature <slug>] [--assigned-phase <phase>] [--assigned-subagent <name>] [--scope <text>]
 
-Validate that a handoff response contains all required schema headings in the
-exact order expected by spec-handoff. If no file is provided, stdin is used.
+Validate that a subagent response conforms to the shared spec-orchestrator
+response contract. If no file is provided, stdin is used.
 EOF
 }
 
@@ -61,12 +61,43 @@ require_nonempty_value() {
   fi
 }
 
+require_exact_match() {
+  local label=$1
+  local actual=$2
+  local expected=$3
+
+  if [[ -n "$expected" && "$actual" != "$expected" ]]; then
+    echo "$label mismatch: expected '$expected', got '$actual'" >&2
+    exit 1
+  fi
+}
+
 input_file=""
+expected_feature=""
+expected_phase=""
+expected_subagent=""
+expected_scope=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --file)
       input_file=${2-}
+      shift 2
+      ;;
+    --feature)
+      expected_feature=${2-}
+      shift 2
+      ;;
+    --assigned-phase)
+      expected_phase=${2-}
+      shift 2
+      ;;
+    --assigned-subagent)
+      expected_subagent=${2-}
+      shift 2
+      ;;
+    --scope)
+      expected_scope=${2-}
       shift 2
       ;;
     --help|-h)
@@ -174,10 +205,15 @@ if ! [[ "$feature_slug" =~ ^[A-Za-z0-9._-]+$ ]]; then
   exit 1
 fi
 
+require_exact_match "Feature-Slug" "$feature_slug" "$expected_feature"
+require_exact_match "Assigned-Phase" "$assigned_phase" "$expected_phase"
+require_exact_match "Assigned-Subagent" "$assigned_subagent" "$expected_subagent"
+require_exact_match "Scope" "$scope" "$expected_scope"
+
 require_enum_value "Status:" "$status" completed blocked rejected
 require_enum_value "Assigned-Phase:" "$assigned_phase" inspection specification planning "task decomposition" implementation verification "drift check" handoff
-require_enum_value "Assigned-Subagent:" "$assigned_subagent" spec-handoff
+require_enum_value "Assigned-Subagent:" "$assigned_subagent" spec-viewer spec-analyst spec-planner spec-tasker spec-implementer spec-verifier spec-drift-check spec-handoff
 require_enum_value "Recommended-Next-Phase:" "$recommended_next_phase" inspection specification planning "task decomposition" implementation verification "drift check" handoff none
 require_enum_value "Recommended-Next-Subagent:" "$recommended_next_subagent" spec-viewer spec-analyst spec-planner spec-tasker spec-implementer spec-verifier spec-drift-check spec-handoff none
 
-echo "handoff response schema is valid"
+echo "subagent response schema is valid"

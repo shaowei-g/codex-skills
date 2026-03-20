@@ -138,3 +138,14 @@ Return `blocked` if continuity notes cannot be prepared because the current phas
 ## Output Rule
 
 When a subagent returns `blocked` or `rejected`, it must still complete the shared response format and make the reason explicit in `Blockers` or `Evidence` as appropriate.
+
+## Malformed output classification
+
+Treat response-shape failures using these rules:
+
+- format-only and repairable: heading order mismatch, missing `none` placeholder, enum spelling drift, or self-check formatting defect when the delegated meaning is still clear
+- semantic and rejectable: wrong feature, wrong assigned phase, wrong assigned subagent, multi-scope output, extra undeclared work, ownership violation, routing override attempt, or a second failed repair pass
+
+The orchestrator may allow one repair pass only for the format-only class.
+The repair prompt must preserve the delegated scope and must not ask for new work.
+Semantic failures must be rejected or replaced with a controlled failure record.

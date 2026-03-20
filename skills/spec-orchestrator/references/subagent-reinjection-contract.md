@@ -64,6 +64,8 @@
 - no routing authority
 - no handoff authority
 - schema-only return
+- approved headings only
+- approved enum values only
 - stop immediately
 
 ### phase gate
@@ -99,6 +101,18 @@
 - Notes
 - Self-Check
 
+### validator assets
+
+- `../scripts/validate_subagent_response.sh`
+- `../scripts/print_subagent_response_schema.sh`
+
+### approved output enforcement
+
+- validate before accept
+- one repair pass for format-only defects
+- reject semantic violations immediately
+- replace unrecoverable malformed output with controlled failure record
+
 ### self-check
 
 - one_bounded_scope
@@ -119,7 +133,9 @@
 ### validator
 
 - valid status
+- valid heading count and order
 - single bounded scope
+- feature match
 - assigned phase match
 - assigned subagent match
 - ownership compliance
@@ -128,6 +144,7 @@
 - no silent handoff
 - schema completeness
 - self-check completeness
+- self-check values fixed
 - advisory not treated as authority
 
 ### violation taxonomy
@@ -150,6 +167,9 @@
 ### recovery rules
 
 - validate before continue
+- allow one structure-only repair pass
 - discard invalid routing authority
 - classify violation
+- reject repeated malformed output
+- replace unrecoverable malformed output with schema printer
 - reroute from earliest unresolved phase

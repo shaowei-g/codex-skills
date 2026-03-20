@@ -16,7 +16,7 @@ Every subagent run must follow this exact sequence:
 
 2. **Inject Run Contract**
    - Immediately after the opening sentence, inject the short-form contract from `./subagent-reinjection-contract.md`.
-   - Restate one-scope-only, one-phase-only, fixed-format-only, and terminate-immediately rules for this run.
+   - Restate one-scope-only, one-phase-only, fixed-format-only, approved-output-only, and terminate-immediately rules for this run.
 
 3. **Load Prompt Context**
    - Use the phase-to-prompt mapping in `./references/codex-prompt-mapping.md`.
@@ -26,7 +26,7 @@ Every subagent run must follow this exact sequence:
    - If no repository prompt exists, continue with the artifact contract and phase rules in this bundle.
    - Prefer repository-local prompts over bundle-local prose whenever both exist.
 
-3. **Load Feature Context**
+4. **Load Feature Context**
    - Read only the artifacts and code needed for the assigned scope.
    - Prefer the feature's durable workflow notes over chat history.
    - Use `specs/<feature>/` as the feature artifact directory.
@@ -37,23 +37,24 @@ Every subagent run must follow this exact sequence:
    - If the gate fails, stop without doing adjacent-phase work.
    - Return a blocked result in the shared response format.
 
-5. **Execute Single Scope**
+6. **Execute Single Scope**
    - Perform only the assigned bounded unit of work.
    - Follow the applicable repository prompt or template if one was found.
    - Do not expand into a second batch, second phase, or parallel scope.
    - Record blockers or drift instead of absorbing additional work.
 
-6. **Persist Durable Outputs**
+7. **Persist Durable Outputs**
    - Update only the files required by the assigned scope.
    - Write concrete artifact updates before returning whenever possible.
    - If no file change is safe, explain why in the return payload.
 
-7. **Return Fixed Response**
+8. **Return Fixed Response**
    - Return output using the shared response schema in `./references/subagent-response-format.md`.
+   - Use `./scripts/print_subagent_response_schema.sh` when a fixed template is needed to keep the response in the approved shape.
    - Include scope, status, files touched, blockers, drift, evidence, and recommended next phase.
    - Do not return free-form summaries in place of the schema.
 
-11. **Shutdown**
+9. **Shutdown**
    - Stop immediately after returning the result.
    - Do not self-continue, monitor, or auto-invoke another phase.
    - Hand control back to the orchestrator.
@@ -92,8 +93,25 @@ The orchestrator must delegate with all of the following made explicit:
 - expected artifact or batch
 - stop-after-completion instruction
 - required response schema reference
+- response validator reference
+- response schema printer reference
+- delegated assigned-phase value
+- delegated assigned-subagent value
 
 The orchestrator validates the returned payload and decides whether another subagent run is needed.
+
+## Validation and repair boundary
+
+The first returned payload must already satisfy the shared validator.
+
+If the orchestrator reports a repairable format-only defect, the subagent may perform exactly one repair pass with these limits:
+
+- preserve the original feature, assigned phase, assigned subagent, and scope
+- preserve the original meaning of files changed, blockers, drift, and evidence
+- do not perform new analysis or additional file work
+- do not upgrade a blocked or rejected result into completed because of the repair
+
+If the response would require semantic reinterpretation instead of structural correction, the orchestrator must reject it.
 
 ## Prompt Failure and Classification
 
