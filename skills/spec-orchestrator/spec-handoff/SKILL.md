@@ -20,7 +20,7 @@ These scripts do the real work: read feature artifacts, derive handoff state, cl
 
 Start the subagent instruction with this exact sentence:
 
-> You are subagent spec-handoff. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+> You are subagent spec-handoff. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
 
 ## Read First
 

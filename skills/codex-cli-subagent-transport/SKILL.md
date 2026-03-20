@@ -32,7 +32,8 @@ codex exec --model gpt-5.4-mini -c model_reasoning_effort="low" -o "$response_fi
 
 ## Transport rules
 
-- write the full delegated prompt into `prompt_file`
+- write the compact delegated prompt into `prompt_file`
+- prefer the workflow's required-fields plus path-references prompt shape over pasted inline contract prose
 - read only `response_file` as the authoritative delegated result
 - treat `exec_log` as diagnostics only
 - do not infer delegated output from terminal chatter or execution logs

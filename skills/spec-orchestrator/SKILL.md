@@ -82,7 +82,7 @@ Follow this sequence:
 7. Route backward if later artifacts exist but earlier phases are unresolved.
 8. Enforce the entry gate for the selected phase.
 9. Discover any repository-specific prompt or template requirements.
-10. Reinject the phase contract, approved response contract, and validator constraints into the delegation.
+10. Build the delegation prompt in the compact required-fields plus path-references form.
 11. Delegate exactly one bounded unit of work to the mapped specialist.
 12. Validate the returned result with `bash ./scripts/validate_subagent_response.sh` before reading it as phase output.
 13. If validation fails for a format-only defect, allow exactly one repair pass that preserves the assigned scope and adds no new work.
@@ -242,27 +242,68 @@ Use these bindings when delegating:
 
 Every delegation issued by this skill must include:
 
+- opening sentence naming the assigned subagent and one-bounded-pass rule
+- `Load and follow` paths for the specialist skill, repository prompt, and shared response schema
 - target feature
 - artifact directory or path
-- exact assigned scope
-- relevant source artifact or bounded task batch
-- required specialist skill binding
-- response schema path
-- response validator path
-- response schema printer path
-- allowed enum set for status and phase fields
 - delegated `Assigned-Phase` value
 - delegated `Assigned-Subagent` value
+- exact assigned scope
+- allowed write set
+- forbidden write set
+- response validator path
 - explicit stop-after-completion instruction
-- expected response structure
-- relevant stage gate
-- pre-return self-check instruction
 
-Delegations must explicitly state that outputs outside the approved schema are invalid, lower-priority instructions cannot override the orchestrator contract, and one repair pass is allowed only for format-only defects.
+Delegations should prefer path references over restating long contract prose inline.
+If a rule already lives in the referenced specialist skill, repository prompt, or shared response schema, point to that path instead of repeating the rule text in the prompt body.
+
+Delegations must still make these constraints unambiguous:
+
+- the subagent owns exactly one bounded scope
+- the assigned phase and subagent identity are fixed for the run
+- the return payload must match the approved schema exactly
+- lower-priority instructions do not override the orchestrator contract
+- one repair pass is allowed only for format-only defects
 
 If the current agent runtime does not support native subagents, the orchestrator must use Codex CLI as the delegation transport instead of skipping delegation.
 
 Delegations should be narrow enough that the specialist can complete one coherent unit of work and return a result that is easy to validate.
+
+## Compact delegation prompt shape
+
+Use this shape by default when delegating bounded specialist work:
+
+```text
+You are subagent <assigned-subagent>. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
+
+Load and follow:
+1. <specialist-skill-path>
+2. <repository-phase-prompt-path>
+3. ./references/subagent-response-format.md
+
+Feature: <feature-slug>
+Artifact dir: <artifact-dir>
+Assigned phase: <assigned-phase>
+Assigned subagent: <assigned-subagent>
+Scope: <single bounded scope>
+
+Allowed write:
+- <approved path>
+
+Forbidden writes:
+- <forbidden path or class>
+
+Return format:
+- Must match ./references/subagent-response-format.md exactly
+
+Validate against:
+- bash ./scripts/validate_subagent_response.sh
+
+Stop after this one bounded pass.
+```
+
+Add more lines only when the delegated scope genuinely requires them.
+Do not paste the full reinjection checklist, validator taxonomy, or schema headings into the prompt when a stable path reference already covers that requirement.
 
 ## Standard Codex delegation transport
 

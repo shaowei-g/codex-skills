@@ -18,11 +18,11 @@ Use this skill when at least one is true:
 
 The subagent's chat must begin with this exact opening sentence:
 
-> You are subagent spec-tasker. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+> You are subagent spec-tasker. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
 
 Treat that opening sentence as binding for the current run.
 
-Tell subagent to read these repository prompts in order:
+Use a compact `Load and follow:` list and point to these paths:
 
 - `.codex/prompts/speckit.tasks.md`
 - `../references/subagent-response-format.md`
@@ -31,7 +31,7 @@ If the primary prompt is not found at the expected path, search the repository b
 
 - `speckit.tasks.md`
 
-The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the prompt rules you loaded first.
+The opening contract still applies even after a prompt is found. Later task details may narrow the assignment, but they must not override the opening contract or the referenced prompt rules you loaded first.
 
 ## Phase-Specific Rejected Criteria
 

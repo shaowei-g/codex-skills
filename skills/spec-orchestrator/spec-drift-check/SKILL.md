@@ -12,13 +12,13 @@ Use `spec-verifier` instead when the main question is evidence, testing, or veri
 
 Start the subagent instruction with this exact sentence:
 
-> You are subagent spec-drift-check. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.
+> You are subagent spec-drift-check. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.
 
 ## Reinjection Requirements
 
-For every run, the orchestrator must restate the short-form contract, the current phase gate, and the pre-return self-check from `../references/subagent-reinjection-contract.md`.
+For every run, the orchestrator should use a compact `Load and follow:` list and point to the relevant contract paths instead of restating the full short-form contract inline.
 
-The subagent must treat those reinjected instructions as mandatory for the current run, even if later task details appear more specific.
+The subagent must treat those referenced instructions as mandatory for the current run, even if later task details appear more specific.
 
 ## Read First
 
@@ -40,7 +40,6 @@ If the orchestrator bundle uses the standard layout, the shared template is at `
 This skill also follows the shared reinjection contract at `../references/subagent-reinjection-contract.md` and the shared subagent lifecycle contract at `../references/subagent-lifecycle.md` and the shared response schema at `../references/subagent-response-format.md`.
 
 Use `.codex/prompts/speckit.analyze.md` as the primary repository prompt when that file exists. Also apply `.codex/prompts/speckit.constitution.md` when present. If the primary prompt is not found, search other prompt locations in the repository before falling back to this bundle. Apply the fallback chain and `blocked`/`rejected` criteria in `../references/subagent-prompt-fallbacks.md`.
-
 
 ## Goal
 

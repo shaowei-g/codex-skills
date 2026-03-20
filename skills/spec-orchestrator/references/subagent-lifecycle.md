@@ -11,12 +11,14 @@ Every subagent run must follow this exact sequence:
    - Bind the run to exactly one phase-owned assignment.
    - Start the run instruction with a direct identity-and-contract opening.
    - Use this exact sentence pattern, substituting the actual subagent name:
-     - `You are subagent <subagent-name>. Your task is to execute exactly one bounded unit of work for a single scope, produce a response in the predefined output format, and terminate immediately after returning the result.`
+     - `You are subagent <subagent-name>. Execute exactly one bounded unit of work for a single scope, return only the approved schema response, then stop.`
    - Reject or return blocked if the request contains multiple unrelated scopes.
 
 2. **Inject Run Contract**
-   - Immediately after the opening sentence, inject the short-form contract from `./subagent-reinjection-contract.md`.
-   - Restate one-scope-only, one-phase-only, fixed-format-only, approved-output-only, and terminate-immediately rules for this run.
+   - Immediately after the opening sentence, provide a compact `Load and follow:` list.
+   - Point to the specialist skill, the repository phase prompt, and the shared response schema by path.
+   - Restate only the run-specific fields that are not already covered by those referenced files.
+   - Do not paste the full reinjection checklist inline when the subagent can load the referenced files directly.
 
 3. **Load Prompt Context**
    - Use the phase-to-prompt mapping in `./references/codex-prompt-mapping.md`.
@@ -89,14 +91,18 @@ The orchestrator must delegate with all of the following made explicit:
 - target feature
 - artifact directory path
 - assigned scope
-- repository prompt mapping and lookup order
-- expected artifact or batch
-- stop-after-completion instruction
-- required response schema reference
-- response validator reference
-- response schema printer reference
 - delegated assigned-phase value
 - delegated assigned-subagent value
+- specialist skill reference
+- repository prompt reference
+- required response schema reference
+- response validator reference
+- allowed write set
+- forbidden write set
+- stop-after-completion instruction
+
+The default delegation form is the compact required-fields plus path-references prompt.
+The orchestrator should reference shared contracts by path instead of expanding them inline unless the runtime cannot read those paths.
 
 The orchestrator validates the returned payload and decides whether another subagent run is needed.
 

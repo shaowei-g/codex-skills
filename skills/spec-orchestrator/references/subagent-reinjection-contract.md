@@ -1,5 +1,16 @@
 # Core Goal
 
+This reference defines the contract that path-referenced delegation prompts rely on.
+The orchestrator should usually reference this file indirectly through the specialist skill and lifecycle contract instead of pasting the whole checklist into every prompt.
+
+## Compact delegation rule
+
+- prefer required fields plus path references
+- reference this contract instead of restating it inline
+- restate only run-specific values that the referenced files cannot infer
+- keep delegated prompts short enough to scan in one screen
+- expand the full checklist only when the runtime cannot reliably load referenced files
+
 - orchestrator authority
 - prevent subagent drift
 - multi-step delegation control
