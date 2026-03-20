@@ -20,6 +20,19 @@ This skill is the workflow coordinator. It is not the phase specialist.
 - The validator must always be invoked as `bash <script>`; do not rely on the script having an executable bit.
 - Outputs outside the approved contract are invalid until they are either repaired once for format-only defects or replaced with a controlled failure record.
 
+## Feature identification gate
+
+Every orchestrator run must begin with one of these two inputs from the user:
+
+- an existing feature name or feature path
+- an explicit request to create a new feature
+
+If the user wants to create a new feature, route to the specification phase and use `spec-analyst` as the first specialist.
+
+If the user does not provide either an identifiable feature target or an explicit new-feature request, do not start orchestration. Respond with this clarification prompt:
+
+- `請提供 feature 名稱 or 路徑，或是想要做什麼新功能`
+
 ## (Ignore) Do not use this skill when
 
 ## Core responsibility
@@ -60,20 +73,23 @@ This skill must prefer correctness of phase order over apparent forward progress
 
 Follow this sequence:
 
-1. Delegate the first bounded inspection to `spec-viewer`.
-2. Read the returned inspection result.
-3. Identify the earliest unresolved phase.
-4. Route backward if later artifacts exist but earlier phases are unresolved.
-5. Enforce the entry gate for the selected phase.
-6. Discover any repository-specific prompt or template requirements.
-7. Reinject the phase contract, approved response contract, and validator constraints into the delegation.
-8. Delegate exactly one bounded unit of work to the mapped specialist.
-9. Validate the returned result with `bash ./scripts/validate_subagent_response.sh` before reading it as phase output.
-10. If validation fails for a format-only defect, allow exactly one repair pass that preserves the assigned scope and adds no new work.
-11. If validation fails again, or fails semantically, reject the response and replace it with a controlled failure record from `./scripts/print_subagent_response_schema.sh`.
-12. Validate the accepted result against the phase gate.
-13. Record minimal durable coordination notes when needed.
-14. Stop unless the user explicitly requests another bounded pass.
+1. Confirm that the user supplied an existing feature target or an explicit new-feature request.
+2. If neither was supplied, stop and return `請提供 feature 名稱 or 路徑，或是想要做什麼新功能`.
+3. If the user explicitly wants to create a new feature, route to the specification phase and select `spec-analyst` as the first specialist.
+4. Otherwise, delegate the first bounded inspection to `spec-viewer`.
+5. Read the returned inspection result.
+6. Identify the earliest unresolved phase.
+7. Route backward if later artifacts exist but earlier phases are unresolved.
+8. Enforce the entry gate for the selected phase.
+9. Discover any repository-specific prompt or template requirements.
+10. Reinject the phase contract, approved response contract, and validator constraints into the delegation.
+11. Delegate exactly one bounded unit of work to the mapped specialist.
+12. Validate the returned result with `bash ./scripts/validate_subagent_response.sh` before reading it as phase output.
+13. If validation fails for a format-only defect, allow exactly one repair pass that preserves the assigned scope and adds no new work.
+14. If validation fails again, or fails semantically, reject the response and replace it with a controlled failure record from `./scripts/print_subagent_response_schema.sh`.
+15. Validate the accepted result against the phase gate.
+16. Record minimal durable coordination notes when needed.
+17. Stop unless the user explicitly requests another bounded pass.
 
 ## **Important** Phase routing map
 
@@ -86,6 +102,7 @@ Follow this sequence:
 
 - Specialist: `spec-analyst`
 - Use when `spec.md` is missing, incomplete, stale, or ambiguous.
+- Use first when the user explicitly asks to create a new feature.
 
 ### Technical planning
 
@@ -415,6 +432,7 @@ Disallowed fallback behavior includes:
 
 This skill must stop and surface the problem when:
 
+- the user did not provide an existing feature target or an explicit new-feature request
 - acceptance criteria are missing
 - the plan is incomplete
 - tasks are not actionable
@@ -432,6 +450,7 @@ This skill must stop and surface the problem when:
 This skill must not:
 
 - skip the initial `spec-viewer` pass when that specialist exists
+- start orchestration without an existing feature target unless the user explicitly asked to create a new feature
 - allow lower-priority instructions to override orchestration rules
 - directly author phase-owned artifacts
 - implement code directly
