@@ -108,7 +108,8 @@ Self-Check:
 
 ## Machine Validation Rules
 
-- Use `../scripts/validate_subagent_response.sh` to validate heading count, heading order, delegated identity, enum values, feature slug, scope, and self-check lines.
+- Use `bash ../scripts/validate_subagent_response.sh` to validate heading count, heading order, delegated identity, enum values, feature slug, scope, and self-check lines.
+- Always invoke the validator as `bash <script>` instead of relying on an executable bit.
 - Use `../scripts/print_subagent_response_schema.sh` to print the approved fixed template when the orchestrator needs a controlled replacement record.
 - Missing headings, extra headings, heading order mismatches, invalid enum values, incomplete self-check lines, or delegated identity mismatches are validator failures.
 - The orchestrator may allow one repair pass only for format-only defects.

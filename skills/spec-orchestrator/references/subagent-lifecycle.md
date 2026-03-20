@@ -100,6 +100,9 @@ The orchestrator must delegate with all of the following made explicit:
 
 The orchestrator validates the returned payload and decides whether another subagent run is needed.
 
+When the orchestrator runs the shared validator, it must invoke it as `bash ./scripts/validate_subagent_response.sh`.
+Do not assume the validator script has an executable bit.
+
 ## Validation and repair boundary
 
 The first returned payload must already satisfy the shared validator.

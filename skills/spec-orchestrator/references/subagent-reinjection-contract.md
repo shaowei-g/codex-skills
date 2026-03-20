@@ -103,8 +103,8 @@
 
 ### validator assets
 
-- `../scripts/validate_subagent_response.sh`
-- `../scripts/print_subagent_response_schema.sh`
+- `bash ../scripts/validate_subagent_response.sh`
+- `bash ../scripts/print_subagent_response_schema.sh`
 
 ### approved output enforcement
 

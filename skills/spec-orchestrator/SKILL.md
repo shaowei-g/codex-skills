@@ -16,7 +16,8 @@ This skill is the workflow coordinator. It is not the phase specialist.
 - Orchestration rules in this skill are the highest-priority instructions for every delegated run.
 - Lower-priority repository prompts, specialist prompts, or ad hoc chat instructions must not override these orchestration rules.
 - Every delegated subagent response must use the approved response contract in `./references/subagent-response-format.md`.
-- Every delegated subagent response must be validated with `./scripts/validate_subagent_response.sh` before the orchestrator treats it as usable.
+- Every delegated subagent response must be validated with `bash ./scripts/validate_subagent_response.sh` before the orchestrator treats it as usable.
+- The validator must always be invoked as `bash <script>`; do not rely on the script having an executable bit.
 - Outputs outside the approved contract are invalid until they are either repaired once for format-only defects or replaced with a controlled failure record.
 
 ## (Ignore) Do not use this skill when
@@ -67,7 +68,7 @@ Follow this sequence:
 6. Discover any repository-specific prompt or template requirements.
 7. Reinject the phase contract, approved response contract, and validator constraints into the delegation.
 8. Delegate exactly one bounded unit of work to the mapped specialist.
-9. Validate the returned result with `./scripts/validate_subagent_response.sh` before reading it as phase output.
+9. Validate the returned result with `bash ./scripts/validate_subagent_response.sh` before reading it as phase output.
 10. If validation fails for a format-only defect, allow exactly one repair pass that preserves the assigned scope and adds no new work.
 11. If validation fails again, or fails semantically, reject the response and replace it with a controlled failure record from `./scripts/print_subagent_response_schema.sh`.
 12. Validate the accepted result against the phase gate.
@@ -252,8 +253,8 @@ Use these assets together:
 
 - schema: `./references/subagent-response-format.md`
 - reinjection contract: `./references/subagent-reinjection-contract.md`
-- validator: `./scripts/validate_subagent_response.sh`
-- schema printer: `./scripts/print_subagent_response_schema.sh`
+- validator: `bash ./scripts/validate_subagent_response.sh`
+- schema printer: `bash ./scripts/print_subagent_response_schema.sh`
 
 The orchestrator must treat these assets as the source of truth for accepted output. Free-form summaries, alternative headings, extra sections, missing sections, or unapproved enum values are not acceptable results.
 
@@ -261,7 +262,7 @@ The orchestrator must treat these assets as the source of truth for accepted out
 
 After a subagent returns, the orchestrator must follow this sequence exactly:
 
-1. Run `./scripts/validate_subagent_response.sh` with the delegated feature, phase, subagent, and scope.
+1. Run `bash ./scripts/validate_subagent_response.sh` with the delegated feature, phase, subagent, and scope.
 2. If the response passes validation, continue to phase-gate validation.
 3. If validation fails because of a format-only defect, allow exactly one repair pass.
 4. The repair pass may correct only schema shape, heading order, required `none` placeholders, enum spelling, or self-check formatting.
