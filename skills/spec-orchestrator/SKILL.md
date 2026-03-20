@@ -1,566 +1,312 @@
 ---
 name: spec-orchestrator
-description: Orchestrate feature delivery across spec, plan, tasks, implementation, verification, review, drift control, continuation, and handoff. Always start by delegating one bounded inspection pass to `spec-viewer` to confirm the current feature state, identify the earliest unresolved phase, and route to the correct specialist subagent.
+description: Only use this skill when the user explicitly requests it. Within this skill, orchestration rules are the highest-priority instructions and must always be followed first. Orchestrates feature work across the Spec Kit workflow by determining the current phase, routing to the correct specialist, enforcing stage gates, and preserving continuity without taking over specialist responsibilities.
 ---
 
-# Spec Orchestrator
+# spec-orchestrator
 
-Coordinate feature delivery without collapsing all phases into one agent context.
+## Coordination, routing, and continuity for the Spec Kit workflow
 
-This skill owns:
+Use this skill to coordinate feature delivery across the full Spec Kit workflow. It determines the current workflow state, identifies the earliest unresolved phase, routes work to the correct specialist subagent, enforces phase order and stage gates, and preserves continuity across interrupted or multi-step work.
 
-- feature resolution
-- orchestration authority
-- mandatory first-pass inspection delegation
-- delegation sequencing
-- stage gating
-- bounded batch selection
-- review coordination
-- drift escalation
-- continuation
-- handoff coordination
+This skill is the workflow coordinator. It is not the phase specialist.
 
-This skill does **not** own specialist phase execution when the corresponding specialist subagent exists.
+## (Ignore) Do not use this skill when
 
-The orchestrator must never directly create, rewrite, or complete phase-owned artifacts such as `spec.md`, `plan.md`, `tasks.md`, implementation changes, or verification evidence when the corresponding specialist subagent exists. It may inspect returned results, route, validate, and record coordination notes only.
+## Core responsibility
 
-## Mandatory First Delegation Rule
+This skill is responsible for orchestration only. It must:
 
-Whenever `spec-orchestrator` is invoked for orchestration, it must first delegate exactly one bounded inspection pass to subagent `spec-viewer` for the resolved target feature.
+- Delegate the specialist work to the correct subagent when that subagent exists.
+- Enforce the correct phase order and stage gates.
+- Preserve continuity with durable notes when needed.
+- Inspect the current workflow state before routing
+- Identify the earliest unresolved phase
+- Validate whether the returned result satisfies the relevant stage gate TODO: Validate by program first.
+- Preserve continuity with minimal durable notes when needed
 
-This initial `spec-viewer` pass is mandatory before any later specialist routing decision.
+This skill must not perform specialist work itself when the specialist exists.
 
-The orchestrator must not skip this first `spec-viewer` delegation because:
+## Non-responsibilities
 
-- some artifacts already exist
-- a later phase appears obvious
-- earlier chat context seems to imply current state
-- implementation files already exist
-- the user asked to continue from an assumed phase
-- a previous run likely inspected the feature already
+This skill must not directly author or rewrite phase-owned deliverables, including:
 
-The purpose of the first `spec-viewer` pass is to confirm:
+- `spec.md`
+- `plan.md`
+- `tasks.md`
+- implementation or code changes
+- verification evidence
 
-- target feature identity
-- artifact inventory
-- current workflow state
-- earliest unresolved phase
-- readiness signals
-- stale-artifact or drift signals
-- recommended next valid phase
+This skill must not silently absorb specialist responsibilities just because the next step is obvious.
 
-If `spec-viewer` does not exist, the orchestrator must clearly report that blocker and may perform only the smallest safe fallback needed to preserve workflow continuity.
+## Routing principle
 
-## Required Delegation Rule
+Always route to the earliest unresolved phase.
 
-When a specialist subagent exists for the next valid phase, **use that subagent explicitly**.
+Later artifacts do not justify moving forward if an earlier required phase is missing, incomplete, contradictory, or stale. If artifacts and implementation disagree, treat the workflow as being at the earliest unresolved phase.
 
-Do not keep specialist execution inside the orchestrator when the correct subagent is available.
+This skill must prefer correctness of phase order over apparent forward progress.
 
-The orchestrator must stay responsible for:
+## Standard operating flow
 
-- identifying the target feature
-- invoking `spec-viewer` first for state inspection and routing input
-- enforcing entry and exit gates
-- selecting one bounded unit of work
-- validating the returned result
-- making the final delegation decision
-- updating durable coordination notes when needed
+Follow this sequence:
 
-The orchestrator must **not** silently absorb specialist work that belongs to:
+1. Delegate the first bounded inspection to `spec-viewer`.
+2. Read the returned inspection result.
+3. Identify the earliest unresolved phase.
+4. Route backward if later artifacts exist but earlier phases are unresolved.
+5. Enforce the entry gate for the selected phase.
+6. Discover any repository-specific prompt or template requirements.
+7. Reinject the phase contract and constraints into the delegation.
+8. Delegate exactly one bounded unit of work to the mapped specialist.
+9. Validate the returned result against the phase gate.
+10. Record minimal durable coordination notes when needed.
+11. Stop unless the user explicitly requests another bounded pass.
 
-- `spec-viewer`
-- `spec-analyst`
-- `spec-planner`
-- `spec-tasker`
-- `spec-implementer`
-- `spec-verifier`
-- `spec-drift-check`
-- `spec-handoff`
+## **Important** Phase routing map
 
-## Delegation Commands
+### Inspection and routing
 
-Use these explicit commands when routing work:
+- Specialist: `spec-viewer`
+- Use when workflow state must be determined before any other action.
 
-- On every orchestration pass, first spawn subagent `spec-viewer` and apply skill `./spec-viewer/SKILL.md` for exactly one bounded inspection pass.
-- If `spec.md` is missing, ambiguous, or incomplete, spawn subagent `spec-analyst` and apply skill `./spec-analyst/SKILL.md` to create or revise `spec.md`.
-- If `plan.md` is missing, unresolved, or not execution-ready, spawn subagent `spec-planner` and apply skill `./spec-planner/SKILL.md` to create or revise `plan.md`.
-- If `tasks.md` is missing, vague, oversized, or not verifiable, spawn subagent `spec-tasker` and apply skill `./spec-tasker/SKILL.md` to create or revise `tasks.md`.
-- If the next valid phase is implementation, spawn subagent `spec-implementer` and apply skill `./spec-implementer/SKILL.md` to complete exactly one bounded implementation batch.
-- If code or artifacts changed and evidence is required, spawn subagent `spec-verifier` and apply skill `./spec-verifier/SKILL.md` to verify the latest completed batch and record findings.
-- If the main question is whether current work exceeds the approved spec, spawn subagent `spec-drift-check` and apply skill `./spec-drift-check/SKILL.md` to assess drift and write `drift.md`.
-- If work is pausing, resuming, blocked, or being transferred, spawn subagent `spec-handoff` and apply skill `./spec-handoff/SKILL.md` to write or update `handoff.md`.
+### Specification
 
-Do not phrase delegation as a preference.
-Write the instruction as an explicit spawn action that includes both the subagent name and the skill path.
+- Specialist: `spec-analyst`
+- Use when `spec.md` is missing, incomplete, stale, or ambiguous.
 
-## Mandatory First Delegation Template
+### Technical planning
 
-When this skill starts orchestration for a resolved feature, it must spawn subagent `spec-viewer` and apply skill `./spec-viewer/SKILL.md`.
+- Specialist: `spec-planner`
+- Use when `plan.md` is missing, incomplete, not implementation-ready, or no longer aligned to the spec.
 
-The delegation must explicitly state:
+### Task decomposition
 
-- spawned subagent: `spec-viewer`
-- applied skill: `./spec-viewer/SKILL.md`
-- target feature
-- artifact directory
-- assigned scope: inspect current workflow state for one feature and recommend the next valid phase
+- Specialist: `spec-tasker`
+- Use when `tasks.md` is missing, vague, oversized, unordered, or not verifiable.
 
-Close the subagent after returning the inspection result.
-Do not create or rewrite phase-owned artifacts during this first inspection pass.
+### Implementation
 
-## Use This Skill When
+- Specialist: `spec-implementer`
+- Use when prerequisites are satisfied and there is an actionable, bounded task batch ready for execution.
 
-Use this skill when the request is about workflow orchestration, for example:
+### Verification
 
-- determine the next valid phase for a feature
-- inspect current artifact and implementation state before delegation
-- continue an interrupted feature workflow
-- route work back to an earlier phase when artifacts conflict
-- decide whether work may move forward
-- coordinate review, drift handling, or handoff
-- explicitly delegate one bounded unit to the correct specialist subagent
+- Specialist: `spec-verifier`
+- Use after implementation when evidence is needed, or when the user explicitly asks for review, verification, or alignment checking.
 
-Examples:
+### Drift review
 
-- "Continue feature `checkout-flow` from the correct phase."
-- "Figure out what phase this feature is in."
-- "Resume this partially completed feature safely."
-- "Route this feature to the correct subagent."
-- "Prepare a handoff for the next agent."
+- Specialist: `spec-drift-check`
+- Use when the main problem is scope mismatch, out-of-spec behavior, or artifact-to-code divergence.
 
-## Do Not Use This Skill When
+### Handoff and continuation
 
-Do not use this skill when the user directly wants one specialist phase and orchestration is unnecessary.
+- Specialist: `spec-handoff`
+- Use when work must be paused, transferred, resumed, or packaged for continuity.
 
-Examples:
+## Skill bindings
 
-- write `spec.md`
-- create `plan.md`
-- decompose `plan.md` into tasks
-- implement a specific task
-- verify a specific completed batch
-- create only a handoff summary
+Use these bindings when delegating:
 
-In those cases, use the relevant specialist subagent directly.
+- `spec-viewer` → `./spec-viewer/SKILL.md`
+- `spec-analyst` → `./spec-analyst/SKILL.md`
+- `spec-planner` → `./spec-planner/SKILL.md`
+- `spec-tasker` → `./spec-tasker/SKILL.md`
+- `spec-implementer` → `./spec-implementer/SKILL.md`
+- `spec-verifier` → `./spec-verifier/SKILL.md`
+- `spec-drift-check` → `./spec-drift-check/SKILL.md`
+- `spec-handoff` → `./spec-handoff/SKILL.md`
 
-## Prompt Discovery Convention
+## Stage gates
 
-When routing a specialist phase, must use the mapping at `./references/codex-prompt-mapping.md`.
+### Inspection and routing gate
 
-The orchestrator must:
-If no repository prompt exists, continue using the assigned artifact contract and phase rules in this skill bundle.
+**Entry**
 
-The orchestrator must prefer repository-local prompts over bundle-local prose.
+- orchestration has been invoked
+- workflow state has not yet been confirmed
 
-## Core Rules
+**Exit**
 
-- Never skip a required earlier phase.
-- Never implement directly from a raw request unless `spec.md`, `plan.md`, and `tasks.md` are ready.
-- Never absorb spec expansion into implementation without recording drift.
-- Never approve materially broader scope on behalf of the user.
-- Always select one bounded unit of work at a time.
-- Persist workflow state in files, not only in chat.
-- If artifacts and code disagree, treat the workflow as being at the earliest unresolved phase.
-- If multiple plausible features exist and no single target is clear, stop and ask the user to identify the feature.
-- The orchestrator must follow the routing flow in this file strictly and may not skip forward because a later artifact happens to exist.
-- The orchestrator must not perform the initial inspection itself when `spec-viewer` exists.
-
-## Operating Flow (Mandatory)
-
-Follow this flow exactly on every orchestration pass:
-
-1. Resolve the target feature.
-2. Spawn subagent `spec-viewer` and apply skill `./spec-viewer/SKILL.md` for exactly one bounded inspection pass on the resolved feature.
-3. Read the returned inspection result and determine the **earliest unresolved phase**.
-4. If a later artifact exists while an earlier phase is unresolved, route **backward** to that earlier phase. Do not treat the later artifact as permission to continue.
-5. Enforce the entry gate for the earliest unresolved phase.
-6. Discover the applicable repository prompt or template for that phase.
-7. Reinject the short-form subagent contract, the current phase gate, and the required pre-return self-check.
-8. Spawn the mapped specialist subagent and apply the mapped skill path for exactly one bounded unit of work for that phase.
-9. Do not perform that phase's work inside the orchestrator.
-10. Validate the returned result against the exit gate and against the reinjection contract.
-11. Update coordination notes only when needed.
-12. Stop after validation unless the user explicitly asked for continued orchestration across another bounded pass.
-
-## Step 1: Resolve the Target Feature
-
-Resolve the feature before routing.
-
-Use this order:
-
-1. If the user names the feature slug, use it.
-2. Otherwise inspect `specs/`.
-3. If exactly one plausible active feature exists, use it.
-4. If multiple active candidates exist, stop and ask the user to choose.
-
-Do not guess between multiple active features.
-
-## Step 2: Inspect Current State
-
-This step must be executed by subagent `spec-viewer` when that subagent exists.
-
-The orchestrator must delegate exactly one bounded inspection pass and must not replace that pass with direct inspection inside the orchestrator.
-
-`spec-viewer` must inspect at least:
-
-- whether `spec.md`, `plan.md`, and `tasks.md` exist
-- whether any later artifact exists without its required earlier artifact
-- whether `review.md`, `drift.md`, and `handoff.md` exist
-- whether current code reflects completed or partial implementation
-- whether `tasks.md` is actionable and bounded
-- whether code changes exist that have not been verified
-- which phase is the earliest unresolved phase
-- which next valid specialist subagent should be invoked
-
-If available, read `handoff.md` first when resuming.
-
-If `plan.md` exists but `spec.md` is missing, incomplete, or ambiguous, the workflow is still in **Specification**. The orchestrator must route to `spec-analyst`; it must not route to handoff, planning, or direct artifact editing.
-
-## Shared Subagent Contracts
-
-Keep shared lifecycle and response rules out of this main orchestrator skill file.
-Use these references instead:
-
-- lifecycle contract: `./references/subagent-lifecycle.md`
-- response schema: `./references/subagent-response-format.md`
-- prompt mapping: `./references/codex-prompt-mapping.md`
-- prompt fallback and failure classification: `./references/subagent-prompt-fallbacks.md`
-- reinjection contract: `./references/subagent-reinjection-contract.md`
-
-The orchestrator must delegate using those shared contracts rather than redefining them inline.
-When validating a `blocked` or `rejected` result, use `./references/subagent-prompt-fallbacks.md`.
-At every delegated pass, also reinject the short-form contract defined in `./references/subagent-reinjection-contract.md`.
-
-## Required Delegation Payload Elements
-
-Every delegation payload must state all of the following:
-
-- target feature
-- artifact directory path
-- exactly one assigned scope
-- relevant artifact or bounded batch
-- repository prompt mapping instruction
-- explicit stop-after-completion instruction
-- required response schema reference
-- short-form reinjection contract
-- phase gate stating allowed and forbidden artifact ownership
-- pre-return self-check instruction
-
-The orchestrator validates the returned payload and decides the next phase.
-If the task cannot be completed, the subagent must return a blocked or rejected result and stop.
-The orchestrator must not rely on the opening sentence alone; it must restate the reinjection contract for every delegated run.
-
-## Routing Rules
-
-Route to the earliest unresolved phase.
-
-After the next valid phase is identified, resolve the spawned subagent and applied skill only from `## Subagent Skill Bindings`.
-
-| Condition                                                                                    | Next valid phase       |
-| -------------------------------------------------------------------------------------------- | ---------------------- |
-| orchestrator invoked for a feature and initial state has not yet been confirmed in this pass | Inspection / routing   |
-| feature state, readiness, or artifact alignment remains unclear after inspection             | Inspection / routing   |
-| `spec.md` missing                                                                            | Specification          |
-| `spec.md` incomplete or ambiguous                                                            | Specification          |
-| `spec.md` ready and `plan.md` missing                                                        | Technical planning     |
-| `plan.md` incomplete or not execution-ready                                                  | Technical planning     |
-| `spec.md` and `plan.md` ready, `tasks.md` missing                                            | Task decomposition     |
-| `tasks.md` vague, oversized, or not verifiable                                               | Task decomposition     |
-| actionable tasks remain and prerequisites are satisfied                                      | Implementation         |
-| latest implementation batch completed and evidence is missing                                | Verification           |
-| the user explicitly requests verification, acceptance review, or artifact/code alignment     | Verification           |
-| the main issue is scope mismatch or unexpected work                                          | Drift review           |
-| the user asks to pause, resume, or transfer work                                             | Handoff / continuation |
-
-If a later artifact exists while an earlier artifact is incomplete, route backward and record the mismatch in `review.md`.
-
-Examples of mandatory backward routing:
-
-- `plan.md` exists but `spec.md` is missing or incomplete → route to `Specification`
-- `tasks.md` exists but `plan.md` is missing or incomplete → route to `Technical planning`
-- implementation exists but `tasks.md` is missing or not bounded → route to `Task decomposition` or earlier if needed
-
-The existence of a later artifact never authorizes skipping the earliest unresolved phase.
-
-## Subagent Skill Bindings
-
-This section is the single source of truth for specialist delegation.
-
-When the orchestrator delegates phase work, it must resolve the next valid phase first, then use this table to determine:
-
-- which subagent to spawn
-- which skill path to apply
-
-The orchestrator must not redefine, restate, or duplicate these bindings elsewhere in this file.
-
-| Phase                  | Spawn subagent     | Apply skill                   |
-| ---------------------- | ------------------ | ----------------------------- |
-| Inspection / routing   | `spec-viewer`      | `./spec-viewer/SKILL.md`      |
-| Specification          | `spec-analyst`     | `./spec-analyst/SKILL.md`     |
-| Technical planning     | `spec-planner`     | `./spec-planner/SKILL.md`     |
-| Task decomposition     | `spec-tasker`      | `./spec-tasker/SKILL.md`      |
-| Implementation         | `spec-implementer` | `./spec-implementer/SKILL.md` |
-| Verification           | `spec-verifier`    | `./spec-verifier/SKILL.md`    |
-| Drift review           | `spec-drift-check` | `./spec-drift-check/SKILL.md` |
-| Handoff / continuation | `spec-handoff`     | `./spec-handoff/SKILL.md`     |
-
-Every delegation instruction must name both:
-
-- the spawned subagent
-- the applied skill path
-
-Both must be resolved from this table only.
-
-## Stage Gates
-
-### 0. Inspection / Routing
-
-Entry:
-
-- orchestration was invoked and current state must be confirmed first
-- artifact inventory is unknown, stale, or disputed
-- earliest unresolved phase is not yet established
-- phase readiness must be checked before delegation
-- drift or stale-artifact signals must be classified before phase routing
-
-Exit:
-
+- feature is identified
 - artifact inventory is explicit
-- readiness for each known phase is explicit
-- earliest unresolved phase is identified
-- exactly one next valid phase is recommended
-- drift or stale-artifact signals are called out when present
+- current workflow state is explicit
+- earliest unresolved phase is explicit
+- blockers or drift are called out
+- next valid phase is recommended
 
-### 1. Specification
+### Specification gate
 
-Entry:
+**Entry**
 
-- `spec.md` is missing, incomplete, or ambiguous
-- acceptance criteria are missing
-- scope boundaries are unclear
+- `spec.md` is missing, weak, stale, incomplete, or ambiguous
 
-Exit:
+**Exit**
 
-- `spec.md` exists
-- intended user-facing outcome is explicit
-- acceptance criteria are explicit and testable
-- non-goals, constraints, and scope boundaries are clear
-- open questions are resolved or marked as blockers
+- `spec.md` is testable
+- scope is clear
+- acceptance criteria are explicit
+- constraints and blockers are captured
 
-### 2. Technical Planning
+### Planning gate
 
-Entry:
+**Entry**
 
-- `spec.md` is complete enough to plan against
+- `spec.md` is ready
 
-Exit:
+**Exit**
 
-- `plan.md` describes the implementation approach
-- touched systems, modules, and interfaces are identified
-- dependencies, risks, and verification strategy are recorded
-- the plan does not invent scope beyond `spec.md`
+- `plan.md` is execution-ready
+- plan is aligned to the spec
+- implementation approach is coherent and bounded
 
-### 3. Task Decomposition
+### Tasking gate
 
-Entry:
+**Entry**
 
-- `plan.md` is complete enough to decompose
+- `plan.md` is ready
 
-Exit:
+**Exit**
 
-- `tasks.md` exists
-- tasks are ordered, actionable, and bounded
-- each task or batch is independently verifiable
-- tasks cover planned work without adding features
+- `tasks.md` is ordered
+- tasks are bounded
+- tasks are actionable
+- tasks are verifiable
 
-### 4. Implementation
+### Implementation gate
 
-Entry:
+**Entry**
 
 - `spec.md`, `plan.md`, and `tasks.md` are ready
-- the selected batch is small and coherent
-- dependencies for that batch are satisfied
+- selected work is a bounded implementation batch
 
-Exit:
+**Exit**
 
-- the selected batch is complete
-- task state reflects reality
-- code, tests, and notes are updated
-- any detected drift is recorded immediately
+- one bounded implementation batch is completed
+- changes are recorded in the appropriate workflow artifact
 
-### 5. Verification
+### Verification gate
 
-Entry:
+**Entry**
 
-- code or artifact batch changed
-- success criteria exist
+- changed work exists
+- success criteria are available
 
-Exit:
+**Exit**
 
-- evidence is recorded against acceptance criteria
-- failures, gaps, and uncertainties are documented
-- if verification fails, the workflow routes back to the earliest incomplete phase
+- verification evidence is recorded
+- failures, gaps, or regressions are clearly identified
+- the workflow can either continue or route backward safely
 
-### 6. Handoff / Continuation
+### Handoff gate
 
-Entry:
+**Entry**
 
-- work is pausing, blocked, interrupted, or resuming
+- work is pausing, blocked, interrupted, transferred, or resuming
 
-Exit:
+**Exit**
 
-- `handoff.md` states current phase, completed work, pending work, blockers, and recommended next step
-- the next agent can continue without chat history
+- `handoff.md` captures current state, blockers, and recommended next step
 
-## Delegation Payload Contract
+## Delegation requirements
 
-Whenever this orchestrator uses a specialist subagent, provide all of the following. If a mapped specialist subagent exists, the orchestrator must delegate rather than perform the phase work itself:
+Every delegation issued by this skill must include:
 
-- feature slug
-- artifact directory path
-- current phase
-- why this is the next valid phase
-- exact files to read first
-- current scope boundaries from `spec.md`
-- the single bounded unit or batch to complete
-- expected deliverable
-- exit criteria
-- repository prompt lookup order
-- explicit drift-handling instructions
+- target feature
+- artifact directory or path
+- exact assigned scope
+- relevant source artifact or bounded task batch
+- required specialist skill binding
+- explicit stop-after-completion instruction
+- expected response structure
+- relevant stage gate
+- pre-return self-check instruction
 
-If the subagent is `spec-implementer`, also provide:
+Delegations should be narrow enough that the specialist can complete one coherent unit of work and return a result that is easy to validate.
 
-- exact files or modules owned in this batch
-- a warning not to revert unrelated edits
-- whether the batch is sequential or parallel-safe
+## Bounded execution rules
 
-## Verification Trigger Rule
+This skill must keep execution bounded.
 
-Use `spec-verifier` only in either of these cases:
+- Delegate one coherent batch at a time.
+- Prefer batches of 1–3 checklist items when tasking exists.
+- Do not assign the next batch until the current batch is verified or clearly blocked.
+- If the available task scope is too broad, route back to `spec-tasker` instead of pushing implementation forward.
 
-- immediately after a bounded implementation batch completed and evidence is still missing
-- the user explicitly requests verification, acceptance review, checklist validation, artifact consistency review, or artifact/code alignment checking
+## Verification rules
 
-Do not use `spec-verifier` as the default discovery agent for phase detection. Use `spec-viewer` first when the main need is state inspection, readiness checking, routing recommendation, or earliest-unresolved-phase detection.
+Use `spec-verifier` only when verification is actually the correct phase.
 
-## Forbidden Orchestrator Actions
+Valid uses include:
 
-The orchestrator must not do any of the following when the mapped specialist subagent exists:
+- after completed implementation when evidence is missing
+- when the user explicitly requests verification, review, or alignment checking
 
-- skip the mandatory first `spec-viewer` pass
-- create or rewrite `spec.md` itself
-- create or rewrite `plan.md` itself
-- create or rewrite `tasks.md` itself
-- implement task batches itself
-- generate verification evidence itself
-- choose handoff as the next phase when an earlier required phase is unresolved
-- perform initial phase detection itself when `spec-viewer` exists
+Invalid uses include:
 
-If the orchestrator observes a missing or stale artifact, it must route to the correct specialist subagent instead of patching that artifact directly.
+- initial workflow detection
+- deciding whether a spec, plan, or task file exists
+- replacing the initial `spec-viewer` inspection pass
 
-## Reinjection Requirement
+Verification must produce evidence, not just opinion.
 
-At every critical step, the orchestrator must reinject the governing contract instead of assuming the subagent still prioritizes the earlier skill context.
+## Drift control rules
 
-Critical steps:
+Treat `spec.md` as the governing contract for approved scope.
 
-- immediately before delegation
-- immediately before task details
-- immediately before the subagent returns
+If work exceeds that scope:
 
-Use `./references/subagent-reinjection-contract.md`.
+- route to `spec-drift-check`
+- do not continue implementation as though the new work were already approved
+- allow only clarifications that remain within existing acceptance criteria
+- route back to specification when the requested behavior expands scope, adds new behavior, or materially changes intent
 
-## Required Return Contract
+### Minimum `drift.md` content
 
-Require every specialist subagent to return:
+When drift must be recorded, include at least:
 
-- work completed
-- files created or updated
-- blockers
-- unresolved questions
-- drift detected, if any
-- verification or evidence status, if relevant
-- recommended next phase
-
-Do not advance the workflow if the returned result is too vague to validate.
-
-## Bounded Execution Rules
-
-- Select one coherent batch at a time.
-- Prefer 1 to 3 checklist items, not the entire backlog.
-- Do not assign a new batch before the previous batch is verified or explicitly blocked.
-- If `tasks.md` is not decomposed enough for bounded execution, route back to `spec-tasker`.
-
-## Drift-Control Rules
-
-Treat `spec.md` as the contract.
-
-- If requested or discovered work exceeds the current spec, use subagent `spec-drift-check`.
-- If implementation reveals a clarification that does not expand behavior, label it as clarification and continue only if it remains within existing acceptance criteria.
-- If implementation reveals new behavior, new integrations, new surfaces, or materially broader scope, route back to specification before more implementation.
-- Never hide scope expansion as cleanup or a small follow-up.
-
-Minimum `drift.md` structure:
-
-- out-of-scope request or discovery
+- the out-of-scope item
 - why it exceeds the current spec
 - affected artifacts or code
-- blocking decision
-- recommendation
+- whether it is blocking
+- recommended next action
 
-## Review Mode
+## Review mode
 
-Use review mode when:
+Enter review mode when:
 
 - the user asks whether the workflow is aligned
 - artifacts conflict
-- code appears to have moved ahead of documentation
-- later artifacts exist while earlier artifacts are incomplete
+- implementation has moved ahead of the documentation
+- later artifacts exist while earlier ones remain incomplete or stale
 
-In review mode:
+Delegate `spec-verifier` to review and validate alignment, completeness, and blockers.
 
-1. compare `spec.md` to `plan.md`
-2. compare `plan.md` to `tasks.md`
-3. compare `tasks.md` to current implementation
-4. compare implementation to verification evidence
-5. use subagent `spec-verifier` to record findings in `review.md`
+## Continuation mode
 
-Classify findings as:
+When resuming work:
 
-- blocker
-- drift
-- stale artifact
-- verified
+1. Read `handoff.md` first if it exists.
+2. Still run `spec-viewer` again.
+3. Recompute the earliest unresolved phase.
+4. Resume from the correct phase, not from the newest file that happens to exist.
 
-## Continuation Mode
+Do not assume that the presence of `plan.md`, `tasks.md`, or implementation means the workflow is ready to continue forward.
 
-Use continuation mode when resuming interrupted work.
+## Handoff rules
 
-In continuation mode:
+Use `spec-handoff` only when:
 
-1. read `handoff.md` first if present
-2. invoke `spec-viewer` to inspect current state again
-3. re-read primary artifacts as needed based on the inspection result
-4. determine the earliest incomplete phase again from the returned inspection
-5. use the correct subagent for that phase
-6. do not invoke `spec-handoff` unless the user asked to pause, transfer, summarize, or package continuity notes
+- the user asks to pause, resume, transfer, or hand off work
+- the current pass is blocked and continuity notes are needed
+- work must be packaged for another agent or another session
 
-Do not resume from the latest file that happens to exist. Resume from the earliest unresolved phase.
+Do not create a handoff instead of addressing an earlier unresolved required phase.
 
-## Handoff Behavior
+### Minimum `handoff.md` content
 
-Use subagent `spec-handoff` only when at least one of the following is true:
-
-- the user explicitly asks to pause, resume, transfer, or prepare a handoff
-- the current pass ends in a blocked state and continuity notes are needed for the next agent
-- work is intentionally being packaged for another agent or a later session
-
-Do **not** choose handoff as the next phase merely because `handoff.md` is missing.  
-Do **not** use handoff to bypass a missing earlier artifact such as `spec.md`.  
-Do **not** invoke handoff automatically after every orchestration pass.
-
-Minimum `handoff.md` structure:
+A valid handoff must include:
 
 - current phase
 - completed work
@@ -568,72 +314,82 @@ Minimum `handoff.md` structure:
 - blockers
 - recommended next step
 
-## Durable Output Rule
+## Durable outputs
 
-Each orchestration pass should leave a durable update when one is needed and safe, such as:
+This skill should leave durable written artifacts only when needed for coordination or continuity.
 
-- task state update in `tasks.md`
-- review note in `review.md`
-- drift note in `drift.md`
-- handoff summary in `handoff.md` when handoff behavior is explicitly triggered
+Valid durable outputs include:
 
-## Fallback Rules
+- task state updates in `tasks.md`
+- drift notes in `drift.md`
+- continuity notes in `handoff.md`
 
-If a required specialist subagent does not exist:
+Do not create extra durable artifacts just to narrate orchestration.
 
-- say so clearly
-- do not silently convert the orchestrator into the full specialist
-- perform only the smallest safe fallback needed to preserve workflow continuity
-- record the fallback in `handoff.md`
+## Fallback rules
 
-Allowed fallback examples:
+If a required specialist subagent is missing:
 
-- identify the correct next phase
-- draft a blocker summary
-- create a minimal handoff
-- record drift
+- state that clearly
+- do not silently absorb the full specialist role
+- do only the smallest safe fallback
+- record the fallback in `handoff.md` when continuity matters
 
-Disallowed fallback examples unless the user explicitly asks:
+### Allowed fallback behavior
 
-- writing a full replacement spec
-- producing the full plan
-- doing full task decomposition
-- performing a full implementation pass
+Allowed minimal fallback behavior includes:
 
-## Stop Conditions
+- identifying the next phase
+- summarizing a blocker
+- creating a minimal handoff
+- recording drift
 
-Stop and report blockers when:
+### Disallowed fallback behavior
+
+Disallowed fallback behavior includes:
+
+- full spec writing
+- full planning
+- full task decomposition
+- full implementation execution
+
+## Stop conditions
+
+This skill must stop and surface the problem when:
 
 - acceptance criteria are missing
 - the plan is incomplete
 - tasks are not actionable
-- implementation would exceed approved scope
+- implementation would exceed scope
 - the target feature cannot be identified safely
-- a required earlier artifact is missing or contradicted by later work
-- the only available later artifact would tempt the workflow to skip the earliest unresolved phase
-- the specialist result is too incomplete to validate
+- earlier artifacts are missing, stale, or contradicted
+- a later artifact would tempt an invalid phase skip
+- a specialist result is too vague to validate
+- multiple active features exist and the correct one is unclear
 
-## Trigger Examples
+## Hard rules
 
-Trigger this skill:
+This skill must not:
 
-- "Resume feature `audit-log-export` from the correct phase."
-- "What is the next valid phase for this partially completed feature?"
-- "Review whether the plan and tasks still match the shipped code."
-- "Continue this feature without skipping required stages."
-- "Prepare a handoff for the next agent."
+- skip the initial `spec-viewer` pass when that specialist exists
+- directly author phase-owned artifacts
+- implement code directly
+- generate verification evidence directly
+- use handoff as a substitute for unresolved earlier phases
+- perform initial phase detection itself when `spec-viewer` is available
 
-Do not trigger this skill:
+## Success condition
 
-- "Write `plan.md` for feature `audit-log-export`."
-- "Decompose this plan into tasks."
-- "Implement task 4 from `tasks.md`."
-- "Run verification on the latest implementation batch."
+This skill succeeds when it leaves the feature in a safer, clearer workflow state by:
 
-## Precision Examples
+- correctly identifying the current phase
+- routing to the earliest valid unresolved phase
+- delegating exactly one bounded unit of work
+- validating the result against the correct gate
+- preserving continuity without taking over specialist responsibilities
 
-- `plan.md` exists and `spec.md` does not exist → next valid phase is **Specification**; use `spec-analyst`; do not use `spec-handoff`; do not edit `spec.md` inside the orchestrator.
-- `tasks.md` exists and `plan.md` is stale → next valid phase is **Technical planning**; use `spec-planner`; do not continue implementation.
-- implementation files changed and no verification evidence exists → next valid phase is **Verification**; use `spec-verifier`.
-- the user only asks to package current status for another agent → use `spec-handoff`, but do not change phase-owned artifacts.
-- the user invokes orchestration without a confirmed state → first use `spec-viewer`; do not guess the phase directly inside the orchestrator.
+## Guiding principle
+
+The orchestrator routes and validates.
+
+The specialists perform the phase work.
