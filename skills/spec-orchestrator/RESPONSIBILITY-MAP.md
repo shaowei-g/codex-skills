@@ -12,7 +12,7 @@ Keep the main orchestrator prompt as a thin policy shell:
 - stop conditions
 - external transport skill pointers
 
-Everything else should live in one canonical reference, the owning specialist skill, or the external transport skill. Specialists should load only a thin execution contract, shared artifact marker rules, shared status semantics, and the shared response schema, not orchestration mechanics or Codex CLI transport details.
+Everything else should live in one canonical reference, the owning specialist skill, or the external transport skill. Specialists should load only a thin execution contract, shared artifact marker rules, shared status semantics, and the shared response schema, not orchestration mechanics or Codex CLI transport details. When startup speed matters, specialists may use a maintained shortcut that summarizes those four shared references and only open the deeper canon when needed.
 
 ## File Responsibility Table
 
@@ -21,6 +21,7 @@ Everything else should live in one canonical reference, the owning specialist sk
 | `SKILL.md` | Orchestrator authority and routing shell | routing authority, feature gate, earliest-unresolved-phase rule, validation acceptance, stop conditions, transport pointer | phase details, full lifecycle prose, response schema details, repeated prompt lookup chain |
 | `references/codex-prompt-mapping.md` | Repository prompt resolution | phase → primary prompt mapping, lookup order, constitution/clarify loading rules | blocked/rejected taxonomy, lifecycle, validator policy |
 | `references/specialist-execution-contract.md` | Thin common contract for specialists | one bounded pass, no routing authority, advisory-only recommendations, schema-only return, stop rule | orchestration lifecycle, reinjection policy, transport fallback, validator repair flow, detailed status taxonomy |
+| `references/shared-specialist-contract.md` | Load-time shortcut for specialist runs | compact execution summary that points back to the four canonical shared references | becoming the only source of truth or drifting from the canonical shared references |
 | `references/artifact-acceptance-markers.md` | Canonical artifact acceptance and front matter contract | YAML marker fields, acceptance meaning, orchestrator-owned promotion, cross-artifact consistency checks | response schema details, transport fallback, phase-local expert judgment |
 | `references/specialist-status-semantics.md` | Shared specialist status meanings | `completed` / `blocked` / `rejected` semantics, common status boundary examples | transport fallback, prompt mapping, reconstruction repair |
 | `references/subagent-lifecycle.md` | Execution sequence for one delegated run | prepare assignment → inject → load prompt/local context → gate → execute → persist → collect response → stop | delegated field checklist, authority limits, self-check contract, violation taxonomy |
@@ -31,7 +32,7 @@ Everything else should live in one canonical reference, the owning specialist sk
 | `../codex-cli-subagent-transport/references/manifest-based-run-contract.md` | External manifest-based run contract | deterministic repo-local run artifacts, manifest locator rule, authoritative response path collection, no-/tmp discovery rule | specialist phase judgment, routing decisions, schema repetition |
 | `../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh` | External repo-local Codex CLI transport wrapper | deterministic run directory, prompt copy, response/log paths, manifest emission, exit-code capture | routing decisions, response validation semantics |
 | `references/subagent-prompt-fallbacks.md` | Compatibility shim only | pointer to the split references for older links | normative fallback or status rules |
-| `references/subagent-response-format.md` | Canonical response schema | headings, enums, field rules, machine validation semantics | lifecycle, routing, fallback rules |
+| `references/subagent-response-format.md` | Canonical compact response schema | minimal headings, enums, `Result` payload rule, machine validation semantics | lifecycle, routing, fallback rules |
 | `scripts/validate_artifact_markers.sh` + `scripts/validate_artifact_markers.py` | Canonical artifact marker validator | required marker fields, accepted-state checks, cross-artifact consistency checks, compatibility mode vs `--require-markers` strict mode | subagent response schema validation, routing policy, specialist phase judgment |
 | `spec-viewer/SKILL.md` | Inspection-phase specialist behavior | inspection purpose, read order, phase-local blocked/rejected criteria, owned outputs | orchestration references, shared schema restatement |
 | `spec-analyst/SKILL.md` | Specification-phase specialist behavior | spec-local purpose, entry signals, blocked/rejected criteria, owned outputs | orchestration references, prompt lookup duplication, fallback taxonomy |

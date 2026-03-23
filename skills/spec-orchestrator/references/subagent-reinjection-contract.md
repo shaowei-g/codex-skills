@@ -30,6 +30,8 @@ Every delegated run should make these values explicit:
 - Response-Validator
 - Stop-After-Return
 
+The delegated response payload itself should stay compact: fixed identity fields plus one `Result` section for supporting detail.
+
 When the assigned phase is `inspection`, the delegated scope should ask only for a truthful state report and advisory routing recommendation. It must not embed an already-decided workflow conclusion as if inspection were merely confirmation.
 When inspection includes advisory recommendation fields, the delegated subagent should still keep `chose_next_phase = false` and `chose_next_subagent = false` because the recommendations do not exercise routing authority.
 

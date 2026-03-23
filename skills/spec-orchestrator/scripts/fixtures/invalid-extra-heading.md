@@ -18,41 +18,13 @@ Scope:
 
 - inspect one feature state and recommend one next valid phase
 
-Summary:
+Result:
 
 - none
 
-Files-Changed:
+Unexpected:
 
-none
-
-Files-Read:
-
-- specs/demo-feature/spec.md
-
-Missing-Prerequisites:
-
-none
-
-Contract-Violations:
-
-none
-
-Blockers:
-
-none
-
-Unresolved Questions:
-
-none
-
-Drift:
-
-none
-
-Evidence:
-
-- none
+- this heading is not allowed
 
 Recommended-Next-Phase:
 
@@ -61,14 +33,6 @@ Recommended-Next-Phase:
 Recommended-Next-Subagent:
 
 - spec-analyst
-
-Notes:
-
-- none
-
-Unexpected:
-
-- this heading is not allowed
 
 Self-Check:
 

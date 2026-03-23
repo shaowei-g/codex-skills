@@ -18,41 +18,11 @@ Scope:
 
 - inspect one feature state and recommend one next valid phase
 
-Summary:
+Result:
 
 - inspected the feature artifact inventory and current workflow state
-
-Files-Changed:
-
-none
-
-Files-Read:
-
-- specs/demo-feature/spec.md
-
-Missing-Prerequisites:
-
-none
-
-Contract-Violations:
-
-none
-
-Blockers:
-
-none
-
-Unresolved Questions:
-
-none
-
-Drift:
-
-none
-
-Evidence:
-
-- reviewed existing feature artifacts only
+- read specs/demo-feature/spec.md
+- no durable file updates were needed
 
 Recommended-Next-Phase:
 
@@ -61,10 +31,6 @@ Recommended-Next-Phase:
 Recommended-Next-Subagent:
 
 - spec-analyst
-
-Notes:
-
-- none
 
 Self-Check:
 

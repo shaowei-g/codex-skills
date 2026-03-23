@@ -18,41 +18,11 @@ Scope:
 
 - create or revise one plan.md
 
-Summary:
+Result:
 
-none
-
-Files-Changed:
-
-none
-
-Files-Read:
-
-- specs/demo-feature/spec.md
-
-Missing-Prerequisites:
-
+- reviewed specs/demo-feature/spec.md
 - missing dependency interface details needed for the plan
-
-Contract-Violations:
-
-none
-
-Blockers:
-
 - cannot proceed safely without the missing technical constraints
-
-Unresolved Questions:
-
-- none
-
-Drift:
-
-none
-
-Evidence:
-
-- reviewed spec.md and found unresolved implementation constraints
 
 Recommended-Next-Phase:
 
@@ -61,10 +31,6 @@ Recommended-Next-Phase:
 Recommended-Next-Subagent:
 
 - spec-planner
-
-Notes:
-
-- none
 
 Self-Check:
 

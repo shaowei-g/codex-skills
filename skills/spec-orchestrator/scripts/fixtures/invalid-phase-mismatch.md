@@ -18,39 +18,7 @@ Scope:
 
 - inspect one feature state and recommend one next valid phase
 
-Summary:
-
-- none
-
-Files-Changed:
-
-none
-
-Files-Read:
-
-- specs/demo-feature/spec.md
-
-Missing-Prerequisites:
-
-none
-
-Contract-Violations:
-
-none
-
-Blockers:
-
-none
-
-Unresolved Questions:
-
-none
-
-Drift:
-
-none
-
-Evidence:
+Result:
 
 - none
 
@@ -61,10 +29,6 @@ Recommended-Next-Phase:
 Recommended-Next-Subagent:
 
 - spec-analyst
-
-Notes:
-
-- none
 
 Self-Check:
 

@@ -47,6 +47,32 @@ assigned_subagent=""
 marker_path=""
 snapshot_file=""
 
+emit_result() {
+  local validation_status="$1"
+  local validation_reason="$2"
+  local delegated_status="${3-}"
+  local recommended_next_phase="${4-}"
+  local recommended_next_subagent="${5-}"
+  local snapshot_status="${6-}"
+  local response_sha="${7-}"
+  local marker_mode="${8-}"
+  local marker_passed="${9-}"
+
+  printf 'VALIDATION_STATUS=%q\n' "$validation_status"
+  printf 'VALIDATION_REASON=%q\n' "$validation_reason"
+  printf 'ASSIGNED_PHASE=%q\n' "$assigned_phase"
+  printf 'ASSIGNED_SUBAGENT=%q\n' "$assigned_subagent"
+  printf 'DELEGATED_STATUS=%q\n' "$delegated_status"
+  printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$recommended_next_phase"
+  printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$recommended_next_subagent"
+  printf 'MARKER_VALIDATION_MODE=%q\n' "$marker_mode"
+  printf 'MARKER_VALIDATION_PASSED=%q\n' "$marker_passed"
+  printf 'SNAPSHOT_STATUS=%q\n' "$snapshot_status"
+  printf 'RESPONSE_SHA256=%q\n' "$response_sha"
+  printf 'VALIDATION_SUMMARY=%q\n' "phase=$assigned_phase delegated_status=${delegated_status:-none} validation=$validation_status next_phase=${recommended_next_phase:-none} next_subagent=${recommended_next_subagent:-none} snapshot=${snapshot_status:-none}"
+}
+
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo-root) repo_root="${2-}"; shift 2 ;;
@@ -166,20 +192,12 @@ case "$assigned_phase" in
 esac
 
 if [[ "$cacheable_phase" != "true" ]]; then
-  printf 'VALIDATION_STATUS=%q\n' "accepted_without_snapshot"
-  printf 'VALIDATION_REASON=%q\n' "phase not cached by routing snapshot v1"
-  printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
-  printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$RECOMMENDED_NEXT_PHASE"
-  printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
+  emit_result     "accepted_without_snapshot"     "phase not cached by routing snapshot v1"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"
   exit 0
 fi
 
 if [[ "$DELEGATED_STATUS" != "completed" ]]; then
-  printf 'VALIDATION_STATUS=%q\n' "accepted_without_snapshot"
-  printf 'VALIDATION_REASON=%q\n' "delegated status is not completed"
-  printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
-  printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$RECOMMENDED_NEXT_PHASE"
-  printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
+  emit_result     "accepted_without_snapshot"     "delegated status is not completed"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"
   exit 0
 fi
 
@@ -256,12 +274,7 @@ if [[ "${SNAPSHOT_RESPONSE_SHA256:-}" != "$expected_response_sha" ]]; then
   exit 1
 fi
 
-printf 'VALIDATION_STATUS=%q\n' "accepted_with_snapshot"
-printf 'VALIDATION_REASON=%q\n' "schema valid and snapshot refreshed"
-printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
-printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$expected_next_phase"
-printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$expected_next_subagent"
-printf 'SNAPSHOT_STATUS=%q\n' "verified"
+emit_result   "accepted_with_snapshot"   "schema valid and snapshot refreshed"   "$DELEGATED_STATUS"   "$expected_next_phase"   "$expected_next_subagent"   "verified"   "$expected_response_sha"   "$marker_validation_mode"   "$marker_validation_passed"
 printf 'SNAPSHOT_WRITE_STATUS=%q\n' "$write_snapshot_status"
 printf 'SNAPSHOT_LOOKUP_STATUS=%q\n' "$SNAPSHOT_STATUS"
 printf 'SNAPSHOT_FILE=%q\n' "$write_snapshot_file"
@@ -270,4 +283,3 @@ printf 'SNAPSHOT_WRITE_PHASE=%q\n' "$write_phase"
 printf 'SNAPSHOT_WRITE_SUBAGENT=%q\n' "$write_subagent"
 printf 'SNAPSHOT_LOOKUP_PHASE=%q\n' "$EARLIEST_UNRESOLVED_PHASE"
 printf 'SNAPSHOT_LOOKUP_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
-printf 'RESPONSE_SHA256=%q\n' "$expected_response_sha"

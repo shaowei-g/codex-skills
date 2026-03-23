@@ -9,12 +9,11 @@ Use this skill when handoff or continuity packaging is the current phase for one
 
 ## Shared Contracts
 
-Load and follow these shared references first:
+Load this shared shortcut first:
 
-- `../references/specialist-execution-contract.md`
-- `../references/artifact-acceptance-markers.md`
-- `../references/subagent-response-format.md`
-- `../references/specialist-status-semantics.md`
+- `../references/shared-specialist-contract.md`
+
+Open the deeper canonical shared references only when the shortcut is insufficient for the current situation.
 
 ## Helper Scripts
 

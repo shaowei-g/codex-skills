@@ -96,6 +96,32 @@ Specialists share these thin common contracts:
 - `./references/subagent-response-format.md`
 - `./references/specialist-status-semantics.md`
 
+## Lean operating mode
+
+Use the smallest reliable context set for each run.
+
+### Happy-path read order
+
+For a normal run, load only this minimum set before delegating:
+
+1. feature target plus repo-local routing snapshot lookup
+2. the assigned phase prompt from `.codex/prompts/`
+3. `.codex/prompts/speckit.constitution.md` when present
+4. the mapped specialist skill for the assigned phase
+5. only the feature artifacts needed for that phase
+6. `bash ./scripts/validate_delegated_run.sh` for acceptance
+
+### Efficiency rules
+
+- Prefer direct fixed paths over recursive search. Search only when a required direct path is missing or unreadable.
+- Do not preload multiple specialist skills “just in case”.
+- Do not reopen shared reference files when the mapped specialist already loaded the shared shortcut and no conflict is present.
+- Treat `bash ./scripts/validate_delegated_run.sh` as the default single acceptance entry point. Do not separately rerun schema validation, marker validation, and snapshot refresh on the happy path.
+- Expect a compact delegated schema. Read the delegated `response_file` directly when validator output is insufficient and use the single `Result` section rather than expecting many micro-fields.
+- Prefer the delegated manifest as the source of response and log paths. Do not rediscover run artifacts with workspace globbing.
+- Keep progress narration decision-focused. Summarize the route, delegated phase, validation result, and next bounded step rather than narrating every file read.
+
+
 ## Validation policy
 
 - Every delegated response must match the approved schema in:

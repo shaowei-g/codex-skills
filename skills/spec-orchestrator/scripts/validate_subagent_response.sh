@@ -7,7 +7,7 @@ Usage:
   validate_subagent_response.sh [--file <path>] [--feature <slug>] [--assigned-phase <phase>] [--assigned-subagent <name>] [--scope <text>]
 
 Validate that a subagent response conforms to the shared spec-orchestrator
-response contract. If no file is provided, stdin is used.
+compact response contract. If no file is provided, stdin is used.
 EOF
 }
 
@@ -139,18 +139,9 @@ expected_headings=(
   "Assigned-Phase:"
   "Assigned-Subagent:"
   "Scope:"
-  "Summary:"
-  "Files-Changed:"
-  "Files-Read:"
-  "Missing-Prerequisites:"
-  "Contract-Violations:"
-  "Blockers:"
-  "Unresolved Questions:"
-  "Drift:"
-  "Evidence:"
+  "Result:"
   "Recommended-Next-Phase:"
   "Recommended-Next-Subagent:"
-  "Notes:"
   "Self-Check:"
 )
 
@@ -189,6 +180,7 @@ feature_slug=$(extract_first_bullet_value "Feature-Slug:" "$source_file")
 assigned_phase=$(extract_first_bullet_value "Assigned-Phase:" "$source_file")
 assigned_subagent=$(extract_first_bullet_value "Assigned-Subagent:" "$source_file")
 scope=$(extract_first_bullet_value "Scope:" "$source_file")
+result_value=$(extract_first_bullet_value "Result:" "$source_file")
 recommended_next_phase=$(extract_first_bullet_value "Recommended-Next-Phase:" "$source_file")
 recommended_next_subagent=$(extract_first_bullet_value "Recommended-Next-Subagent:" "$source_file")
 
@@ -197,6 +189,7 @@ require_nonempty_value "Feature-Slug:" "$feature_slug"
 require_nonempty_value "Assigned-Phase:" "$assigned_phase"
 require_nonempty_value "Assigned-Subagent:" "$assigned_subagent"
 require_nonempty_value "Scope:" "$scope"
+require_nonempty_value "Result:" "$result_value"
 require_nonempty_value "Recommended-Next-Phase:" "$recommended_next_phase"
 require_nonempty_value "Recommended-Next-Subagent:" "$recommended_next_subagent"
 

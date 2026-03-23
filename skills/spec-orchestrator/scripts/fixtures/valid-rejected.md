@@ -18,41 +18,11 @@ Scope:
 
 - implement one bounded batch from tasks.md
 
-Summary:
+Result:
 
-none
-
-Files-Changed:
-
-none
-
-Files-Read:
-
-- specs/demo-feature/tasks.md
-
-Missing-Prerequisites:
-
-none
-
-Contract-Violations:
-
-- multi_scope_violation
-
-Blockers:
-
-- request combined multiple implementation batches
-
-Unresolved Questions:
-
-- none
-
-Drift:
-
-none
-
-Evidence:
-
-- rejected before file changes because the request was not single-scope
+- rejected before file changes because the request combined multiple implementation batches
+- contract violation: multi_scope_violation
+- read specs/demo-feature/tasks.md
 
 Recommended-Next-Phase:
 
@@ -61,10 +31,6 @@ Recommended-Next-Phase:
 Recommended-Next-Subagent:
 
 - spec-tasker
-
-Notes:
-
-- none
 
 Self-Check:
 
