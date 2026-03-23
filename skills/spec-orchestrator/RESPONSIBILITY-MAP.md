@@ -175,3 +175,11 @@ Codex CLI mechanics should remain outside `spec-orchestrator` itself.
 - temp-path avoidance rules beyond high-level guardrails
 
 Those belong to `../codex-cli-subagent-transport/`.
+
+
+## Response Artifact Materialization
+
+- Specialists may produce phase-owned file payloads in the shared `Artifacts` section when delegated transport cannot persist repo files safely.
+- The orchestrator owns response-artifact materialization into the repository.
+- Marker validation and routing snapshot refresh happen only after orchestrator-side materialization succeeds when artifact payloads are present.
+- Specialists still do not own formal acceptance.

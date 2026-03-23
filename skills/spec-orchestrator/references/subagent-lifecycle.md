@@ -27,6 +27,7 @@ Every delegated run should follow this sequence:
    - if the available native agent is read-only or mismatched, treat native execution as unavailable and use the external transport fallback instead of attempting the wrong agent
    - prefer path references over pasted contracts when the runtime can load files reliably
    - when using Codex CLI transport, prepare a repo-local prompt file for `bash ../../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh`
+   - for write-owning phases, instruct the specialist to prefer direct repo writes when safe and to fall back to response-embedded `Artifacts` payloads when transport can read but cannot persist files safely
 
 3. **Load Prompt and Local Context**
    - resolve repository prompts using `./codex-prompt-mapping.md`

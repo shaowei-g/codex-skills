@@ -1,6 +1,6 @@
 Status:
 
-- done
+- blocked
 
 Feature-Slug:
 
@@ -8,31 +8,33 @@ Feature-Slug:
 
 Assigned-Phase:
 
-- inspection
+- planning
 
 Assigned-Subagent:
 
-- spec-viewer
+- spec-planner
 
 Scope:
 
-- inspect one feature state and recommend one next valid phase
+- create one plan artifact
 
 Result:
 
-- none
+- blocked
 
 Artifacts:
 
-- none
+```artifact path="specs/demo-feature/plan.md"
+# Not allowed
+```
 
 Recommended-Next-Phase:
 
-- specification
+- planning
 
 Recommended-Next-Subagent:
 
-- spec-analyst
+- spec-planner
 
 Self-Check:
 

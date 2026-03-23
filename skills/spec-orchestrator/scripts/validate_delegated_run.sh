@@ -1,3 +1,4 @@
+\
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -12,11 +13,13 @@ Usage:
     --assigned-subagent <subagent> \
     [--orchestrator-mode standard|booster] \
     [--marker-path /abs/path/to/repo/specs/<feature>] \
-    [--snapshot-file /abs/path/to/routing-snapshot.json]
+    [--snapshot-file /abs/path/to/routing-snapshot.json] \
+    [--disable-response-artifact-materialization true|false]
 
 Rules:
 - Always validates subagent response schema.
-- Runs artifact marker validation for:
+- Materializes response-embedded artifact payloads when present and enabled.
+- Runs artifact marker validation for completed:
   specification, planning, task decomposition
 - Writes routing snapshot only when:
   - response status is completed
@@ -48,6 +51,7 @@ assigned_subagent=""
 orchestrator_mode=""
 marker_path=""
 snapshot_file=""
+disable_response_artifact_materialization="false"
 
 emit_result() {
   local validation_status="$1"
@@ -60,6 +64,8 @@ emit_result() {
   local marker_mode="${8-}"
   local marker_passed="${9-}"
   local effective_mode="${10-}"
+  local artifact_materialization_status="${11-}"
+  local artifact_materialization_count="${12-}"
 
   printf 'VALIDATION_STATUS=%q\n' "$validation_status"
   printf 'VALIDATION_REASON=%q\n' "$validation_reason"
@@ -72,10 +78,11 @@ emit_result() {
   printf 'MARKER_VALIDATION_PASSED=%q\n' "$marker_passed"
   printf 'ORCHESTRATOR_MODE=%q\n' "$effective_mode"
   printf 'SNAPSHOT_STATUS=%q\n' "$snapshot_status"
+  printf 'ARTIFACT_MATERIALIZATION_STATUS=%q\n' "$artifact_materialization_status"
+  printf 'ARTIFACT_MATERIALIZATION_COUNT=%q\n' "$artifact_materialization_count"
   printf 'RESPONSE_SHA256=%q\n' "$response_sha"
-  printf 'VALIDATION_SUMMARY=%q\n' "mode=${effective_mode:-unspecified} phase=$assigned_phase delegated_status=${delegated_status:-none} validation=$validation_status next_phase=${recommended_next_phase:-none} next_subagent=${recommended_next_subagent:-none} snapshot=${snapshot_status:-none}"
+  printf 'VALIDATION_SUMMARY=%q\n' "mode=${effective_mode:-unspecified} phase=$assigned_phase delegated_status=${delegated_status:-none} validation=$validation_status materialization=${artifact_materialization_status:-none}/${artifact_materialization_count:-0} next_phase=${recommended_next_phase:-none} next_subagent=${recommended_next_subagent:-none} snapshot=${snapshot_status:-none}"
 }
-
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -87,6 +94,7 @@ while [[ $# -gt 0 ]]; do
     --orchestrator-mode) orchestrator_mode="${2-}"; shift 2 ;;
     --marker-path) marker_path="${2-}"; shift 2 ;;
     --snapshot-file) snapshot_file="${2-}"; shift 2 ;;
+    --disable-response-artifact-materialization) disable_response_artifact_materialization="${2-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *)
       echo "Unknown argument: $1" >&2
@@ -96,11 +104,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "$repo_root" && -n "$feature" && -n "$response_file" && -n "$assigned_phase" && -n "$assigned_subagent" ]] || {
-  usage
-  exit 2
-}
-
+[[ -n "$repo_root" && -n "$feature" && -n "$response_file" && -n "$assigned_phase" && -n "$assigned_subagent" ]] || { usage; exit 2; }
 [[ -d "$repo_root" ]] || { echo "repo root not found: $repo_root" >&2; exit 2; }
 [[ -f "$response_file" ]] || { echo "response file not found: $response_file" >&2; exit 2; }
 
@@ -135,7 +139,6 @@ lines = path.read_text(encoding="utf-8").splitlines()
 headings = {}
 current_heading = None
 buffer = []
-
 for line in lines:
     stripped = line.strip()
     if stripped.endswith(":") and stripped[:-1] and all(ch.isalpha() or ch in " -" for ch in stripped[:-1]):
@@ -146,13 +149,11 @@ for line in lines:
         continue
     if current_heading is not None:
         buffer.append(line)
-
 if current_heading is not None:
     headings[current_heading] = list(buffer)
 
 def first_value(heading):
-    section = headings.get(heading, [])
-    for raw in section:
+    for raw in headings.get(heading, []):
         stripped = raw.strip()
         if not stripped:
             continue
@@ -165,16 +166,30 @@ def q(value):
     return shlex.quote(value)
 
 response_sha = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-status = first_value("Status:")
-next_phase = first_value("Recommended-Next-Phase:")
-next_subagent = first_value("Recommended-Next-Subagent:")
-
-print(f"DELEGATED_STATUS={q(status)}")
-print(f"RECOMMENDED_NEXT_PHASE={q(next_phase)}")
-print(f"RECOMMENDED_NEXT_SUBAGENT={q(next_subagent)}")
+print(f"DELEGATED_STATUS={q(first_value('Status:'))}")
+print(f"RECOMMENDED_NEXT_PHASE={q(first_value('Recommended-Next-Phase:'))}")
+print(f"RECOMMENDED_NEXT_SUBAGENT={q(first_value('Recommended-Next-Subagent:'))}")
 print(f"RESPONSE_SHA256={q(response_sha)}")
 PY
 )"
+
+artifact_materialization_status="not_attempted"
+artifact_materialization_count="0"
+if [[ "${disable_response_artifact_materialization:-false}" != "true" ]]; then
+  materialize_args=(--repo-root "$repo_root" --response-file "$response_file" --feature "$feature")
+  case "$assigned_phase" in
+    specification|planning|"task decomposition")
+      materialize_args+=(--allow-prefix "specs/$feature/")
+      ;;
+  esac
+  eval "$(
+    bash "$script_dir/materialize_response_artifacts.sh" "${materialize_args[@]}"
+  )"
+  artifact_materialization_status="$ARTIFACT_MATERIALIZATION_STATUS"
+  artifact_materialization_count="$ARTIFACT_MATERIALIZATION_COUNT"
+else
+  artifact_materialization_status="disabled"
+fi
 
 marker_validation_mode="skipped"
 marker_validation_passed="true"
@@ -182,29 +197,32 @@ authoritative_basis=""
 cacheable_phase="true"
 
 case "$assigned_phase" in
-  inspection)
-    authoritative_basis="validated_inspection"
-    ;;
-  specification|planning|"task decomposition")
-    bash "$script_dir/validate_artifact_markers.sh" --require-markers "$marker_path"
-    marker_validation_mode="required"
-    marker_validation_passed="true"
-    authoritative_basis="validated_markers"
-    ;;
-  *)
-    cacheable_phase="false"
-    ;;
+  inspection) authoritative_basis="validated_inspection" ;;
+  specification|planning|"task decomposition") authoritative_basis="validated_markers" ;;
+  *) cacheable_phase="false" ;;
 esac
 
-if [[ "$cacheable_phase" != "true" ]]; then
-  emit_result     "accepted_without_snapshot"     "phase not cached by routing snapshot v1"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"     "${orchestrator_mode:-unspecified}"
+if [[ "$DELEGATED_STATUS" != "completed" ]]; then
+  emit_result "accepted_without_snapshot" "delegated status is not completed" "$DELEGATED_STATUS" "$RECOMMENDED_NEXT_PHASE" "$RECOMMENDED_NEXT_SUBAGENT" "skipped" "$RESPONSE_SHA256" "$marker_validation_mode" "$marker_validation_passed" "${orchestrator_mode:-unspecified}" "$artifact_materialization_status" "$artifact_materialization_count"
   exit 0
 fi
 
-if [[ "$DELEGATED_STATUS" != "completed" ]]; then
-  emit_result     "accepted_without_snapshot"     "delegated status is not completed"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"     "${orchestrator_mode:-unspecified}"
+if [[ "$assigned_phase" == "specification" || "$assigned_phase" == "planning" || "$assigned_phase" == "task decomposition" ]]; then
+  bash "$script_dir/validate_artifact_markers.sh" --require-markers "$marker_path"
+  marker_validation_mode="required"
+  marker_validation_passed="true"
+fi
+
+if [[ "$cacheable_phase" != "true" ]]; then
+  emit_result "accepted_without_snapshot" "phase not cached by routing snapshot v1" "$DELEGATED_STATUS" "$RECOMMENDED_NEXT_PHASE" "$RECOMMENDED_NEXT_SUBAGENT" "skipped" "$RESPONSE_SHA256" "$marker_validation_mode" "$marker_validation_passed" "${orchestrator_mode:-unspecified}" "$artifact_materialization_status" "$artifact_materialization_count"
   exit 0
 fi
+
+eval "$(
+  bash "$script_dir/compute_feature_fingerprint.sh" \
+    --repo-root "$repo_root" \
+    --feature "$feature"
+)"
 
 export FEATURE_FINGERPRINT FINGERPRINT_INPUT_COUNT ARTIFACTS_JSON
 
@@ -240,47 +258,21 @@ expected_next_phase="$RECOMMENDED_NEXT_PHASE"
 expected_next_subagent="$RECOMMENDED_NEXT_SUBAGENT"
 expected_response_sha="$RESPONSE_SHA256"
 
-lookup_args=(
-  --mode lookup
-  --repo-root "$repo_root"
-  --feature "$feature"
-)
+lookup_args=(--mode lookup --repo-root "$repo_root" --feature "$feature")
 if [[ -n "$snapshot_file" ]]; then
   lookup_args+=(--snapshot-file "$snapshot_file")
 fi
-
 eval "$(bash "$script_dir/read_or_refresh_routing_snapshot.sh" "${lookup_args[@]}")"
 
-if [[ "$write_snapshot_status" != "written" ]]; then
-  echo "snapshot refresh verification failed: write status '$write_snapshot_status'" >&2
-  exit 1
-fi
-if [[ "$SNAPSHOT_STATUS" != "hit" ]]; then
-  echo "snapshot refresh verification failed: lookup status '$SNAPSHOT_STATUS'" >&2
-  exit 1
-fi
-if [[ "${EARLIEST_UNRESOLVED_PHASE:-}" != "$expected_next_phase" ]]; then
-  echo "snapshot refresh verification failed: lookup earliest unresolved phase '$EARLIEST_UNRESOLVED_PHASE' does not match '$expected_next_phase'" >&2
-  exit 1
-fi
-if [[ "${RECOMMENDED_NEXT_PHASE:-}" != "$expected_next_phase" ]]; then
-  echo "snapshot refresh verification failed: lookup recommended next phase '$RECOMMENDED_NEXT_PHASE' does not match '$expected_next_phase'" >&2
-  exit 1
-fi
-if [[ "${RECOMMENDED_NEXT_SUBAGENT:-}" != "$expected_next_subagent" ]]; then
-  echo "snapshot refresh verification failed: lookup next subagent '$RECOMMENDED_NEXT_SUBAGENT' does not match '$expected_next_subagent'" >&2
-  exit 1
-fi
-if [[ "${SNAPSHOT_FEATURE_FINGERPRINT:-}" != "$write_feature_fingerprint" ]]; then
-  echo "snapshot refresh verification failed: snapshot fingerprint '$SNAPSHOT_FEATURE_FINGERPRINT' does not match '$write_feature_fingerprint'" >&2
-  exit 1
-fi
-if [[ "${SNAPSHOT_RESPONSE_SHA256:-}" != "$expected_response_sha" ]]; then
-  echo "snapshot refresh verification failed: snapshot response sha '$SNAPSHOT_RESPONSE_SHA256' does not match '$expected_response_sha'" >&2
-  exit 1
-fi
+[[ "$write_snapshot_status" == "written" ]] || { echo "snapshot refresh verification failed: write status '$write_snapshot_status'" >&2; exit 1; }
+[[ "$SNAPSHOT_STATUS" == "hit" ]] || { echo "snapshot refresh verification failed: lookup status '$SNAPSHOT_STATUS'" >&2; exit 1; }
+[[ "${EARLIEST_UNRESOLVED_PHASE:-}" == "$expected_next_phase" ]] || { echo "snapshot refresh verification failed: lookup earliest unresolved phase '$EARLIEST_UNRESOLVED_PHASE' does not match '$expected_next_phase'" >&2; exit 1; }
+[[ "${RECOMMENDED_NEXT_PHASE:-}" == "$expected_next_phase" ]] || { echo "snapshot refresh verification failed: lookup recommended next phase '$RECOMMENDED_NEXT_PHASE' does not match '$expected_next_phase'" >&2; exit 1; }
+[[ "${RECOMMENDED_NEXT_SUBAGENT:-}" == "$expected_next_subagent" ]] || { echo "snapshot refresh verification failed: lookup next subagent '$RECOMMENDED_NEXT_SUBAGENT' does not match '$expected_next_subagent'" >&2; exit 1; }
+[[ "${SNAPSHOT_FEATURE_FINGERPRINT:-}" == "$write_feature_fingerprint" ]] || { echo "snapshot refresh verification failed: snapshot fingerprint '$SNAPSHOT_FEATURE_FINGERPRINT' does not match '$write_feature_fingerprint'" >&2; exit 1; }
+[[ "${SNAPSHOT_RESPONSE_SHA256:-}" == "$expected_response_sha" ]] || { echo "snapshot refresh verification failed: snapshot response sha '$SNAPSHOT_RESPONSE_SHA256' does not match '$expected_response_sha'" >&2; exit 1; }
 
-emit_result   "accepted_with_snapshot"   "schema valid and snapshot refreshed"   "$DELEGATED_STATUS"   "$expected_next_phase"   "$expected_next_subagent"   "verified"   "$expected_response_sha"   "$marker_validation_mode"   "$marker_validation_passed"   "${orchestrator_mode:-unspecified}"
+emit_result "accepted_with_snapshot" "schema valid and snapshot refreshed" "$DELEGATED_STATUS" "$expected_next_phase" "$expected_next_subagent" "verified" "$expected_response_sha" "$marker_validation_mode" "$marker_validation_passed" "${orchestrator_mode:-unspecified}" "$artifact_materialization_status" "$artifact_materialization_count"
 printf 'SNAPSHOT_WRITE_STATUS=%q\n' "$write_snapshot_status"
 printf 'SNAPSHOT_LOOKUP_STATUS=%q\n' "$SNAPSHOT_STATUS"
 printf 'SNAPSHOT_FILE=%q\n' "$write_snapshot_file"

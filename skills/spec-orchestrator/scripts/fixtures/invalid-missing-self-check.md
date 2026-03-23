@@ -22,6 +22,10 @@ Result:
 
 - none
 
+Artifacts:
+
+- none
+
 Recommended-Next-Phase:
 
 - specification

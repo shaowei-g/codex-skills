@@ -24,6 +24,10 @@ Result:
 - missing dependency interface details needed for the plan
 - cannot proceed safely without the missing technical constraints
 
+Artifacts:
+
+- none
+
 Recommended-Next-Phase:
 
 - planning

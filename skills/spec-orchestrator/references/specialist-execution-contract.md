@@ -24,6 +24,7 @@ This reference defines the minimal execution rules that every specialist skill m
 - Return results only with the approved schema in `./subagent-response-format.md`.
 - Report only durable work actually completed in this run.
 - Do not claim file changes, checks, or evidence that did not occur.
+- When direct repo writes are unavailable but the assigned output content is complete, use the approved `Artifacts` payload section so the orchestrator can materialize the files.
 - Keep `Self-Check` explicit and truthful.
 
 ## Artifact Marker Discipline
@@ -44,3 +45,10 @@ This reference defines the minimal execution rules that every specialist skill m
 - Stop after one bounded pass.
 - Do not continue into another phase after finishing the assigned scope.
 - Do not rely on chat history when repository artifacts or phase-local files should be the source of truth.
+
+
+## Delegated Write Fallback
+
+- A specialist may complete a write-owning scope without direct delegated file writes only by returning exact artifact payloads in the approved `Artifacts` section.
+- Artifact payload fallback does not permit extra phases, extra files outside the bounded scope, or unowned marker promotion.
+- If the delegated environment prevents writes and the specialist cannot provide truthful final artifact content, return `blocked`, not `completed`.

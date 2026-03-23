@@ -28,9 +28,10 @@ Transport interpretation rules:
 - prefer `bash ../../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh` over ad hoc raw `codex exec` invocations
 - materialize delegated run artifacts in a repo-local run directory rather than `/tmp`
 - use `manifest.json` or `manifest.env` as the authoritative locator for run artifacts
-- `response_file` is the only authoritative delegated output
+- `response_file` is the authoritative delegated output
 - `exec_log` is diagnostic only
 - validate `response_file` with `bash ./scripts/validate_subagent_response.sh`
+- when `response_file` contains approved `Artifacts` payloads, materialize them via `bash ./scripts/materialize_response_artifacts.sh` instead of treating missing delegated repo writes as an immediate blocker
 - one delegated step gets at most one execution attempt
 - if that attempt fails or `response_file` is missing, classify the current step as `blocked` and stop the current mode cycle
 - `booster` may start a later delegated step only after the current step produced an authoritative accepted payload and the next phase is re-derived from current validated state

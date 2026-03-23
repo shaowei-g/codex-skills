@@ -26,6 +26,10 @@ Unexpected:
 
 - this heading is not allowed
 
+Artifacts:
+
+- none
+
 Recommended-Next-Phase:
 
 - specification

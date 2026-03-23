@@ -49,6 +49,7 @@ For each booster cycle:
 
 - If the current delegated step ends `blocked`, the current booster cycle ends immediately.
 - Treat transport failure, missing authoritative `response_file`, and invalid delegated execution that prevents safe continuation as blocker-class outcomes for the current cycle.
+- A completed delegated response that includes valid `Artifacts` payloads is not a transport blocker just because the subagent did not persist repo files directly.
 - Do not repair transport, patch shared skills, retry the same step, or begin manual repo edits while still calling the run `booster`.
 
 ### Legal Post-Stop Paths

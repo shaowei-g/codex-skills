@@ -129,3 +129,17 @@ Guardrail:
 - treat shared-tool repair as separate maintenance or diagnostics work, not as part of the bounded feature run
 - do not mutate `~/.codex/skills/...` assets during the current orchestrated cycle
 - after such repair work, restart from a fresh orchestrator run if workflow execution is still needed
+
+
+## 11. Treating Direct Delegated Repo Writes as the Only Success Path
+
+Anti-pattern:
+
+- a delegated write-owning run is marked `blocked` just because direct repo writes failed, even though the response already contains complete artifact payloads that the orchestrator could materialize safely
+
+Guardrail:
+
+- the delegated `response_file` is authoritative
+- for write-owning phases, check for approved `Artifacts` payloads before concluding that transport prevented durable completion
+- let the orchestrator materialize repo-relative payloads locally, then run marker validation and normal acceptance logic
+- do not force specialists to depend on a single transport-specific write mechanism when the shared response contract already supports truthful artifact transfer

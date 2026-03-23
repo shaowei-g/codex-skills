@@ -24,6 +24,10 @@ Result:
 - contract violation: multi_scope_violation
 - read specs/demo-feature/tasks.md
 
+Artifacts:
+
+- none
+
 Recommended-Next-Phase:
 
 - task decomposition

@@ -1,6 +1,6 @@
 Status:
 
-- done
+- completed
 
 Feature-Slug:
 
@@ -8,31 +8,43 @@ Feature-Slug:
 
 Assigned-Phase:
 
-- inspection
+- planning
 
 Assigned-Subagent:
 
-- spec-viewer
+- spec-planner
 
 Scope:
 
-- inspect one feature state and recommend one next valid phase
+- create one plan artifact
 
 Result:
 
-- none
+- completed planning content and returned it for orchestrator-side materialization
 
 Artifacts:
 
-- none
+```artifact path="specs/demo-feature/plan.md"
+---
+phase: planning
+status: ready
+gate: pending
+approved_by_orchestrator: false
+last_gate_check: null
+execution_ready: true
+---
+# Plan
+
+Backend-only plan.
+```
 
 Recommended-Next-Phase:
 
-- specification
+- task decomposition
 
 Recommended-Next-Subagent:
 
-- spec-analyst
+- spec-tasker
 
 Self-Check:
 

@@ -23,6 +23,7 @@ When this file conflicts with a canonical reference, the canonical reference win
 
 - Return results only with the approved compact response schema.
 - Put supporting detail in the single `Result` section instead of inventing extra headings.
+- Use the `Artifacts` section only for machine-materializable repo files from the assigned phase.
 - Report only durable work actually completed in this run.
 - Keep `Self-Check` explicit and truthful.
 - Use `completed`, `blocked`, and `rejected` exactly as defined by the shared status semantics.
@@ -46,3 +47,11 @@ When this file conflicts with a canonical reference, the canonical reference win
 - Load only the feature artifacts needed for the assigned scope.
 - Prefer durable workflow artifacts over chat history.
 - Open the deeper canonical references only when the shortcut is insufficient for the current situation.
+
+
+## Transport-aware write fallback
+
+- When delegated transport can read but cannot safely persist repo files, do not fake direct writes.
+- If the assigned phase work is otherwise complete, return `completed` with artifact payload blocks in `Artifacts` so the orchestrator can materialize them.
+- If the artifact content itself is not ready, return `blocked` with `Artifacts: - none`.
+- Do not emit artifact payloads for work outside the assigned phase.

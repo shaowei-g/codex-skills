@@ -10,7 +10,7 @@ Return `completed` when all of the following are true:
 - the assigned phase is correct
 - the entry gate for that phase is satisfied
 - the bounded specialist scope was fully completed in this run
-- any claimed durable outputs actually exist and match the repository state
+- any claimed durable outputs either already exist in the repository or are fully present as approved response artifact payloads for orchestrator materialization
 - any markerized artifact changes remain consistent with `./artifact-acceptance-markers.md`
 
 ## Rejected
@@ -44,6 +44,7 @@ Common `blocked` examples:
 - Use `rejected` for phase mismatch, routing mismatch, or bounded-scope violations.
 - Use `blocked` for valid phase work that is currently prevented by missing prerequisites.
 - Use `completed` only for work actually finished in this run.
+- Response-embedded artifact payloads count as finished only when they are complete enough for truthful orchestrator materialization.
 - A `completed` specialist run may still leave the artifact in `draft` or `ready`; formal `accepted` markers belong to orchestrator gate acceptance.
 - Do not use status selection to justify cross-phase work or silent scope expansion.
 

@@ -126,6 +126,13 @@ For a standard run or a single booster step, load only this minimum set before d
 5. only the feature artifacts needed for that phase
 6. `bash ./scripts/validate_delegated_run.sh` for acceptance
 
+### Delegated write rule
+
+- For write-owning phases, the preferred success path is direct repo writes by the delegated specialist.
+- When delegated transport cannot safely persist repo files but the specialist can still produce final artifact content, the specialist should return those files in the approved `Artifacts` payload section.
+- The orchestrator then materializes those repo-relative artifact payloads locally before marker validation, acceptance, and any booster continuation decision.
+- Do not classify a write-owning delegated step as blocked solely because direct delegated writes failed when valid artifact payloads are already present in the response.
+
 ### Efficiency rules
 
 - Prefer direct fixed paths over recursive search. Search only when a required direct path is missing or unreadable.
@@ -133,6 +140,7 @@ For a standard run or a single booster step, load only this minimum set before d
 - Do not reopen shared reference files when the mapped specialist already loaded the shared shortcut and no conflict is present.
 - Treat `bash ./scripts/validate_delegated_run.sh` as the default single acceptance entry point. Do not separately rerun schema validation, marker validation, and snapshot refresh on the happy path.
 - Expect a compact delegated schema. Read the delegated `response_file` directly when validator output is insufficient and use the single `Result` section rather than expecting many micro-fields.
+- For write-owning phases, treat response-embedded `Artifacts` payloads as the preferred fallback when delegated transport can read but cannot safely persist repo files.
 - Prefer the delegated manifest as the source of response and log paths. Do not rediscover run artifacts with workspace globbing.
 - Keep progress narration decision-focused. Summarize the route, delegated phase, validation result, and next bounded step rather than narrating every file read.
 - In `booster` mode, reuse the smallest stable context between accepted steps: refreshed snapshot, validated markers, the next phase prompt, and the next specialist skill.

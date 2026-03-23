@@ -1,6 +1,6 @@
 Status:
 
-- done
+- completed
 
 Feature-Slug:
 
@@ -8,31 +8,33 @@ Feature-Slug:
 
 Assigned-Phase:
 
-- inspection
+- planning
 
 Assigned-Subagent:
 
-- spec-viewer
+- spec-planner
 
 Scope:
 
-- inspect one feature state and recommend one next valid phase
+- create one plan artifact
 
 Result:
 
-- none
+- completed
 
 Artifacts:
 
-- none
+```artifact path="../escape.md"
+# Bad path
+```
 
 Recommended-Next-Phase:
 
-- specification
+- task decomposition
 
 Recommended-Next-Subagent:
 
-- spec-analyst
+- spec-tasker
 
 Self-Check:
 
