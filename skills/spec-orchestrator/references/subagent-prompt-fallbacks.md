@@ -8,3 +8,6 @@ Use these instead:
 - specialist `completed` / `blocked` / `rejected` semantics: `./specialist-status-semantics.md`
 
 Keep this file only as a compatibility shim for older references.
+- `./orchestrator-anti-patterns.md` for orchestrator guardrails against premature routing conclusions and in-run transport debugging
+
+- external Codex CLI transport skill: `../../codex-cli-subagent-transport/SKILL.md`

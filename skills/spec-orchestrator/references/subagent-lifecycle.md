@@ -9,20 +9,23 @@ Scope ownership, required delegated fields, authority limits, and violation labe
 Every delegated run should follow this sequence:
 
 1. **Prepare Assignment**
-   - determine the earliest unresolved phase
+   - determine the earliest unresolved phase candidate
    - select the mapped specialist
    - define one bounded unit of work for the chosen run
+   - do not state an authoritative workflow-phase conclusion yet unless validated artifact markers already establish it
 
 2. **Inject**
    - open with the delegated identity-and-stop instruction
    - provide the run-specific assignment values
    - prefer path references over pasted contracts when the runtime can load files reliably
+   - when using Codex CLI transport, prepare a repo-local prompt file for `bash ../../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh`
 
 3. **Load Prompt and Local Context**
    - resolve repository prompts using `./codex-prompt-mapping.md`
    - load only the feature artifacts and repository context needed for the assigned scope
    - prefer durable workflow artifacts over chat history
-- when markerized artifacts exist, inspect formal acceptance using `./artifact-acceptance-markers.md` before routing forward
+   - when markerized artifacts exist, inspect formal acceptance using `./artifact-acceptance-markers.md` before routing forward
+   - when current state remains unclear or conflicting, delegate inspection and defer authoritative routing until the schema-valid inspection result returns
 
 4. **Check Entry Gate**
    - consult the assigned specialist skill for phase-local entry expectations
@@ -30,33 +33,36 @@ Every delegated run should follow this sequence:
    - return only an allowed schema status
 
 5. **Execute Assigned Work**
-   - perform the delegated bounded unit of work only
-   - keep file updates within the assigned ownership set
-   - record blockers or drift instead of absorbing adjacent work
+   - perform the delegated bounded scope only
+   - do not widen the assignment, choose the next phase, or continue into follow-on work
 
 6. **Persist Durable Outputs**
-   - write only the artifacts owned by the assigned specialist and scope
-   - if no safe write is possible, explain that in the delegated response
+   - only when the assigned specialist and scope allow file changes
+   - keep ownership within the declared artifact set
+   - preserve artifact marker rules when markerized workflow artifacts are touched
 
-7. **Collect Response**
-   - require the fixed schema in `./subagent-response-format.md`
-   - validate the returned payload before accepting it
+7. **Collect Authoritative Result**
+   - when using Codex CLI transport, read `manifest.json` or `manifest.env` first to locate run artifacts
+   - read the delegated `response_file`
+   - treat `response_file` as authoritative
+   - treat logs as diagnostics only
+   - do not rely on workspace globbing or `/tmp` discovery to find delegated outputs after the run
+   - if no authoritative delegated payload exists after the single delegated attempt, stop and classify the run as `blocked`
 
-8. **Stop**
-   - end the delegated run after the response is returned
-   - do not self-continue or route into another delegated pass from inside the same run
+8. **Validate and Accept**
+   - validate the response schema
+   - run artifact marker validation when acceptance or continuation depends on markerized artifacts
+   - use one format-only repair pass only when allowed by `./orchestrator-fallback.md`
+   - route based on validated markers or the current schema-valid specialist result, not pre-delegation summary text
+
+9. **Stop**
+   - stop after the single bounded run is accepted, blocked, or rejected
+   - do not start transport debugging or a second delegated attempt inside the same feature run
 
 ## Related References
 
 - prompt lookup: `./codex-prompt-mapping.md`
-- artifact acceptance: `./artifact-acceptance-markers.md`
-- delegated prompt contract and authority checks: `./subagent-reinjection-contract.md`
+- delegation contract: `./subagent-reinjection-contract.md`
 - fallback and repair: `./orchestrator-fallback.md`
-- response schema: `./subagent-response-format.md`
-
-## Acceptance Checkpoint
-
-If the delegated run updates or relies on markerized phase artifacts for formal acceptance or continuation, validate them before treating the phase as accepted:
-
-- `bash ./scripts/validate_artifact_markers.sh specs/<feature>`
-- use `--require-markers` when the updated artifacts are expected to carry front matter markers
+- external Codex CLI transport skill: `../../codex-cli-subagent-transport/references/manifest-based-run-contract.md`
+- anti-pattern guardrails: `./orchestrator-anti-patterns.md`

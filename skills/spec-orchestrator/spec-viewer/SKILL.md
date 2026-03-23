@@ -41,12 +41,14 @@ Use this skill when at least one is true:
 ## Owned Outputs
 
 - inspection summary in the shared schema
+- authoritative inspection verdict for current workflow state based on accepted markers when available
 - advisory next-phase recommendation based on accepted markers when available
 - minimal continuity notes only when the assigned scope explicitly asks for them
 
 ## Phase-Specific Rejected Criteria
 
 Return `rejected` if the request asks this skill to author phase-owned artifacts, implement work, or perform verification instead of inspection.
+Return `rejected` if the request tries to force a pre-decided route and treats inspection as confirmation-only instead of allowing a truthful current-state report.
 
 ## Phase-Specific Blocked Criteria
 

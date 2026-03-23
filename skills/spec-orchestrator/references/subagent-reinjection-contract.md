@@ -30,6 +30,9 @@ Every delegated run should make these values explicit:
 - Response-Validator
 - Stop-After-Return
 
+When the assigned phase is `inspection`, the delegated scope should ask only for a truthful state report and advisory routing recommendation. It must not embed an already-decided workflow conclusion as if inspection were merely confirmation.
+When inspection includes advisory recommendation fields, the delegated subagent should still keep `chose_next_phase = false` and `chose_next_subagent = false` because the recommendations do not exercise routing authority.
+
 ## Authority and Ownership Checks
 
 A delegated subagent must remain within the assigned feature, phase, scope, and ownership set.
@@ -43,11 +46,19 @@ A delegated subagent must not:
 - continue implicitly after return
 - modify files outside the allowed ownership set
 
+The orchestrator must not:
+
+- bypass the external transport skill and inline ad hoc raw `codex exec` collection logic when deterministic manifest-based artifacts are required
+
+- present preliminary artifact observations as authoritative phase acceptance when validated markers or the delegated inspection result are still pending
+- substitute environment diagnostics for the missing specialist result
+
 ## Advisory Recommendation Rule
 
 - `Recommended-Next-Phase` is advisory only
 - `Recommended-Next-Subagent` is advisory only
 - the orchestrator keeps routing authority
+- for inspection runs, authoritative routing still depends on the schema-valid inspection result or validated artifact markers
 
 ## Self-Check Contract
 
@@ -75,12 +86,16 @@ Use these labels when classifying semantic contract failures:
 - `undeclared_file_change`
 - `advisory_as_authority`
 - `prerequisite_bypass`
+- `premature_state_conclusion`
+- `diagnostic_as_feature_evidence`
 
 ## Related References
 
 - lifecycle sequence: `./subagent-lifecycle.md`
 - artifact acceptance: `./artifact-acceptance-markers.md`
 - fallback and repair: `./orchestrator-fallback.md`
+- external Codex CLI transport skill: `../../codex-cli-subagent-transport/references/manifest-based-run-contract.md`
+- anti-pattern guardrails: `./orchestrator-anti-patterns.md`
 - response schema: `./subagent-response-format.md`
 
 ## Artifact Marker Reference

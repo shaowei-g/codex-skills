@@ -10,9 +10,9 @@ Keep the main orchestrator prompt as a thin policy shell:
 - gate policy
 - validation policy
 - stop conditions
-- transport contract pointers
+- external transport skill pointers
 
-Everything else should live in one canonical reference or the owning specialist skill. Specialists should load only a thin execution contract, shared artifact marker rules, shared status semantics, and the shared response schema, not orchestration mechanics.
+Everything else should live in one canonical reference, the owning specialist skill, or the external transport skill. Specialists should load only a thin execution contract, shared artifact marker rules, shared status semantics, and the shared response schema, not orchestration mechanics or Codex CLI transport details.
 
 ## File Responsibility Table
 
@@ -25,7 +25,11 @@ Everything else should live in one canonical reference or the owning specialist 
 | `references/specialist-status-semantics.md` | Shared specialist status meanings | `completed` / `blocked` / `rejected` semantics, common status boundary examples | transport fallback, prompt mapping, reconstruction repair |
 | `references/subagent-lifecycle.md` | Execution sequence for one delegated run | prepare assignment → inject → load prompt/local context → gate → execute → persist → collect response → stop | delegated field checklist, authority limits, self-check contract, violation taxonomy |
 | `references/subagent-reinjection-contract.md` | Compact delegation and authority contract | required delegated fields, authority/ownership checks, advisory-only next-step rule, self-check contract, violation taxonomy | lifecycle step ordering, prompt lookup details, transport troubleshooting prose |
-| `references/orchestrator-fallback.md` | Orchestrator-only fallback, transport, and repair | local fallback rule, transport fallback, malformed output classification, reconstruction repair | specialist status meanings, prompt mapping details, schema repetition |
+| `references/orchestrator-fallback.md` | Orchestrator-only fallback, transport, and repair | local fallback rule, single-attempt transport fallback, diagnostic isolation, malformed output classification, reconstruction repair | specialist status meanings, prompt mapping details, schema repetition |
+| `references/orchestrator-anti-patterns.md` | Orchestrator guardrails against bad flow behavior | premature-state-conclusion rule, single-attempt transport discipline, environment-diagnostic isolation, summary-is-not-acceptance reminders | specialist phase instructions, schema details, transport implementation specifics |
+| `../codex-cli-subagent-transport/SKILL.md` | External transport entry point | when native subagent execution is unavailable, delegate transport mechanics here | routing decisions, specialist semantics, acceptance logic |
+| `../codex-cli-subagent-transport/references/manifest-based-run-contract.md` | External manifest-based run contract | deterministic repo-local run artifacts, manifest locator rule, authoritative response path collection, no-/tmp discovery rule | specialist phase judgment, routing decisions, schema repetition |
+| `../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh` | External repo-local Codex CLI transport wrapper | deterministic run directory, prompt copy, response/log paths, manifest emission, exit-code capture | routing decisions, response validation semantics |
 | `references/subagent-prompt-fallbacks.md` | Compatibility shim only | pointer to the split references for older links | normative fallback or status rules |
 | `references/subagent-response-format.md` | Canonical response schema | headings, enums, field rules, machine validation semantics | lifecycle, routing, fallback rules |
 | `scripts/validate_artifact_markers.sh` + `scripts/validate_artifact_markers.py` | Canonical artifact marker validator | required marker fields, accepted-state checks, cross-artifact consistency checks, compatibility mode vs `--require-markers` strict mode | subagent response schema validation, routing policy, specialist phase judgment |
@@ -49,6 +53,7 @@ Keep only the orchestrator rules that must remain in the always-loaded shell:
 - validator acceptance policy
 - stop conditions
 - pointers to the authoritative references
+- anti-pattern guardrails that keep the orchestrator from acting like an inspector or transport debugger
 
 Do not repeat:
 
@@ -110,7 +115,8 @@ It should not define:
 This file is the orchestrator-only source of truth for delegated-run fallback handling:
 
 - local phase fallback after prompt lookup
-- transport fallback
+- single-attempt transport fallback
+- diagnostic isolation
 - malformed output classification
 - reconstruction repair
 
@@ -119,6 +125,21 @@ It should not define:
 - specialist phase-specific gates
 - specialist `completed` / `blocked` / `rejected` semantics
 - response schema structure
+
+### `references/orchestrator-anti-patterns.md`
+This file captures failure modes the orchestrator must actively avoid:
+
+- premature state conclusions before validated markers or inspection results exist
+- transport debugging inside the bounded feature run
+- environment diagnostics contaminating feature reasoning
+- repeated workaround loops after the delegated attempt already failed
+- treating prior summaries as formal phase acceptance
+
+It should not define:
+
+- specialist phase-local rules
+- delegated response schema details
+- transport implementation specifics
 
 ## Specialist Loading Rule
 
@@ -139,3 +160,16 @@ Each specialist should then define only:
 ## Expected Benefits
 
 This split reduces duplicated instruction load, keeps delegation mechanics centralized in orchestrator-owned references, and makes specialist skills read more like phase cards than mini-orchestrators.
+
+## External Transport Extraction Rule
+
+Codex CLI mechanics should remain outside `spec-orchestrator` itself.
+
+`spec-orchestrator` may point to the external transport skill, but should not own:
+
+- raw `codex exec` invocation details
+- manifest file format definitions
+- repo-local run-directory naming rules
+- temp-path avoidance rules beyond high-level guardrails
+
+Those belong to `../codex-cli-subagent-transport/`.

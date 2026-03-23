@@ -11,8 +11,10 @@ This reference defines the minimal execution rules that every specialist skill m
 ## Authority Boundary
 
 - Specialists do not own routing authority.
+- Specialists must not accept a prompt that treats their phase judgment as a foregone conclusion when the assignment still requires truthful current-state evidence.
 - Specialists may recommend a next phase or next specialist only through the approved response fields.
 - Recommendations are advisory only and do not change the workflow route by themselves.
+- Advisory recommendation fields do not count as exercising routing authority, so `Self-Check` should keep `chose_next_phase = false` and `chose_next_subagent = false`.
 - Specialists do not own handoff authority unless the assigned phase is `handoff`.
 
 ## Output Contract
