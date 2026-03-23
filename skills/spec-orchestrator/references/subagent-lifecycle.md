@@ -13,6 +13,9 @@ Every delegated run should follow this sequence:
    - select the mapped specialist
    - define one bounded unit of work for the chosen run
    - do not state an authoritative workflow-phase conclusion yet unless validated artifact markers already establish it
+   - before delegating fresh inspection, check whether a reusable routing snapshot exists for the feature
+   - a reusable snapshot may shortcut repeated inspection only when its fingerprint matches current feature artifacts and its validation metadata is still authoritative
+   - on snapshot miss, stale, or invalid status, continue with normal inspection routing
 
 2. **Inject**
    - open with the delegated identity-and-stop instruction
@@ -57,6 +60,8 @@ Every delegated run should follow this sequence:
    - run artifact marker validation when acceptance or continuation depends on markerized artifacts
    - use one format-only repair pass only when allowed by `./orchestrator-fallback.md`
    - route based on validated markers or the current schema-valid specialist result, not pre-delegation summary text
+   - after accepting a schema-valid inspection result or a marker-validated phase-owned update, refresh the repo-local routing snapshot
+   - snapshot refresh must be driven from the authoritative delegated response, not from logs
 
 9. **Stop**
    - stop after the single bounded run is accepted, blocked, or rejected

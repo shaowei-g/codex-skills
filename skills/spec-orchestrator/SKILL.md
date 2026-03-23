@@ -40,6 +40,18 @@ If neither is provided, stop and return:
 - Otherwise, inspect current state first with `spec-viewer`.
 - When current state is not already established by validated artifact markers, the inspection result from `spec-viewer` is the sole routing basis for that run.
 
+### Routing snapshot shortcut
+
+- Before starting a fresh inspection run, the orchestrator may consult a repo-local routing snapshot in:
+  - `.codex/spec-orchestrator-state/<feature>/routing-snapshot.json`
+- A routing snapshot is reusable only when all are true:
+  - the current feature fingerprint matches the snapshot fingerprint
+  - the snapshot points to a schema-valid delegated response
+  - when the snapshot basis is `validated_markers`, marker validation passed
+- A routing snapshot is a coordination cache, not formal acceptance by itself.
+- Validated artifact markers still override a stale or conflicting snapshot.
+- On `missing`, `stale`, or `invalid` snapshot status, fall back to normal inspection with `spec-viewer`.
+
 ### Delegation rule
 
 - Delegate exactly one bounded unit of work per run.
@@ -101,6 +113,14 @@ Specialists share these thin common contracts:
 - Semantic violations must be rejected, not normalized.
 - If an invalid response cannot be safely repaired, replace it with a controlled failure record using:
   - `bash ./scripts/print_subagent_response_schema.sh`
+
+### Snapshot refresh rule
+
+- After accepting a schema-valid inspection result or a marker-validated phase-owned update, refresh the routing snapshot for that feature.
+- Use:
+  - `bash ./scripts/validate_delegated_run.sh`
+- Do not refresh the routing snapshot from terminal chatter or raw logs.
+- Do not reuse a routing snapshot when the feature fingerprint changed.
 
 Delegated execution references:
 
@@ -168,4 +188,7 @@ Stop and surface the blocker when any of the following is true:
 - When markerized artifacts are used as the basis for routing or continuation, require them to pass `bash ./scripts/validate_artifact_markers.sh` before treating them as authoritative.
 - Treat formal acceptance as an artifact marker decision, not just a prior summary statement.
 - Treat pre-delegation observations and prior summaries as non-authoritative when they conflict with validated markers or the current schema-valid inspection result.
+- Repo-local routing snapshots are allowed as minimal durable coordination notes.
+- They must never override validated artifact markers.
+- They are reusable only while the referenced feature fingerprint still matches.
 - Handoff packaging belongs to `spec-handoff`, not the orchestrator by default.
