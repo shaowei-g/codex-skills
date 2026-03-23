@@ -165,6 +165,7 @@ Read-only agents may inspect these phases only for separate non-owning inspectio
 - Treat delegated `manifest.json` or `manifest.env` as the authoritative locator for `response_file` and `exec_log`.
 - Treat delegated `response_file` as authoritative output.
 - Treat execution logs as diagnostics only.
+- Prefer fixed known bundle paths under `~/.codex/skills/spec-orchestrator/` and `~/.codex/skills/codex-cli-subagent-transport/` before recursive workspace search when locating skills, validators, and transport assets.
 - Do not infer accepted phase output from terminal chatter.
 - Do not use environment warnings, unrelated skill-load failures, or shell-policy denials as feature-state evidence.
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat >&2 <<'EOF'
+  cat >&2 <<'USAGE'
 Usage:
 
 Lookup:
@@ -23,13 +23,26 @@ Write:
     --recommended-next-subagent <subagent|none> \
     --response-file /abs/path/to/response.md \
     --response-sha256 sha256:... \
-    --response-schema-valid true \
+    --response-schema-valid true|false \
     --marker-validation-mode required|optional|skipped \
     --marker-validation-passed true|false
 
 Optional:
   --snapshot-file /abs/path/to/routing-snapshot.json
-EOF
+USAGE
+}
+
+select_python() {
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' python3
+    return 0
+  fi
+  if command -v python >/dev/null 2>&1; then
+    printf '%s\n' python
+    return 0
+  fi
+  echo "python runtime not found (need python3 or python)" >&2
+  exit 127
 }
 
 mode=""
@@ -76,6 +89,7 @@ done
 [[ -d "$repo_root" ]] || { echo "repo root not found: $repo_root" >&2; exit 2; }
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python_bin="$(select_python)"
 
 if [[ -z "$snapshot_file" ]]; then
   snapshot_file="$repo_root/.codex/spec-orchestrator-state/$feature/routing-snapshot.json"
@@ -93,7 +107,7 @@ case "$mode" in
     export FEATURE="$feature"
     export CURRENT_FEATURE_FINGERPRINT="$FEATURE_FINGERPRINT"
 
-    python3 - <<'PY'
+    "$python_bin" - <<'PY'
 import json
 import os
 import pathlib
@@ -103,20 +117,20 @@ snapshot_file = pathlib.Path(os.environ["SNAPSHOT_FILE"])
 feature = os.environ["FEATURE"]
 current_fingerprint = os.environ["CURRENT_FEATURE_FINGERPRINT"]
 
-def q(v: str) -> str:
-    return shlex.quote(v)
+def q(value):
+    return shlex.quote(value)
 
-def emit(status: str, reason: str, payload: dict | None = None) -> None:
+def emit(status, reason, payload=None):
     print(f"SNAPSHOT_STATUS={q(status)}")
     print(f"SNAPSHOT_REASON={q(reason)}")
     print(f"SNAPSHOT_FILE={q(str(snapshot_file))}")
     if payload:
-      current = payload.get("current", {})
-      print(f"SNAPSHOT_FEATURE_FINGERPRINT={q(current.get('feature_fingerprint', ''))}")
-      print(f"EARLIEST_UNRESOLVED_PHASE={q(current.get('earliest_unresolved_phase', ''))}")
-      print(f"RECOMMENDED_NEXT_PHASE={q(current.get('recommended_next_phase', ''))}")
-      print(f"RECOMMENDED_NEXT_SUBAGENT={q(current.get('recommended_next_subagent', ''))}")
-      print(f"AUTHORITATIVE_BASIS={q(payload.get('authoritative_basis', ''))}")
+        current = payload.get("current", {})
+        print(f"SNAPSHOT_FEATURE_FINGERPRINT={q(current.get('feature_fingerprint', ''))}")
+        print(f"EARLIEST_UNRESOLVED_PHASE={q(current.get('earliest_unresolved_phase', ''))}")
+        print(f"RECOMMENDED_NEXT_PHASE={q(current.get('recommended_next_phase', ''))}")
+        print(f"RECOMMENDED_NEXT_SUBAGENT={q(current.get('recommended_next_subagent', ''))}")
+        print(f"AUTHORITATIVE_BASIS={q(payload.get('authoritative_basis', ''))}")
 
 if not snapshot_file.exists():
     emit("missing", "snapshot file not found")
@@ -142,8 +156,8 @@ if payload.get("feature_slug") != feature:
 
 current = payload.get("current", {})
 validation = payload.get("validation", {})
-
 snapshot_fingerprint = current.get("feature_fingerprint", "")
+
 if snapshot_fingerprint != current_fingerprint:
     emit("stale", "feature fingerprint changed", payload)
     raise SystemExit(0)
@@ -157,7 +171,7 @@ if basis == "validated_markers" and validation.get("marker_validation_passed") i
     emit("invalid", "marker validation required but not passed", payload)
     raise SystemExit(0)
 
-if basis not in {"validated_markers", "validated_inspection"}:
+if basis not in ("validated_markers", "validated_inspection"):
     emit("invalid", "unsupported authoritative basis", payload)
     raise SystemExit(0)
 
@@ -198,7 +212,7 @@ PY
     export MARKER_VALIDATION_MODE="$marker_validation_mode"
     export MARKER_VALIDATION_PASSED="$marker_validation_passed"
 
-    python3 - <<'PY'
+    "$python_bin" - <<'PY'
 import datetime as dt
 import json
 import os
@@ -234,9 +248,9 @@ payload = {
     "validation": {
         "response_file": os.environ["RESPONSE_FILE"],
         "response_sha256": os.environ["RESPONSE_SHA256"],
-        "response_schema_valid": os.environ["RESPONSE_SCHEMA_VALID"] == "true",
+        "response_schema_valid": os.environ["RESPONSE_SCHEMA_VALID"].lower() == "true",
         "marker_validation_mode": os.environ["MARKER_VALIDATION_MODE"],
-        "marker_validation_passed": os.environ["MARKER_VALIDATION_PASSED"] == "true",
+        "marker_validation_passed": os.environ["MARKER_VALIDATION_PASSED"].lower() == "true",
         "validated_at": now,
         "validator": "skills/spec-orchestrator/scripts/validate_delegated_run.sh",
     },

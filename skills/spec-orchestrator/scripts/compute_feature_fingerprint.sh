@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat >&2 <<'EOF'
+  cat >&2 <<'USAGE'
 Usage:
   bash ./skills/spec-orchestrator/scripts/compute_feature_fingerprint.sh \
     --repo-root /abs/path/to/repo \
@@ -15,7 +15,20 @@ Prints shell-safe assignments:
   FEATURE_FINGERPRINT
   FINGERPRINT_INPUT_COUNT
   ARTIFACTS_JSON
-EOF
+USAGE
+}
+
+select_python() {
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' python3
+    return 0
+  fi
+  if command -v python >/dev/null 2>&1; then
+    printf '%s\n' python
+    return 0
+  fi
+  echo "python runtime not found (need python3 or python)" >&2
+  exit 127
 }
 
 repo_root=""
@@ -46,7 +59,9 @@ done
 [[ -n "$repo_root" && -n "$feature" ]] || { usage; exit 2; }
 [[ -d "$repo_root" ]] || { echo "repo root not found: $repo_root" >&2; exit 2; }
 
-python3 - "$repo_root" "$feature" <<'PY'
+python_bin="$(select_python)"
+
+"$python_bin" - "$repo_root" "$feature" <<'PY'
 import hashlib
 import json
 import pathlib
@@ -57,7 +72,7 @@ repo_root = pathlib.Path(sys.argv[1]).resolve()
 feature = sys.argv[2]
 feature_dir = repo_root / "specs" / feature
 
-def q(value: str) -> str:
+def q(value):
     return shlex.quote(value)
 
 if not feature_dir.exists():

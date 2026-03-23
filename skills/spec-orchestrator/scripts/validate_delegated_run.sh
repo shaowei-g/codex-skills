@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat >&2 <<'EOF'
+  cat >&2 <<'USAGE'
 Usage:
   bash ./skills/spec-orchestrator/scripts/validate_delegated_run.sh \
     --repo-root /abs/path/to/repo \
@@ -21,7 +21,21 @@ Rules:
   - response status is completed
   - schema is valid
   - marker validation passes when required
-EOF
+- Treats this script as the single snapshot-refresh entry point for accepted delegated runs.
+USAGE
+}
+
+select_python() {
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' python3
+    return 0
+  fi
+  if command -v python >/dev/null 2>&1; then
+    printf '%s\n' python
+    return 0
+  fi
+  echo "python runtime not found (need python3 or python)" >&2
+  exit 127
 }
 
 repo_root=""
@@ -63,6 +77,7 @@ if [[ -z "$marker_path" ]]; then
 fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python_bin="$(select_python)"
 
 bash "$script_dir/validate_subagent_response.sh" \
   --file "$response_file" \
@@ -71,51 +86,62 @@ bash "$script_dir/validate_subagent_response.sh" \
   --assigned-subagent "$assigned_subagent"
 
 eval "$(
-  python3 - "$response_file" <<'PY'
+  "$python_bin" - "$response_file" <<'PY'
+import hashlib
 import pathlib
-import re
 import shlex
 import sys
 
 path = pathlib.Path(sys.argv[1])
-text = path.read_text(encoding="utf-8")
+lines = path.read_text(encoding="utf-8").splitlines()
+headings = {}
+current_heading = None
+buffer = []
 
-def first_bullet(heading: str) -> str:
-    pattern = re.compile(rf'^{re.escape(heading)}\n((?:- .*\n?)*)', re.M)
-    m = pattern.search(text)
-    if not m:
-        return ""
-    for line in m.group(1).splitlines():
-        if line.startswith("- "):
-            return line[2:].strip()
+for line in lines:
+    stripped = line.strip()
+    if stripped.endswith(":") and stripped[:-1] and all(ch.isalpha() or ch in " -" for ch in stripped[:-1]):
+        if current_heading is not None:
+            headings[current_heading] = list(buffer)
+        current_heading = stripped
+        buffer = []
+        continue
+    if current_heading is not None:
+        buffer.append(line)
+
+if current_heading is not None:
+    headings[current_heading] = list(buffer)
+
+def first_value(heading):
+    section = headings.get(heading, [])
+    for raw in section:
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("- "):
+            return stripped[2:].strip()
+        return stripped
     return ""
 
-def q(v: str) -> str:
-    return shlex.quote(v)
+def q(value):
+    return shlex.quote(value)
 
-status = first_bullet("Status:")
-next_phase = first_bullet("Recommended-Next-Phase:")
-next_subagent = first_bullet("Recommended-Next-Subagent:")
+response_sha = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+status = first_value("Status:")
+next_phase = first_value("Recommended-Next-Phase:")
+next_subagent = first_value("Recommended-Next-Subagent:")
 
 print(f"DELEGATED_STATUS={q(status)}")
 print(f"RECOMMENDED_NEXT_PHASE={q(next_phase)}")
 print(f"RECOMMENDED_NEXT_SUBAGENT={q(next_subagent)}")
-PY
-)"
-
-response_sha256="$(
-  python3 - "$response_file" <<'PY'
-import hashlib
-import pathlib
-import sys
-p = pathlib.Path(sys.argv[1])
-print("sha256:" + hashlib.sha256(p.read_bytes()).hexdigest())
+print(f"RESPONSE_SHA256={q(response_sha)}")
 PY
 )"
 
 marker_validation_mode="skipped"
 marker_validation_passed="true"
 authoritative_basis=""
+cacheable_phase="true"
 
 case "$assigned_phase" in
   inspection)
@@ -128,15 +154,25 @@ case "$assigned_phase" in
     authoritative_basis="validated_markers"
     ;;
   *)
-    printf 'VALIDATION_STATUS=%q\n' "accepted_without_snapshot"
-    printf 'VALIDATION_REASON=%q\n' "phase not cached by routing snapshot v1"
-    exit 0
+    cacheable_phase="false"
     ;;
 esac
+
+if [[ "$cacheable_phase" != "true" ]]; then
+  printf 'VALIDATION_STATUS=%q\n' "accepted_without_snapshot"
+  printf 'VALIDATION_REASON=%q\n' "phase not cached by routing snapshot v1"
+  printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
+  printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$RECOMMENDED_NEXT_PHASE"
+  printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
+  exit 0
+fi
 
 if [[ "$DELEGATED_STATUS" != "completed" ]]; then
   printf 'VALIDATION_STATUS=%q\n' "accepted_without_snapshot"
   printf 'VALIDATION_REASON=%q\n' "delegated status is not completed"
+  printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
+  printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$RECOMMENDED_NEXT_PHASE"
+  printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
   exit 0
 fi
 
@@ -150,7 +186,7 @@ write_args=(
   --recommended-next-phase "$RECOMMENDED_NEXT_PHASE"
   --recommended-next-subagent "$RECOMMENDED_NEXT_SUBAGENT"
   --response-file "$response_file"
-  --response-sha256 "$response_sha256"
+  --response-sha256 "$RESPONSE_SHA256"
   --response-schema-valid true
   --marker-validation-mode "$marker_validation_mode"
   --marker-validation-passed "$marker_validation_passed"
@@ -160,4 +196,13 @@ if [[ -n "$snapshot_file" ]]; then
   write_args+=(--snapshot-file "$snapshot_file")
 fi
 
-bash "$script_dir/read_or_refresh_routing_snapshot.sh" "${write_args[@]}"
+eval "$(bash "$script_dir/read_or_refresh_routing_snapshot.sh" "${write_args[@]}")"
+
+printf 'VALIDATION_STATUS=%q\n' "accepted_with_snapshot"
+printf 'VALIDATION_REASON=%q\n' "schema valid and snapshot refreshed"
+printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
+printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$RECOMMENDED_NEXT_PHASE"
+printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
+printf 'SNAPSHOT_STATUS=%q\n' "$SNAPSHOT_STATUS"
+printf 'SNAPSHOT_FILE=%q\n' "$SNAPSHOT_FILE"
+printf 'RESPONSE_SHA256=%q\n' "$RESPONSE_SHA256"
