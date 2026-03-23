@@ -2,6 +2,8 @@
 
 This reference defines only the operating sequence that `spec-orchestrator` should follow for one delegated specialist run.
 
+In `booster` mode, repeat this lifecycle step-by-step; do not merge multiple phases into one delegated run.
+
 Scope ownership, required delegated fields, authority limits, and violation labels are defined in `./subagent-reinjection-contract.md`.
 
 ## Lifecycle

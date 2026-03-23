@@ -31,9 +31,10 @@ Transport interpretation rules:
 - `response_file` is the only authoritative delegated output
 - `exec_log` is diagnostic only
 - validate `response_file` with `bash ./scripts/validate_subagent_response.sh`
-- one orchestrator run gets at most one delegated execution attempt
-- if that attempt fails or `response_file` is missing, classify the run as `blocked` and stop
-- do not perform in-run smoke tests, background retries, alternate temp-path experiments, workspace-glob discovery, or workaround loops after the delegated attempt fails
+- one delegated step gets at most one execution attempt
+- if that attempt fails or `response_file` is missing, classify the current step as `blocked` and stop the current mode cycle
+- `booster` may start a later delegated step only after the current step produced an authoritative accepted payload and the next phase is re-derived from current validated state
+- do not perform in-step smoke tests, background retries, alternate temp-path experiments, workspace-glob discovery, or workaround loops after the delegated attempt fails
 
 ## Diagnostic Isolation Rule
 

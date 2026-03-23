@@ -24,8 +24,9 @@ Anti-pattern:
 
 Guardrail:
 
-- one orchestrator run gets at most one delegated execution attempt
-- if that attempt does not produce an authoritative `response_file`, classify the run as `blocked`
+- one delegated step gets at most one execution attempt
+- in `standard` mode there is one delegated step; in `booster` mode there may be many sequential steps, but never a retry for the same step
+- if that attempt does not produce an authoritative `response_file`, classify the current step as `blocked`
 - use a repo-local run manifest to locate delegated outputs rather than rediscovering temp files
 - do not turn the current feature run into transport diagnosis work
 - transport diagnosis, if needed, should happen outside the bounded feature run or as separate diagnostics only
@@ -50,12 +51,24 @@ Anti-pattern:
 
 Guardrail:
 
-- after the single delegated attempt fails, stop
-- do not add a second delegated attempt, background rerun, or workaround loop inside the same run
+- after the delegated attempt for the current step fails, stop that step and the current mode cycle
+- do not add a second delegated attempt, background rerun, or workaround loop for the same step
 - the only allowed extra step after an authoritative delegated payload exists is validation and one format-only repair pass
 - do not bypass the external transport skill with ad hoc raw `codex exec` calls when deterministic run artifacts are required
 
-## 5. Summary-As-Acceptance
+## 5. Booster Without Explicit Unlock
+
+Anti-pattern:
+
+- the orchestrator sees a user ask to “finish the feature” or “do everything” and silently turns that into a multi-phase execution loop
+
+Guardrail:
+
+- `booster` is allowed only when the current user request explicitly says `mode: booster`
+- without that exact unlock, stay in `standard` mode and stop after one validated delegated step
+- never treat broad intent language as permission to chain phases automatically
+
+## 6. Summary-As-Acceptance
 
 Anti-pattern:
 
@@ -67,7 +80,7 @@ Guardrail:
 - if markerized artifacts are absent or invalid, routing must rely on the current authoritative inspection result
 - never let a previous summary overrule repository evidence or failed marker validation
 
-## 6. Orchestrator Acting Like a Specialist
+## 7. Orchestrator Acting Like a Specialist
 
 Anti-pattern:
 

@@ -6,7 +6,7 @@ This reference defines the minimal execution rules that every specialist skill m
 
 - Execute exactly one bounded assignment for exactly one feature.
 - Stay within the assigned phase and assigned specialist identity.
-- Do not switch phases, split into multiple passes, or widen the requested scope.
+- Do not switch phases, split into multiple passes, or widen the requested scope, even when the orchestrator is operating in `booster` mode.
 
 ## Authority Boundary
 

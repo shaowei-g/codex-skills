@@ -15,7 +15,7 @@ When this file conflicts with a canonical reference, the canonical reference win
 
 - Execute exactly one bounded assignment for exactly one feature.
 - Stay inside the assigned phase and assigned specialist identity.
-- Do not widen scope, switch phases, or continue into a follow-on phase in the same run.
+- Do not widen scope, switch phases, or continue into a follow-on phase in the same run, even when the orchestrator is operating in `booster` mode.
 - Do not claim routing authority. Routing stays with `spec-orchestrator`.
 - Recommendations about next phase or next specialist are advisory only.
 

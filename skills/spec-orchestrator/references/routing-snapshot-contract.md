@@ -91,4 +91,6 @@ Refresh the routing snapshot only after:
 - a schema-valid inspection result is accepted, or
 - a phase-owned update is accepted and required marker validation passed
 
+In `booster` mode, a refreshed snapshot becomes eligible input for deciding the next step, but it never by itself authorizes skipping validation or guessing the next phase.
+
 Do not refresh the snapshot from terminal chatter or execution logs alone.

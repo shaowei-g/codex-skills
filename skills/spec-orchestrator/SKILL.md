@@ -1,6 +1,6 @@
 ---
 name: spec-orchestrator
-description: Only use this skill when the user explicitly requests it. Orchestrates Spec Kit workflow state, routes to the earliest unresolved phase, validates delegated outputs, and preserves continuity without taking over specialist work.
+description: Only use this skill when the user explicitly requests it. Orchestrates Spec Kit workflow state, routes to the earliest unresolved phase, validates delegated outputs, preserves continuity without taking over specialist work, and supports an explicit user-gated booster mode for end-to-end feature advancement.
 ---
 
 # spec-orchestrator
@@ -30,6 +30,16 @@ If neither is provided, stop and return:
 
 - `請提供 feature 名稱 or 路徑，或是想要做什麼新功能`
 
+### Execution modes
+
+- Default mode is `standard`.
+- `booster` is unlocked only when the current user request explicitly contains `mode: booster`.
+- Do not infer `booster` from vague phrases such as “end to end”, “do everything”, or “finish the feature”.
+- If the user does not explicitly request `mode: booster`, follow `standard` mode even when multiple later phases look obvious.
+- `booster` changes only orchestrator loop behavior. It does not relax specialist phase boundaries, ownership rules, validation rules, or stop conditions for an individual delegated step.
+- Canonical mode rules live in:
+  - `./references/orchestrator-modes.md`
+
 ### Routing rule
 
 - Always route to the earliest unresolved phase.
@@ -38,7 +48,7 @@ If neither is provided, stop and return:
 - If artifacts, implementation, or workflow notes disagree, route backward to the earliest unresolved phase.
 - If the user explicitly requests a new feature, start at specification with `spec-analyst`.
 - Otherwise, inspect current state first with `spec-viewer`.
-- When current state is not already established by validated artifact markers, the inspection result from `spec-viewer` is the sole routing basis for that run.
+- When current state is not already established by validated artifact markers, the inspection result from `spec-viewer` is the sole initial routing basis for that mode cycle.
 
 ### Routing snapshot shortcut
 
@@ -54,12 +64,14 @@ If neither is provided, stop and return:
 
 ### Delegation rule
 
-- Delegate exactly one bounded unit of work per run.
-- Keep assigned phase and assigned subagent fixed for that run.
-- At most one delegated execution attempt is allowed per run.
-- Stop after the delegated pass is accepted, blocked, or rejected.
-- Do not chain phases inside one delegated run.
-- Do not turn transport troubleshooting, smoke tests, background retries, or temp-path workarounds into extra work inside the same feature run.
+- In `standard` mode, delegate exactly one bounded unit of work for the current user request and then stop after that delegated step is accepted, blocked, or rejected.
+- In `booster` mode, the orchestrator may chain multiple delegated steps for the same feature, but only one phase-scoped delegated step at a time.
+- Keep assigned phase and assigned subagent fixed within each delegated step.
+- At most one delegated execution attempt is allowed per delegated step.
+- Do not chain phases inside one delegated prompt or one specialist response.
+- After each accepted delegated step in `booster` mode, recompute the earliest unresolved phase before deciding whether to continue.
+- `booster` may continue only while the next phase is unambiguous, prerequisites are satisfied, and no blocker, rejection, or validation failure occurred.
+- Do not turn transport troubleshooting, smoke tests, background retries, or temp-path workarounds into extra work inside the same delegated step or booster cycle.
 
 ### Specialist bindings
 
@@ -102,7 +114,7 @@ Use the smallest reliable context set for each run.
 
 ### Happy-path read order
 
-For a normal run, load only this minimum set before delegating:
+For a standard run or a single booster step, load only this minimum set before delegating:
 
 1. feature target plus repo-local routing snapshot lookup
 2. the assigned phase prompt from `.codex/prompts/`
@@ -120,7 +132,8 @@ For a normal run, load only this minimum set before delegating:
 - Expect a compact delegated schema. Read the delegated `response_file` directly when validator output is insufficient and use the single `Result` section rather than expecting many micro-fields.
 - Prefer the delegated manifest as the source of response and log paths. Do not rediscover run artifacts with workspace globbing.
 - Keep progress narration decision-focused. Summarize the route, delegated phase, validation result, and next bounded step rather than narrating every file read.
-
+- In `booster` mode, reuse the smallest stable context between accepted steps: refreshed snapshot, validated markers, the next phase prompt, and the next specialist skill.
+- In `booster` mode, do not preload all later-phase specialist skills at once; load each next specialist only after the prior step is accepted.
 
 ## Validation policy
 
@@ -135,7 +148,7 @@ For a normal run, load only this minimum set before delegating:
 - Use `--require-markers` after a phase-owned update that is expected to create or preserve markerized artifacts.
 - Always invoke the validator as `bash <script>`.
 - One repair pass is allowed only for format-only defects after an authoritative delegated payload exists.
-- If the delegated attempt fails to produce an authoritative payload, classify the run as `blocked` and stop rather than debugging transport inside the same run.
+- If a delegated attempt fails to produce an authoritative payload, classify that delegated step as `blocked` and stop rather than debugging transport inside the same step.
 - Semantic violations must be rejected, not normalized.
 - If an invalid response cannot be safely repaired, replace it with a controlled failure record using:
   - `bash ./scripts/print_subagent_response_schema.sh`
@@ -147,6 +160,7 @@ For a normal run, load only this minimum set before delegating:
   - `bash ./scripts/validate_delegated_run.sh`
 - Do not refresh the routing snapshot from terminal chatter or raw logs.
 - Do not reuse a routing snapshot when the feature fingerprint changed.
+- In `booster` mode, treat each accepted step as a new snapshot decision point before continuing.
 
 Delegated execution references:
 
@@ -155,6 +169,7 @@ Delegated execution references:
 - fallback and repair: `./references/orchestrator-fallback.md`
 - external Codex CLI transport skill: `../codex-cli-subagent-transport/SKILL.md`
 - anti-pattern guardrails: `./references/orchestrator-anti-patterns.md`
+- execution modes: `./references/orchestrator-modes.md`
 
 ## Transport contract
 
@@ -200,7 +215,7 @@ Read-only agents may inspect these phases only for separate non-owning inspectio
 
 ## Stop conditions
 
-Stop and surface the blocker when any of the following is true:
+Stop the current mode cycle and surface the blocker when any of the following is true:
 
 - no feature target or explicit new-feature request was provided
 - the correct feature cannot be identified safely
@@ -209,7 +224,9 @@ Stop and surface the blocker when any of the following is true:
 - a delegated result violates phase, scope, ownership, or routing boundaries
 - continuation would require skipping an earlier unresolved phase
 - the assigned specialist is unavailable and transport fallback is also unavailable
-- the single delegated execution attempt failed to produce an authoritative delegated payload
+- the delegated execution attempt for the current step failed to produce an authoritative delegated payload
+- `booster` would need to guess the next phase, skip a required phase, or continue after any non-`completed` delegated status
+- `booster` reaches a valid terminal state such as accepted handoff or no further unresolved phase with satisfied workflow requirements
 
 ## Continuity rule
 
@@ -222,3 +239,4 @@ Stop and surface the blocker when any of the following is true:
 - They must never override validated artifact markers.
 - They are reusable only while the referenced feature fingerprint still matches.
 - Handoff packaging belongs to `spec-handoff`, not the orchestrator by default.
+- `booster` may use the same continuity artifacts between steps, but each continuation decision must still come from current validated state rather than stale chat intent.
