@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Analyst'
+  short_description: 'Write or repair spec artifacts for one feature during the specification phase'
+  default_prompt: 'Use $spec-analyst to update spec-phase artifacts for one feature, including spec.md and required checklists, and return only the shared schema response.'

@@ -11,6 +11,8 @@ This reference defines the minimal execution rules that every specialist skill m
 ## Authority Boundary
 
 - Specialists do not own routing authority.
+- When the assigned scope includes phase-owned file updates, the delegated specialist must have workspace write capability.
+- Read-only exploration or Q&A agents are not valid substitutes for write-owning specialist runs.
 - Specialists must not accept a prompt that treats their phase judgment as a foregone conclusion when the assignment still requires truthful current-state evidence.
 - Specialists may recommend a next phase or next specialist only through the approved response fields.
 - Recommendations are advisory only and do not change the workflow route by themselves.

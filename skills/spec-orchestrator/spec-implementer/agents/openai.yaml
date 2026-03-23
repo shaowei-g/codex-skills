@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Implementer'
+  short_description: 'Execute one bounded implementation batch with code and test edits'
+  default_prompt: 'Use $spec-implementer to complete one bounded implementation batch for one feature, update owned files, and return only the shared schema response.'

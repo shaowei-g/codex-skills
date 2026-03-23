@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Verifier'
+  short_description: 'Verify one feature with evidence and alignment checks'
+  default_prompt: 'Use $spec-verifier to gather verification evidence for one feature and return only the shared schema response.'

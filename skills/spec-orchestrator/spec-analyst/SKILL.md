@@ -26,6 +26,12 @@ Use this skill when at least one is true:
 - scope boundaries are unclear
 - a new feature request must be turned into a bounded specification
 
+## Execution Mode
+
+- This specialist is normally write-owning.
+- When the assigned scope includes `spec.md` or checklist updates, the delegated agent must be able to edit workspace files.
+- A read-only exploration agent is not a valid substitute for this skill.
+
 ## Read Order
 
 - `.codex/prompts/speckit.specify.md` first
@@ -37,6 +43,7 @@ Use this skill when at least one is true:
 ## Owned Outputs
 
 - `spec.md` with markerized front matter when safe to add or preserve
+- specification-phase checklist artifacts when the repository workflow expects them for spec readiness
 - clarified scope boundaries
 - explicit acceptance criteria and constraints for the assigned feature
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Planner'
+  short_description: 'Write or repair plan.md for one feature during the planning phase'
+  default_prompt: 'Use $spec-planner to update planning artifacts for one feature, including plan.md, and return only the shared schema response.'

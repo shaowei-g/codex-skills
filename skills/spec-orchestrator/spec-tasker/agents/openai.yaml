@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Tasker'
+  short_description: 'Write or repair tasks.md for one feature during task decomposition'
+  default_prompt: 'Use $spec-tasker to update task decomposition artifacts for one feature, including tasks.md, and return only the shared schema response.'

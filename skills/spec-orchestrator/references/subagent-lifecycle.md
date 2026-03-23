@@ -17,6 +17,9 @@ Every delegated run should follow this sequence:
 2. **Inject**
    - open with the delegated identity-and-stop instruction
    - provide the run-specific assignment values
+   - use the exact mapped specialist identity for native delegation rather than a generic exploration agent
+   - for write-owning scopes, confirm the delegated agent can perform workspace file edits before treating native execution as available
+   - if the available native agent is read-only or mismatched, treat native execution as unavailable and use the external transport fallback instead of attempting the wrong agent
    - prefer path references over pasted contracts when the runtime can load files reliably
    - when using Codex CLI transport, prepare a repo-local prompt file for `bash ../../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh`
 

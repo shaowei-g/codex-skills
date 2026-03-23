@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Spec Viewer'
+  short_description: 'Inspect one feature and report current workflow state without editing files'
+  default_prompt: 'Use $spec-viewer to inspect the current workflow state for one feature and return only the shared schema response.'

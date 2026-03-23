@@ -112,6 +112,27 @@ Delegated execution references:
 
 ## Transport contract
 
+### Native subagent selection contract
+
+- When using native subagent execution, invoke the exact mapped specialist for `Assigned-Subagent`.
+- Do not substitute a generic exploration, search, or Q&A agent for the mapped specialist.
+- A read-only native agent is invalid for a write-owning phase.
+- If the mapped specialist is not registered as a native agent, or the available native agent cannot perform the phase-owned file updates in scope, treat native subagent execution as unavailable for that run and use the external transport skill instead.
+- Native delegation must preserve the assigned specialist identity in both agent selection and delegated prompt content.
+
+### Write-owning phases
+
+Treat these phases as write-owning whenever their normal owned outputs are in scope:
+
+- `specification` via `spec-analyst`
+- `planning` via `spec-planner`
+- `task decomposition` via `spec-tasker`
+- `implementation` via `spec-implementer`
+- `drift check` via `spec-drift-check` when `drift.md` updates are in scope
+- `handoff` via `spec-handoff` when `handoff.md` updates are in scope
+
+Read-only agents may inspect these phases only for separate non-owning inspection assignments. They must not be used for the delegated specialist run that is expected to write the owned artifacts.
+
 - Use native subagent execution when available.
 - If native subagent execution is unavailable, use the external Codex CLI transport skill in:
   - `../codex-cli-subagent-transport/SKILL.md`

@@ -23,6 +23,7 @@ Follow its manifest-based contract in:
 Transport interpretation rules:
 
 - invoke the external transport wrapper rather than embedding raw `codex exec` transport logic in the orchestrator
+- when the available native agent is generic or read-only for a write-owning phase, classify native delegation as unavailable and fall back to the external transport skill instead of attempting the mismatched agent
 
 - prefer `bash ../../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh` over ad hoc raw `codex exec` invocations
 - materialize delegated run artifacts in a repo-local run directory rather than `/tmp`

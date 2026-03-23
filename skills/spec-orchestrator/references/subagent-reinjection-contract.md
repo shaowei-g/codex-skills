@@ -40,6 +40,8 @@ A delegated subagent must remain within the assigned feature, phase, scope, and 
 A delegated subagent must not:
 
 - choose the next phase
+- use a generic read-only exploration or Q&A agent as a substitute for a write-owning specialist
+- accept a write-owning assignment when it cannot modify the owned artifacts in scope
 - choose the next subagent
 - perform unauthorized handoff
 - perform cross-phase execution
@@ -49,6 +51,7 @@ A delegated subagent must not:
 The orchestrator must not:
 
 - bypass the external transport skill and inline ad hoc raw `codex exec` collection logic when deterministic manifest-based artifacts are required
+- treat a generic read-only native agent as a valid implementation of `Assigned-Subagent` for a write-owning phase
 
 - present preliminary artifact observations as authoritative phase acceptance when validated markers or the delegated inspection result are still pending
 - substitute environment diagnostics for the missing specialist result
