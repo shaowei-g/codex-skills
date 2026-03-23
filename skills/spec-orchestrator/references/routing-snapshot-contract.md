@@ -42,6 +42,7 @@ The routing snapshot is never stronger than authoritative artifacts.
   "schema_version": 1,
   "snapshot_kind": "routing",
   "feature_slug": "001-example-feature",
+  "orchestrator_mode": "booster",
   "created_at": "2026-03-23T02:07:09Z",
   "updated_at": "2026-03-23T02:07:09Z",
   "authoritative_basis": "validated_markers",
@@ -94,3 +95,4 @@ Refresh the routing snapshot only after:
 In `booster` mode, a refreshed snapshot becomes eligible input for deciding the next step, but it never by itself authorizes skipping validation or guessing the next phase.
 
 Do not refresh the snapshot from terminal chatter or execution logs alone.
+Do not write or refresh the snapshot for blocked transport, missing authoritative payloads, or manual work that happened after explicit orchestrator exit.

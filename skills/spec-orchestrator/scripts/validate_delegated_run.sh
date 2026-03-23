@@ -10,6 +10,7 @@ Usage:
     --response-file /abs/path/to/response.md \
     --assigned-phase <phase> \
     --assigned-subagent <subagent> \
+    [--orchestrator-mode standard|booster] \
     [--marker-path /abs/path/to/repo/specs/<feature>] \
     [--snapshot-file /abs/path/to/routing-snapshot.json]
 
@@ -44,6 +45,7 @@ feature=""
 response_file=""
 assigned_phase=""
 assigned_subagent=""
+orchestrator_mode=""
 marker_path=""
 snapshot_file=""
 
@@ -57,6 +59,7 @@ emit_result() {
   local response_sha="${7-}"
   local marker_mode="${8-}"
   local marker_passed="${9-}"
+  local effective_mode="${10-}"
 
   printf 'VALIDATION_STATUS=%q\n' "$validation_status"
   printf 'VALIDATION_REASON=%q\n' "$validation_reason"
@@ -67,9 +70,10 @@ emit_result() {
   printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$recommended_next_subagent"
   printf 'MARKER_VALIDATION_MODE=%q\n' "$marker_mode"
   printf 'MARKER_VALIDATION_PASSED=%q\n' "$marker_passed"
+  printf 'ORCHESTRATOR_MODE=%q\n' "$effective_mode"
   printf 'SNAPSHOT_STATUS=%q\n' "$snapshot_status"
   printf 'RESPONSE_SHA256=%q\n' "$response_sha"
-  printf 'VALIDATION_SUMMARY=%q\n' "phase=$assigned_phase delegated_status=${delegated_status:-none} validation=$validation_status next_phase=${recommended_next_phase:-none} next_subagent=${recommended_next_subagent:-none} snapshot=${snapshot_status:-none}"
+  printf 'VALIDATION_SUMMARY=%q\n' "mode=${effective_mode:-unspecified} phase=$assigned_phase delegated_status=${delegated_status:-none} validation=$validation_status next_phase=${recommended_next_phase:-none} next_subagent=${recommended_next_subagent:-none} snapshot=${snapshot_status:-none}"
 }
 
 
@@ -80,6 +84,7 @@ while [[ $# -gt 0 ]]; do
     --response-file) response_file="${2-}"; shift 2 ;;
     --assigned-phase) assigned_phase="${2-}"; shift 2 ;;
     --assigned-subagent) assigned_subagent="${2-}"; shift 2 ;;
+    --orchestrator-mode) orchestrator_mode="${2-}"; shift 2 ;;
     --marker-path) marker_path="${2-}"; shift 2 ;;
     --snapshot-file) snapshot_file="${2-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
@@ -192,12 +197,12 @@ case "$assigned_phase" in
 esac
 
 if [[ "$cacheable_phase" != "true" ]]; then
-  emit_result     "accepted_without_snapshot"     "phase not cached by routing snapshot v1"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"
+  emit_result     "accepted_without_snapshot"     "phase not cached by routing snapshot v1"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"     "${orchestrator_mode:-unspecified}"
   exit 0
 fi
 
 if [[ "$DELEGATED_STATUS" != "completed" ]]; then
-  emit_result     "accepted_without_snapshot"     "delegated status is not completed"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"
+  emit_result     "accepted_without_snapshot"     "delegated status is not completed"     "$DELEGATED_STATUS"     "$RECOMMENDED_NEXT_PHASE"     "$RECOMMENDED_NEXT_SUBAGENT"     "skipped"     "$RESPONSE_SHA256"     "$marker_validation_mode"     "$marker_validation_passed"     "${orchestrator_mode:-unspecified}"
   exit 0
 fi
 
@@ -208,6 +213,7 @@ write_args=(
   --repo-root "$repo_root"
   --feature "$feature"
   --authoritative-basis "$authoritative_basis"
+  --orchestrator-mode "${orchestrator_mode:-unspecified}"
   --phase-just-validated "$assigned_phase"
   --earliest-unresolved-phase "$RECOMMENDED_NEXT_PHASE"
   --recommended-next-phase "$RECOMMENDED_NEXT_PHASE"
@@ -274,7 +280,7 @@ if [[ "${SNAPSHOT_RESPONSE_SHA256:-}" != "$expected_response_sha" ]]; then
   exit 1
 fi
 
-emit_result   "accepted_with_snapshot"   "schema valid and snapshot refreshed"   "$DELEGATED_STATUS"   "$expected_next_phase"   "$expected_next_subagent"   "verified"   "$expected_response_sha"   "$marker_validation_mode"   "$marker_validation_passed"
+emit_result   "accepted_with_snapshot"   "schema valid and snapshot refreshed"   "$DELEGATED_STATUS"   "$expected_next_phase"   "$expected_next_subagent"   "verified"   "$expected_response_sha"   "$marker_validation_mode"   "$marker_validation_passed"   "${orchestrator_mode:-unspecified}"
 printf 'SNAPSHOT_WRITE_STATUS=%q\n' "$write_snapshot_status"
 printf 'SNAPSHOT_LOOKUP_STATUS=%q\n' "$SNAPSHOT_STATUS"
 printf 'SNAPSHOT_FILE=%q\n' "$write_snapshot_file"

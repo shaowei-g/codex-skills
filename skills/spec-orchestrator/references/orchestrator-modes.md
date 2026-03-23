@@ -45,6 +45,27 @@ For each booster cycle:
 
 ### Booster Boundaries
 
+### Booster Failure Boundary
+
+- If the current delegated step ends `blocked`, the current booster cycle ends immediately.
+- Treat transport failure, missing authoritative `response_file`, and invalid delegated execution that prevents safe continuation as blocker-class outcomes for the current cycle.
+- Do not repair transport, patch shared skills, retry the same step, or begin manual repo edits while still calling the run `booster`.
+
+### Legal Post-Stop Paths
+
+After a blocked booster cycle, only these follow-up paths are allowed:
+
+1. **Resume later**
+   - repair the transport layer outside the bounded feature run
+   - start a fresh orchestrator run for the same feature
+   - reuse validated markers and any reusable routing snapshot only if they are still current
+
+2. **Explicit orchestrator exit**
+   - clearly state that `booster` orchestration has ended
+   - begin any manual implementation pass as a separate execution model
+   - do not count later manual work as delegated phase acceptance
+   - if workflow orchestration returns later, reroute from current validated state
+
 - `booster` does not let one specialist execute multiple phases in one response
 - each delegated step keeps one assigned phase, one assigned subagent, and one bounded scope
 - each delegated step gets at most one execution attempt
@@ -54,6 +75,7 @@ For each booster cycle:
 - do not keep going after any delegated `blocked` or `rejected` result
 - do not keep going after transport failure or missing authoritative payload
 - do not keep going when continuation would require guessing the route instead of reading current validated state
+- do not silently switch from blocked `booster` orchestration into manual implementation without first ending orchestrator mode
 
 ## Terminal Conditions
 
@@ -64,6 +86,7 @@ Stop the current mode cycle when any of these become true:
 - the delegated payload fails validation and cannot be safely repaired
 - transport does not produce an authoritative `response_file`
 - the next phase is ambiguous or its prerequisites are missing
+- the operator chooses explicit orchestrator exit after a blocked cycle
 - accepted handoff is reached
 - no further unresolved phase remains under the repository workflow rules
 

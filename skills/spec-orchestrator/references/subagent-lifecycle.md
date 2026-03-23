@@ -76,6 +76,8 @@ Every delegated run should follow this sequence:
 9. **Stop**
    - stop after the single bounded run is accepted, blocked, or rejected
    - do not start transport debugging or a second delegated attempt inside the same feature run
+   - if the current mode is `booster` and the run stopped blocked because of transport or missing authoritative payload, end the booster cycle immediately
+   - the next legal action after that stop is either a fresh later resume after repair or an explicit orchestrator exit before any manual implementation pass
 
 ## Related References
 

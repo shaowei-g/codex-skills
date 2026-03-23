@@ -35,6 +35,20 @@ Transport interpretation rules:
 - if that attempt fails or `response_file` is missing, classify the current step as `blocked` and stop the current mode cycle
 - `booster` may start a later delegated step only after the current step produced an authoritative accepted payload and the next phase is re-derived from current validated state
 - do not perform in-step smoke tests, background retries, alternate temp-path experiments, workspace-glob discovery, or workaround loops after the delegated attempt fails
+- do not patch installed shared skills, `~/.codex/skills/...` transport scripts, or other global tooling as part of the bounded feature run
+
+## Post-Block Transition Rule
+
+When a delegated step is blocked because transport failed or no authoritative payload exists, only these next actions are allowed:
+
+- **resume later**: end the current orchestrator cycle, repair transport outside the feature run, and start a fresh orchestrator run later
+- **explicit orchestrator exit**: end the current orchestrator cycle first, then begin any manual implementation pass as a separate execution model
+
+Forbidden transitions after a blocked transport step:
+
+- retrying the same delegated step inside the same cycle
+- patching shared skills or transport scripts and then continuing as if the blocked cycle were still valid
+- switching directly into manual repo edits while still describing the work as `standard` or `booster` orchestration
 
 ## Diagnostic Isolation Rule
 
@@ -52,12 +66,14 @@ Allowed use of diagnostics:
 - explain why the delegated run is `blocked`
 - support transport troubleshooting outside the bounded feature run
 - support reconstruction only after an authoritative delegated payload or durable repository evidence already exists
+- support deciding whether to resume later or explicitly exit orchestration
 
 Forbidden use of diagnostics:
 
 - inferring feature readiness, drift, or acceptance
 - replacing the missing delegated inspection result
 - justifying a second delegated attempt inside the same run
+- hiding an orchestrator exit boundary and continuing with manual feature work as though the blocked cycle were still authoritative
 
 ## Malformed Output Classification
 

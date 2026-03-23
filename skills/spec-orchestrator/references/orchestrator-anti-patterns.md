@@ -92,7 +92,7 @@ Guardrail:
 - specialists own phase-local judgment and outputs
 - the orchestrator may gather only the minimum evidence needed to choose the correct specialist or validate markers
 
-## 7. Temp-Path Discovery Instead of Declared Run Artifacts
+## 8. Temp-Path Discovery Instead of Declared Run Artifacts
 
 Anti-pattern:
 
@@ -103,3 +103,29 @@ Guardrail:
 - Codex CLI transport should create a repo-local run directory and manifest
 - the orchestrator should read `manifest.json` or `manifest.env` directly
 - `response.md` must be read from the declared path, not inferred from temp-directory search results
+
+
+## 9. Silent Manual Fallback After Blocked Booster
+
+Anti-pattern:
+
+- a blocked `booster` step is followed by manual repo work without clearly ending orchestrator mode first
+- the later manual work is narrated as though it were still part of the accepted booster chain
+
+Guardrail:
+
+- a blocked booster cycle must end immediately
+- the next legal action is either a fresh orchestrator resume after transport repair or an explicit orchestrator exit
+- any manual implementation pass after exit is separate from the orchestrated acceptance chain until workflow orchestration is deliberately re-entered
+
+## 10. Global Tooling Mutation Inside a Feature Run
+
+Anti-pattern:
+
+- the orchestrator edits installed shared skills, transport wrappers, or other global tooling during a feature run in order to keep the current cycle alive
+
+Guardrail:
+
+- treat shared-tool repair as separate maintenance or diagnostics work, not as part of the bounded feature run
+- do not mutate `~/.codex/skills/...` assets during the current orchestrated cycle
+- after such repair work, restart from a fresh orchestrator run if workflow execution is still needed

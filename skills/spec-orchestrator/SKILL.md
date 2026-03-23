@@ -71,6 +71,9 @@ If neither is provided, stop and return:
 - Do not chain phases inside one delegated prompt or one specialist response.
 - After each accepted delegated step in `booster` mode, recompute the earliest unresolved phase before deciding whether to continue.
 - `booster` may continue only while the next phase is unambiguous, prerequisites are satisfied, and no blocker, rejection, or validation failure occurred.
+- If a delegated step is `blocked` because transport failed, the authoritative payload is missing, or execution is otherwise invalid for continuation, stop the booster cycle immediately.
+- After such a stop, only two follow-up paths are allowed: resume later in a fresh orchestrator run after transport is repaired, or explicitly exit orchestrator mode before starting any separate manual implementation pass.
+- Do not blend a blocked booster cycle into transport repair, shared-skill patching, retry loops, or manual repo work while still presenting the run as orchestrated.
 - Do not turn transport troubleshooting, smoke tests, background retries, or temp-path workarounds into extra work inside the same delegated step or booster cycle.
 
 ### Specialist bindings
@@ -149,6 +152,7 @@ For a standard run or a single booster step, load only this minimum set before d
 - Always invoke the validator as `bash <script>`.
 - One repair pass is allowed only for format-only defects after an authoritative delegated payload exists.
 - If a delegated attempt fails to produce an authoritative payload, classify that delegated step as `blocked` and stop rather than debugging transport inside the same step.
+- A blocked transport step does not authorize shared-tool patching, workaround retries, or manual feature work inside the same orchestrator cycle.
 - Semantic violations must be rejected, not normalized.
 - If an invalid response cannot be safely repaired, replace it with a controlled failure record using:
   - `bash ./scripts/print_subagent_response_schema.sh`
@@ -225,18 +229,28 @@ Stop the current mode cycle and surface the blocker when any of the following is
 - continuation would require skipping an earlier unresolved phase
 - the assigned specialist is unavailable and transport fallback is also unavailable
 - the delegated execution attempt for the current step failed to produce an authoritative delegated payload
+- blocked transport or invalid delegated execution would require repair work before the next specialist step can run
 - `booster` would need to guess the next phase, skip a required phase, or continue after any non-`completed` delegated status
 - `booster` reaches a valid terminal state such as accepted handoff or no further unresolved phase with satisfied workflow requirements
+
+## Explicit orchestrator exit rule
+
+- If the operator chooses not to resume later after a blocked transport stop, the orchestrator may end its own mode cycle and explicitly declare that orchestration has stopped.
+- Any later manual implementation pass must be labeled as a separate execution model, not as continued `standard` or `booster` orchestration.
+- Manual work that starts after orchestrator exit must not be counted as an accepted delegated step, must not be written into the routing snapshot as if a specialist completed it, and must not be described as preserving booster continuity.
+- If the user later wants workflow orchestration again, start a fresh orchestrator run from current validated artifacts, marker checks, and any reusable routing snapshot.
 
 ## Continuity rule
 
 - Record only minimal durable coordination notes when continuity is needed.
 - Prefer existing workflow artifacts and their acceptance markers over chat history when resuming.
+- Treat a later resume after blocked transport as a fresh orchestrator run, not as hidden continuation inside the old booster cycle.
 - When markerized artifacts are used as the basis for routing or continuation, require them to pass `bash ./scripts/validate_artifact_markers.sh` before treating them as authoritative.
 - Treat formal acceptance as an artifact marker decision, not just a prior summary statement.
 - Treat pre-delegation observations and prior summaries as non-authoritative when they conflict with validated markers or the current schema-valid inspection result.
 - Repo-local routing snapshots are allowed as minimal durable coordination notes.
 - They must never override validated artifact markers.
 - They are reusable only while the referenced feature fingerprint still matches.
+- They must not be refreshed from blocked transport, missing response payloads, or manual work that happened after explicit orchestrator exit.
 - Handoff packaging belongs to `spec-handoff`, not the orchestrator by default.
 - `booster` may use the same continuity artifacts between steps, but each continuation decision must still come from current validated state rather than stale chat intent.

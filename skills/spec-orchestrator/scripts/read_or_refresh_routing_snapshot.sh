@@ -17,6 +17,7 @@ Write:
     --repo-root /abs/path/to/repo \
     --feature <feature-slug> \
     --authoritative-basis validated_inspection|validated_markers \
+    [--orchestrator-mode standard|booster] \
     --phase-just-validated <phase> \
     --earliest-unresolved-phase <phase|none> \
     --recommended-next-phase <phase|none> \
@@ -51,6 +52,7 @@ repo_root=""
 feature=""
 snapshot_file=""
 authoritative_basis=""
+orchestrator_mode=""
 phase_just_validated=""
 earliest_unresolved_phase=""
 recommended_next_phase=""
@@ -69,6 +71,7 @@ while [[ $# -gt 0 ]]; do
     --feature) feature="${2-}"; shift 2 ;;
     --snapshot-file) snapshot_file="${2-}"; shift 2 ;;
     --authoritative-basis) authoritative_basis="${2-}"; shift 2 ;;
+    --orchestrator-mode) orchestrator_mode="${2-}"; shift 2 ;;
     --phase-just-validated) phase_just_validated="${2-}"; shift 2 ;;
     --earliest-unresolved-phase) earliest_unresolved_phase="${2-}"; shift 2 ;;
     --recommended-next-phase) recommended_next_phase="${2-}"; shift 2 ;;
@@ -137,6 +140,7 @@ def emit(status, reason, payload=None):
         current = payload.get("current", {})
         validation = payload.get("validation", {})
         print(f"SNAPSHOT_FEATURE_FINGERPRINT={q(current.get('feature_fingerprint', ''))}")
+        print(f"ORCHESTRATOR_MODE={q(payload.get('orchestrator_mode', ''))}")
         print(f"EARLIEST_UNRESOLVED_PHASE={q(current.get('earliest_unresolved_phase', ''))}")
         print(f"RECOMMENDED_NEXT_PHASE={q(current.get('recommended_next_phase', ''))}")
         print(f"RECOMMENDED_NEXT_SUBAGENT={q(current.get('recommended_next_subagent', ''))}")
@@ -210,6 +214,7 @@ PY
     export FINGERPRINT_INPUT_COUNT="$FINGERPRINT_INPUT_COUNT"
     export ARTIFACTS_JSON="$ARTIFACTS_JSON"
     export AUTHORITATIVE_BASIS="$authoritative_basis"
+    export ORCHESTRATOR_MODE="${orchestrator_mode:-unspecified}"
     export PHASE_JUST_VALIDATED="$phase_just_validated"
     export EARLIEST_UNRESOLVED_PHASE="$earliest_unresolved_phase"
     export RECOMMENDED_NEXT_PHASE="$recommended_next_phase"
@@ -245,6 +250,7 @@ payload = {
     "schema_version": 1,
     "snapshot_kind": "routing",
     "feature_slug": os.environ["FEATURE"],
+    "orchestrator_mode": os.environ["ORCHESTRATOR_MODE"],
     "created_at": created_at,
     "updated_at": now,
     "authoritative_basis": os.environ["AUTHORITATIVE_BASIS"],
