@@ -29,10 +29,11 @@ Every delegated run should follow this sequence:
 3. **Load Prompt and Local Context**
    - resolve repository prompts using `./codex-prompt-mapping.md`
    - prefer fixed known paths before recursive search:
-     - `.codex/prompts/<phase prompt>.md`
-     - `.codex/prompts/speckit.constitution.md`
-     - `~/.codex/skills/spec-orchestrator/...`
-     - `~/.codex/skills/codex-cli-subagent-transport/...`
+   - optionally resolve exact installed bundle paths first with `bash ~/.codex/skills/spec-orchestrator/scripts/resolve_bundle_paths.sh --specialist <assigned-subagent>`
+   - `.codex/prompts/<phase prompt>.md`
+   - `.codex/prompts/speckit.constitution.md`
+   - `~/.codex/skills/spec-orchestrator/...`
+   - `~/.codex/skills/codex-cli-subagent-transport/...`
    - avoid repository-wide `**/...` discovery when the needed bundle assets live at stable `~/.codex` paths
    - load only the feature artifacts and repository context needed for the assigned scope
    - prefer durable workflow artifacts over chat history
@@ -66,6 +67,7 @@ Every delegated run should follow this sequence:
    - run artifact marker validation when acceptance or continuation depends on markerized artifacts
    - after accepting a schema-valid inspection result or a marker-validated phase-owned update, refresh the repo-local routing snapshot
    - snapshot refresh must be driven from the authoritative delegated response, not from logs
+   - verify the refreshed snapshot by rereading it immediately after write and fail the validator on mismatch
    - use one format-only repair pass only when allowed by `./orchestrator-fallback.md`
    - route based on validated markers or the current schema-valid specialist result, not pre-delegation summary text
 

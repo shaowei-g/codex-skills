@@ -26,6 +26,8 @@ Bundle asset paths are fixed under the user skill root when that runtime layout 
 
 Before any recursive search, resolve known paths directly in this order:
 
+0. optionally materialize exact installed bundle paths with:
+   - `bash ~/.codex/skills/spec-orchestrator/scripts/resolve_bundle_paths.sh --specialist <assigned-subagent>`
 1. the assigned phase primary prompt under `.codex/prompts/`
 2. `.codex/prompts/speckit.constitution.md` when present
 3. `.codex/prompts/speckit.clarify.md` only when clarification is part of scope
@@ -42,7 +44,7 @@ For every delegated run:
 1. Check the primary prompt for the assigned phase.
 2. Also check `.codex/prompts/speckit.constitution.md` when present and apply it as a governing constraint.
 3. Use `.codex/prompts/speckit.clarify.md` only when clarification work is explicitly part of the assigned scope or the primary phase prompt instructs it.
-4. Resolve specialist and transport bundle assets from their fixed `~/.codex/skills/...` paths before any recursive search.
+4. Resolve specialist and transport bundle assets from their fixed `~/.codex/skills/...` paths before any recursive search, preferably from `resolve_bundle_paths.sh` output.
 5. If the primary prompt is not present, search other repository prompt locations for an equivalent prompt for the same phase.
 6. If no repository prompt exists, fall back to the assigned specialist skill and shared local references in this bundle.
 

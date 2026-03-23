@@ -116,7 +116,7 @@ Specialists share these thin common contracts:
 
 ### Snapshot refresh rule
 
-- After accepting a schema-valid inspection result or a marker-validated phase-owned update, refresh the routing snapshot for that feature.
+- After accepting a schema-valid inspection result or a marker-validated phase-owned update, refresh the routing snapshot for that feature and verify the written file by rereading it immediately.
 - Use:
   - `bash ./scripts/validate_delegated_run.sh`
 - Do not refresh the routing snapshot from terminal chatter or raw logs.
@@ -159,6 +159,9 @@ Read-only agents may inspect these phases only for separate non-owning inspectio
 - Prefer:
   - `bash ../codex-cli-subagent-transport/scripts/run_codex_cli_subagent.sh`
   over ad hoc raw `codex exec` invocations when the orchestrator must later read delegated run artifacts.
+- When installed bundle assets live under `~/.codex/skills/...`, prefer direct path resolution with:
+  - `bash ~/.codex/skills/spec-orchestrator/scripts/resolve_bundle_paths.sh --specialist <assigned-subagent>`
+  before any recursive search.
 - Follow the manifest-based run contract in:
   - `../codex-cli-subagent-transport/references/manifest-based-run-contract.md`
 - Materialize delegated run artifacts in a repo-local run directory rather than `/tmp`.

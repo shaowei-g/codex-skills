@@ -22,6 +22,7 @@ Rules:
   - schema is valid
   - marker validation passes when required
 - Treats this script as the single snapshot-refresh entry point for accepted delegated runs.
+- Verifies the snapshot by rereading it after refresh and fails loudly on mismatch.
 USAGE
 }
 
@@ -78,6 +79,12 @@ fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python_bin="$(select_python)"
+
+eval "$(
+  bash "$script_dir/compute_feature_fingerprint.sh" \
+    --repo-root "$repo_root" \
+    --feature "$feature"
+)"
 
 bash "$script_dir/validate_subagent_response.sh" \
   --file "$response_file" \
@@ -176,6 +183,8 @@ if [[ "$DELEGATED_STATUS" != "completed" ]]; then
   exit 0
 fi
 
+export FEATURE_FINGERPRINT FINGERPRINT_INPUT_COUNT ARTIFACTS_JSON
+
 write_args=(
   --mode write
   --repo-root "$repo_root"
@@ -190,19 +199,75 @@ write_args=(
   --response-schema-valid true
   --marker-validation-mode "$marker_validation_mode"
   --marker-validation-passed "$marker_validation_passed"
+  --skip-fingerprint-recompute true
 )
-
 if [[ -n "$snapshot_file" ]]; then
   write_args+=(--snapshot-file "$snapshot_file")
 fi
 
 eval "$(bash "$script_dir/read_or_refresh_routing_snapshot.sh" "${write_args[@]}")"
+write_snapshot_status="$SNAPSHOT_STATUS"
+write_snapshot_file="$SNAPSHOT_FILE"
+write_snapshot_sha="$SNAPSHOT_SHA256"
+write_feature_fingerprint="$FEATURE_FINGERPRINT"
+write_phase="$EARLIEST_UNRESOLVED_PHASE"
+write_subagent="$RECOMMENDED_NEXT_SUBAGENT"
+expected_next_phase="$RECOMMENDED_NEXT_PHASE"
+expected_next_subagent="$RECOMMENDED_NEXT_SUBAGENT"
+expected_response_sha="$RESPONSE_SHA256"
+
+lookup_args=(
+  --mode lookup
+  --repo-root "$repo_root"
+  --feature "$feature"
+)
+if [[ -n "$snapshot_file" ]]; then
+  lookup_args+=(--snapshot-file "$snapshot_file")
+fi
+
+eval "$(bash "$script_dir/read_or_refresh_routing_snapshot.sh" "${lookup_args[@]}")"
+
+if [[ "$write_snapshot_status" != "written" ]]; then
+  echo "snapshot refresh verification failed: write status '$write_snapshot_status'" >&2
+  exit 1
+fi
+if [[ "$SNAPSHOT_STATUS" != "hit" ]]; then
+  echo "snapshot refresh verification failed: lookup status '$SNAPSHOT_STATUS'" >&2
+  exit 1
+fi
+if [[ "${EARLIEST_UNRESOLVED_PHASE:-}" != "$expected_next_phase" ]]; then
+  echo "snapshot refresh verification failed: lookup earliest unresolved phase '$EARLIEST_UNRESOLVED_PHASE' does not match '$expected_next_phase'" >&2
+  exit 1
+fi
+if [[ "${RECOMMENDED_NEXT_PHASE:-}" != "$expected_next_phase" ]]; then
+  echo "snapshot refresh verification failed: lookup recommended next phase '$RECOMMENDED_NEXT_PHASE' does not match '$expected_next_phase'" >&2
+  exit 1
+fi
+if [[ "${RECOMMENDED_NEXT_SUBAGENT:-}" != "$expected_next_subagent" ]]; then
+  echo "snapshot refresh verification failed: lookup next subagent '$RECOMMENDED_NEXT_SUBAGENT' does not match '$expected_next_subagent'" >&2
+  exit 1
+fi
+if [[ "${SNAPSHOT_FEATURE_FINGERPRINT:-}" != "$write_feature_fingerprint" ]]; then
+  echo "snapshot refresh verification failed: snapshot fingerprint '$SNAPSHOT_FEATURE_FINGERPRINT' does not match '$write_feature_fingerprint'" >&2
+  exit 1
+fi
+if [[ "${SNAPSHOT_RESPONSE_SHA256:-}" != "$expected_response_sha" ]]; then
+  echo "snapshot refresh verification failed: snapshot response sha '$SNAPSHOT_RESPONSE_SHA256' does not match '$expected_response_sha'" >&2
+  exit 1
+fi
 
 printf 'VALIDATION_STATUS=%q\n' "accepted_with_snapshot"
 printf 'VALIDATION_REASON=%q\n' "schema valid and snapshot refreshed"
 printf 'DELEGATED_STATUS=%q\n' "$DELEGATED_STATUS"
-printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$RECOMMENDED_NEXT_PHASE"
-printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
-printf 'SNAPSHOT_STATUS=%q\n' "$SNAPSHOT_STATUS"
-printf 'SNAPSHOT_FILE=%q\n' "$SNAPSHOT_FILE"
-printf 'RESPONSE_SHA256=%q\n' "$RESPONSE_SHA256"
+printf 'RECOMMENDED_NEXT_PHASE=%q\n' "$expected_next_phase"
+printf 'RECOMMENDED_NEXT_SUBAGENT=%q\n' "$expected_next_subagent"
+printf 'SNAPSHOT_STATUS=%q\n' "verified"
+printf 'SNAPSHOT_WRITE_STATUS=%q\n' "$write_snapshot_status"
+printf 'SNAPSHOT_LOOKUP_STATUS=%q\n' "$SNAPSHOT_STATUS"
+printf 'SNAPSHOT_FILE=%q\n' "$write_snapshot_file"
+printf 'SNAPSHOT_SHA256=%q\n' "$write_snapshot_sha"
+printf 'SNAPSHOT_WRITE_PHASE=%q\n' "$write_phase"
+printf 'SNAPSHOT_WRITE_SUBAGENT=%q\n' "$write_subagent"
+printf 'SNAPSHOT_LOOKUP_PHASE=%q\n' "$EARLIEST_UNRESOLVED_PHASE"
+printf 'SNAPSHOT_LOOKUP_SUBAGENT=%q\n' "$RECOMMENDED_NEXT_SUBAGENT"
+printf 'RESPONSE_SHA256=%q\n' "$expected_response_sha"
