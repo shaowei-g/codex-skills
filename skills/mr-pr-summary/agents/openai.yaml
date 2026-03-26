@@ -1,0 +1,4 @@
+interface:
+  display_name: "MR/PR Summary"
+  short_description: "Draft MR/PR summaries from branch diffs"
+  default_prompt: "Use $mr-pr-summary to draft a concise merge request or pull request summary from this branch."
