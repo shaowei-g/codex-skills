@@ -34,7 +34,7 @@ Use this skill when at least one is true:
 
 ## Owned Outputs
 
-- `tasks.md` with markerized front matter when safe to add or preserve
+- `tasks.md`
 - ordered bounded task batches
 - dependency and verification notes required for safe implementation
 

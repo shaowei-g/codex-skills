@@ -16,7 +16,7 @@ Write:
     --mode write \
     --repo-root /abs/path/to/repo \
     --feature <feature-slug> \
-    --authoritative-basis validated_inspection|validated_markers \
+    --authoritative-basis validated_response|validated_inspection \
     [--orchestrator-mode standard|booster] \
     --phase-just-validated <phase> \
     --earliest-unresolved-phase <phase|none> \
@@ -180,10 +180,7 @@ if validation.get("response_schema_valid") is not True:
     raise SystemExit(0)
 
 basis = payload.get("authoritative_basis")
-if basis == "validated_markers" and validation.get("marker_validation_passed") is not True:
-    emit("invalid", "marker validation required but not passed", payload)
-    raise SystemExit(0)
-if basis not in ("validated_markers", "validated_inspection"):
+if basis not in ("validated_response", "validated_inspection"):
     emit("invalid", "unsupported authoritative basis", payload)
     raise SystemExit(0)
 

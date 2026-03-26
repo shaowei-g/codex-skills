@@ -17,7 +17,7 @@ Every delegated run should follow this sequence:
    - on snapshot miss, stale, or invalid status, continue with normal inspection routing
    - select the mapped specialist
    - define one bounded unit of work for the chosen run
-   - do not state an authoritative workflow-phase conclusion yet unless validated artifact markers already establish it
+   - do not state an authoritative workflow-phase conclusion yet unless current repository evidence or a delegated inspection result establishes it
 
 2. **Inject**
    - open with the delegated identity-and-stop instruction
@@ -40,7 +40,7 @@ Every delegated run should follow this sequence:
    - avoid repository-wide `**/...` discovery when the needed bundle assets live at stable `~/.codex` paths
    - load only the feature artifacts and repository context needed for the assigned scope
    - prefer durable workflow artifacts over chat history
-   - when markerized artifacts exist, inspect formal acceptance using `./artifact-acceptance-markers.md` before routing forward
+   - inspect current repository artifacts before routing forward
    - when current state remains unclear or conflicting, delegate inspection and defer authoritative routing until the schema-valid inspection result returns
 
 4. **Check Entry Gate**
@@ -55,7 +55,7 @@ Every delegated run should follow this sequence:
 6. **Persist Durable Outputs**
    - only when the assigned specialist and scope allow file changes
    - keep ownership within the declared artifact set
-   - preserve artifact marker rules when markerized workflow artifacts are touched
+   - preserve normal artifact content coherence when workflow artifacts are touched
 
 7. **Collect Authoritative Result**
    - when using Codex CLI transport, read `manifest.json` or `manifest.env` first to locate run artifacts
@@ -67,12 +67,12 @@ Every delegated run should follow this sequence:
 
 8. **Validate and Accept**
    - validate the response schema
-   - run artifact marker validation when acceptance or continuation depends on markerized artifacts
-   - after accepting a schema-valid inspection result or a marker-validated phase-owned update, refresh the repo-local routing snapshot
+   - run delegated response validation before acceptance or continuation
+   - after accepting a schema-valid delegated result, refresh the repo-local routing snapshot
    - snapshot refresh must be driven from the authoritative delegated response, not from logs
    - verify the refreshed snapshot by rereading it immediately after write and fail the validator on mismatch
    - use one format-only repair pass only when allowed by `./orchestrator-fallback.md`
-   - route based on validated markers or the current schema-valid specialist result, not pre-delegation summary text
+   - route based on current repository evidence or the current schema-valid specialist result, not pre-delegation summary text
 
 9. **Stop**
    - stop after the single bounded run is accepted, blocked, or rejected

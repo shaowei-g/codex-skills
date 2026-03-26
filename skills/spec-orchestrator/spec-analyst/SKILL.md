@@ -41,7 +41,7 @@ Use this skill when at least one is true:
 
 ## Owned Outputs
 
-- `spec.md` with markerized front matter when safe to add or preserve
+- `spec.md`
 - specification-phase checklist artifacts when the repository workflow expects them for spec readiness
 - clarified scope boundaries
 - explicit acceptance criteria and constraints for the assigned feature

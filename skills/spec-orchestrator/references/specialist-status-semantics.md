@@ -11,7 +11,7 @@ Return `completed` when all of the following are true:
 - the entry gate for that phase is satisfied
 - the bounded specialist scope was fully completed in this run
 - any claimed durable outputs either already exist in the repository or are fully present as approved response artifact payloads for orchestrator materialization
-- any markerized artifact changes remain consistent with `./artifact-acceptance-markers.md`
+- any artifact changes remain internally consistent with the repository state
 
 ## Rejected
 
@@ -45,11 +45,11 @@ Common `blocked` examples:
 - Use `blocked` for valid phase work that is currently prevented by missing prerequisites.
 - Use `completed` only for work actually finished in this run.
 - Response-embedded artifact payloads count as finished only when they are complete enough for truthful orchestrator materialization.
-- A `completed` specialist run may still leave the artifact in `draft` or `ready`; formal `accepted` markers belong to orchestrator gate acceptance.
+- A `completed` specialist run means the delegated bounded task finished successfully.
 - Do not use status selection to justify cross-phase work or silent scope expansion.
 
 ## Related References
 
 - execution boundary: `./specialist-execution-contract.md`
-- artifact markers: `./artifact-acceptance-markers.md`
+- optional artifact marker reference: `./artifact-acceptance-markers.md`
 - response schema: `./subagent-response-format.md`

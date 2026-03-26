@@ -72,7 +72,7 @@ After a blocked booster cycle, only these follow-up paths are allowed:
 - each delegated step gets at most one execution attempt
 - a format-only repair pass is still limited to one repair for the current delegated payload
 - do not preload all specialists or all prompts before they are needed
-- do not use `booster` to bypass missing prerequisites, authority limits, marker validation, or write-ownership rules
+- do not use `booster` to bypass missing prerequisites, authority limits, or write-ownership rules
 - do not keep going after any delegated `blocked` or `rejected` result
 - do not keep going after transport failure or missing authoritative payload
 - do not keep going when continuation would require guessing the route instead of reading current validated state

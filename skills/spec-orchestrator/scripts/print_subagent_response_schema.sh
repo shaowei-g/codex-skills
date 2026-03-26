@@ -1,44 +1,24 @@
-\
 #!/usr/bin/env bash
 set -euo pipefail
 
 usage() {
   cat <<'EOF'
 Usage:
-  print_subagent_response_schema.sh \
-    --status <completed|blocked|rejected> \
-    --feature <feature-slug> \
-    --assigned-phase <phase> \
-    --assigned-subagent <subagent> \
-    --scope <single scope> \
-    [--result <text>] \
-    [--artifacts <none|fence-template>] \
-    [--recommended-next-phase <phase>] \
-    [--recommended-next-subagent <subagent>]
+  print_subagent_response_schema.sh --status <completed|blocked|rejected>
+
+Print the shared status-only subagent response template.
 EOF
 }
 
 status=""
-feature=""
-assigned_phase=""
-assigned_subagent=""
-scope=""
-result="none"
-artifacts="none"
-recommended_next_phase="none"
-recommended_next_subagent="none"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --status) status=${2-}; shift 2 ;;
-    --feature) feature=${2-}; shift 2 ;;
-    --assigned-phase) assigned_phase=${2-}; shift 2 ;;
-    --assigned-subagent) assigned_subagent=${2-}; shift 2 ;;
-    --scope) scope=${2-}; shift 2 ;;
-    --result) result=${2-}; shift 2 ;;
-    --artifacts) artifacts=${2-}; shift 2 ;;
-    --recommended-next-phase) recommended_next_phase=${2-}; shift 2 ;;
-    --recommended-next-subagent) recommended_next_subagent=${2-}; shift 2 ;;
+    --feature|--assigned-phase|--assigned-subagent|--scope|--result|--artifacts|--recommended-next-phase|--recommended-next-subagent)
+      # Accepted for backward compatibility but ignored by the status-only schema.
+      shift 2
+      ;;
     --help|-h) usage; exit 0 ;;
     *)
       echo "Unknown argument: $1" >&2
@@ -48,47 +28,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "$status" && -n "$feature" && -n "$assigned_phase" && -n "$assigned_subagent" && -n "$scope" ]] || {
-  echo "Missing required arguments: --status, --feature, --assigned-phase, --assigned-subagent, --scope" >&2
+[[ -n "$status" ]] || {
+  echo "Missing required argument: --status" >&2
   usage >&2
   exit 1
 }
 
-case "$status" in completed|blocked|rejected) ;; *) echo "Invalid --status: $status" >&2; exit 1 ;; esac
-case "$assigned_phase" in inspection|specification|planning|"task decomposition"|implementation|verification|"drift check"|handoff) ;; *) echo "Invalid --assigned-phase: $assigned_phase" >&2; exit 1 ;; esac
-case "$assigned_subagent" in spec-viewer|spec-analyst|spec-planner|spec-tasker|spec-implementer|spec-verifier|spec-drift-check|spec-handoff) ;; *) echo "Invalid --assigned-subagent: $assigned_subagent" >&2; exit 1 ;; esac
-case "$recommended_next_phase" in inspection|specification|planning|"task decomposition"|implementation|verification|"drift check"|handoff|none) ;; *) echo "Invalid --recommended-next-phase: $recommended_next_phase" >&2; exit 1 ;; esac
-case "$recommended_next_subagent" in spec-viewer|spec-analyst|spec-planner|spec-tasker|spec-implementer|spec-verifier|spec-drift-check|spec-handoff|none) ;; *) echo "Invalid --recommended-next-subagent: $recommended_next_subagent" >&2; exit 1 ;; esac
-case "$artifacts" in none|fence-template) ;; *) echo "Invalid --artifacts: $artifacts" >&2; exit 1 ;; esac
+case "$status" in
+  completed|blocked|rejected) ;;
+  *)
+    echo "Invalid --status: $status" >&2
+    exit 1
+    ;;
+esac
 
-printf 'Status:\n\n- %s\n\n' "$status"
-printf 'Feature-Slug:\n\n- %s\n\n' "$feature"
-printf 'Assigned-Phase:\n\n- %s\n\n' "$assigned_phase"
-printf 'Assigned-Subagent:\n\n- %s\n\n' "$assigned_subagent"
-printf 'Scope:\n\n- %s\n\n' "$scope"
-printf 'Result:\n\n%s\n\n' "$result"
-printf 'Artifacts:\n\n'
-if [[ "$artifacts" == "none" ]]; then
-  printf '%s\n\n' '- none'
-else
-  cat <<'EOF'
-```artifact path="specs/<feature>/owned-artifact.md"
-<full file content>
-```
-
-EOF
-fi
-printf 'Recommended-Next-Phase:\n\n- %s\n\n' "$recommended_next_phase"
-printf 'Recommended-Next-Subagent:\n\n- %s\n\n' "$recommended_next_subagent"
-cat <<'EOF'
-Self-Check:
-
-- one_bounded_scope = true
-- assigned_phase_only = true
-- chose_next_phase = false
-- chose_next_subagent = false
-- unauthorized_handoff = false
-- outside_ownership_modification = false
-- required_response_schema_used = true
-- terminating_now = true
-EOF
+printf 'Status:\n\n- %s\n' "$status"

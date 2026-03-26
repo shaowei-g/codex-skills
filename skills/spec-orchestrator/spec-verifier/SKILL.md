@@ -28,9 +28,9 @@ Use this skill when at least one is true:
 
 - `.codex/prompts/speckit.checklist.md` first
 - `.codex/prompts/speckit.constitution.md` if present
-- `specs/<feature>/spec.md` and its marker state
-- `specs/<feature>/plan.md` if present and its marker state
-- `specs/<feature>/tasks.md` if present and its marker state
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md` if present
+- `specs/<feature>/tasks.md` if present
 - `specs/<feature>/implementation-status.md` if present
 - changed code, tests, and review artifacts needed for the assigned verification scope
 

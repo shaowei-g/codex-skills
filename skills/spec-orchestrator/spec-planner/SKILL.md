@@ -34,7 +34,7 @@ Use this skill when at least one is true:
 
 ## Owned Outputs
 
-- `plan.md` with markerized front matter when safe to add or preserve
+- `plan.md`
 - plan-level architecture and dependency decisions
 - implementation-ready approach notes for the assigned feature
 

@@ -37,9 +37,9 @@ Use this skill for:
 ## Read Order
 
 - `specs/<feature>/handoff.md` if present
-- `specs/<feature>/spec.md` if present and its marker state
-- `specs/<feature>/plan.md` if present and its marker state
-- `specs/<feature>/tasks.md` if present and its marker state
+- `specs/<feature>/spec.md` if present
+- `specs/<feature>/plan.md` if present
+- `specs/<feature>/tasks.md` if present
 - `specs/<feature>/implementation-status.md` if present
 - `specs/<feature>/review.md` if present
 - `specs/<feature>/drift.md` if present
@@ -52,7 +52,7 @@ Shared template:
 ## Owned Outputs
 
 - `handoff.md`
-- concise current-phase summary with accepted-vs-ready artifact distinctions when available
+- concise current-phase summary from current repository state
 - pending work, blockers, and exact recommended next reading path
 
 ## Phase-Specific Rejected Criteria

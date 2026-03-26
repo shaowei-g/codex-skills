@@ -12,7 +12,7 @@ Guardrail:
 
 - for an existing feature with unclear or conflicting state, the orchestrator may collect candidate routing signals only
 - authoritative workflow-state conclusions must come from exactly one of:
-  - validated artifact acceptance markers from `./artifact-acceptance-markers.md`
+  - current repository evidence
   - a schema-valid inspection result from `spec-viewer`
 - do not present pre-inspection observations as final routing decisions
 
@@ -76,9 +76,9 @@ Anti-pattern:
 
 Guardrail:
 
-- formal acceptance comes from artifact markers plus validator checks, not summary text alone
-- if markerized artifacts are absent or invalid, routing must rely on the current authoritative inspection result
-- never let a previous summary overrule repository evidence or failed marker validation
+- delegated-run acceptance comes from current repository evidence plus the delegated response validator, not summary text alone
+- if repository evidence is incomplete, routing must rely on the current authoritative inspection result
+- never let a previous summary overrule repository evidence
 
 ## 7. Orchestrator Acting Like a Specialist
 
@@ -90,7 +90,7 @@ Guardrail:
 
 - the orchestrator owns routing, delegation, acceptance, and stopping decisions
 - specialists own phase-local judgment and outputs
-- the orchestrator may gather only the minimum evidence needed to choose the correct specialist or validate markers
+- the orchestrator may gather only the minimum evidence needed to choose the correct specialist
 
 ## 8. Temp-Path Discovery Instead of Declared Run Artifacts
 
@@ -141,5 +141,5 @@ Guardrail:
 
 - the delegated `response_file` is authoritative
 - for write-owning phases, check for approved `Artifacts` payloads before concluding that transport prevented durable completion
-- let the orchestrator materialize repo-relative payloads locally, then run marker validation and normal acceptance logic
+- let the orchestrator materialize repo-relative payloads locally, then run normal acceptance logic
 - do not force specialists to depend on a single transport-specific write mechanism when the shared response contract already supports truthful artifact transfer

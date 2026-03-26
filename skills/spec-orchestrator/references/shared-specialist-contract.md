@@ -1,57 +1,22 @@
 # Shared Specialist Contract
 
-Use this file as the default one-file load for specialist runs.
+All specialists share these baseline rules.
 
-It is an execution shortcut for the four canonical shared references:
+## Required Output
 
-- `./specialist-execution-contract.md`
-- `./artifact-acceptance-markers.md`
-- `./subagent-response-format.md`
-- `./specialist-status-semantics.md`
+- Return only the approved status-only response schema.
+- Use exactly one `Status` heading.
+- Allowed values are `completed`, `blocked`, or `rejected`.
 
-When this file conflicts with a canonical reference, the canonical reference wins.
+## Execution Boundaries
 
-## What every specialist must do
+- Stay within one assigned feature and one bounded scope.
+- Do not claim routing authority for the next phase.
+- Do not continue after returning the response.
+- Keep ownership boundaries truthful.
 
-- Execute exactly one bounded assignment for exactly one feature.
-- Stay inside the assigned phase and assigned specialist identity.
-- Do not widen scope, switch phases, or continue into a follow-on phase in the same run, even when the orchestrator is operating in `booster` mode.
-- Do not claim routing authority. Routing stays with `spec-orchestrator`.
-- Recommendations about next phase or next specialist are advisory only.
+## Artifact State
 
-## Output rules
-
-- Return results only with the approved compact response schema.
-- Put supporting detail in the single `Result` section instead of inventing extra headings.
-- Use the `Artifacts` section only for machine-materializable repo files from the assigned phase.
-- Report only durable work actually completed in this run.
-- Keep `Self-Check` explicit and truthful.
-- Use `completed`, `blocked`, and `rejected` exactly as defined by the shared status semantics.
-
-## Artifact rules
-
-- Preserve validator-compatible YAML front matter for markerized workflow artifacts.
-- Specialists may set `status: draft` or `status: ready` when true.
-- Specialists must not self-promote artifacts to formal acceptance.
-- `approved_by_orchestrator: true` and `status: accepted` remain orchestrator-owned.
-
-## Practical status guide
-
-- `completed`: the assigned bounded scope was finished truthfully for this phase.
-- `blocked`: the phase is still the right one, but required inputs, access, or context are missing.
-- `rejected`: the request is for the wrong phase, violates phase boundaries, or asks for authority the specialist does not own.
-
-## Read discipline
-
-- Load the phase prompt first when one exists for the assigned phase.
-- Load only the feature artifacts needed for the assigned scope.
-- Prefer durable workflow artifacts over chat history.
-- Open the deeper canonical references only when the shortcut is insufficient for the current situation.
-
-
-## Transport-aware write fallback
-
-- When delegated transport can read but cannot safely persist repo files, do not fake direct writes.
-- If the assigned phase work is otherwise complete, return `completed` with artifact payload blocks in `Artifacts` so the orchestrator can materialize them.
-- If the artifact content itself is not ready, return `blocked` with `Artifacts: - none`.
-- Do not emit artifact payloads for work outside the assigned phase.
+- YAML front matter is optional.
+- The orchestrator no longer validates YAML headers as an acceptance gate.
+- Specialists may still edit normal markdown artifact content when that is part of the assigned work.

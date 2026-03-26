@@ -30,9 +30,9 @@ Use this skill for:
 
 - `.codex/prompts/speckit.analyze.md` first
 - `.codex/prompts/speckit.constitution.md` if present
-- `specs/<feature>/spec.md` and its marker state
-- `specs/<feature>/plan.md` if present and its marker state
-- `specs/<feature>/tasks.md` if present and its marker state
+- `specs/<feature>/spec.md`
+- `specs/<feature>/plan.md` if present
+- `specs/<feature>/tasks.md` if present
 - `specs/<feature>/implementation-status.md` if present
 - `specs/<feature>/review.md` if present
 - `specs/<feature>/drift.md` if present

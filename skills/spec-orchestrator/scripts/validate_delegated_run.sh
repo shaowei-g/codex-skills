@@ -1,4 +1,3 @@
-\
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -17,16 +16,9 @@ Usage:
     [--disable-response-artifact-materialization true|false]
 
 Rules:
-- Always validates subagent response schema.
-- Materializes response-embedded artifact payloads when present and enabled.
-- Runs artifact marker validation for completed:
-  specification, planning, task decomposition
-- Writes routing snapshot only when:
-  - response status is completed
-  - schema is valid
-  - marker validation passes when required
-- Treats this script as the single snapshot-refresh entry point for accepted delegated runs.
-- Verifies the snapshot by rereading it after refresh and fails loudly on mismatch.
+- Always validates the status-only subagent response schema.
+- Refreshes the routing snapshot only from a schema-valid delegated response.
+- Does not require YAML front matter or marker validation.
 USAGE
 }
 
@@ -108,10 +100,6 @@ done
 [[ -d "$repo_root" ]] || { echo "repo root not found: $repo_root" >&2; exit 2; }
 [[ -f "$response_file" ]] || { echo "response file not found: $response_file" >&2; exit 2; }
 
-if [[ -z "$marker_path" ]]; then
-  marker_path="$repo_root/specs/$feature"
-fi
-
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python_bin="$(select_python)"
 
@@ -135,82 +123,45 @@ import shlex
 import sys
 
 path = pathlib.Path(sys.argv[1])
-lines = path.read_text(encoding="utf-8").splitlines()
-headings = {}
-current_heading = None
-buffer = []
-for line in lines:
+text = path.read_text(encoding="utf-8")
+status = ""
+capture = False
+for line in text.splitlines():
     stripped = line.strip()
-    if stripped.endswith(":") and stripped[:-1] and all(ch.isalpha() or ch in " -" for ch in stripped[:-1]):
-        if current_heading is not None:
-            headings[current_heading] = list(buffer)
-        current_heading = stripped
-        buffer = []
+    if stripped == "Status:":
+        capture = True
         continue
-    if current_heading is not None:
-        buffer.append(line)
-if current_heading is not None:
-    headings[current_heading] = list(buffer)
-
-def first_value(heading):
-    for raw in headings.get(heading, []):
-        stripped = raw.strip()
-        if not stripped:
-            continue
-        if stripped.startswith("- "):
-            return stripped[2:].strip()
-        return stripped
-    return ""
+    if capture and stripped.endswith(":") and stripped[:-1]:
+        break
+    if capture and stripped.startswith("- "):
+        status = stripped[2:].strip()
+        break
 
 def q(value):
     return shlex.quote(value)
 
 response_sha = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-print(f"DELEGATED_STATUS={q(first_value('Status:'))}")
-print(f"RECOMMENDED_NEXT_PHASE={q(first_value('Recommended-Next-Phase:'))}")
-print(f"RECOMMENDED_NEXT_SUBAGENT={q(first_value('Recommended-Next-Subagent:'))}")
+print(f"DELEGATED_STATUS={q(status)}")
+print(f"RECOMMENDED_NEXT_PHASE={q('none')}")
+print(f"RECOMMENDED_NEXT_SUBAGENT={q('none')}")
 print(f"RESPONSE_SHA256={q(response_sha)}")
 PY
 )"
 
-artifact_materialization_status="not_attempted"
+artifact_materialization_status="disabled"
 artifact_materialization_count="0"
 if [[ "${disable_response_artifact_materialization:-false}" != "true" ]]; then
-  materialize_args=(--repo-root "$repo_root" --response-file "$response_file" --feature "$feature")
-  case "$assigned_phase" in
-    specification|planning|"task decomposition")
-      materialize_args+=(--allow-prefix "specs/$feature/")
-      ;;
-  esac
-  eval "$(
-    bash "$script_dir/materialize_response_artifacts.sh" "${materialize_args[@]}"
-  )"
-  artifact_materialization_status="$ARTIFACT_MATERIALIZATION_STATUS"
-  artifact_materialization_count="$ARTIFACT_MATERIALIZATION_COUNT"
-else
-  artifact_materialization_status="disabled"
+  artifact_materialization_status="not_applicable"
 fi
 
-marker_validation_mode="skipped"
+marker_validation_mode="disabled"
 marker_validation_passed="true"
-authoritative_basis=""
+authoritative_basis="validated_response"
 cacheable_phase="true"
-
-case "$assigned_phase" in
-  inspection) authoritative_basis="validated_inspection" ;;
-  specification|planning|"task decomposition") authoritative_basis="validated_markers" ;;
-  *) cacheable_phase="false" ;;
-esac
 
 if [[ "$DELEGATED_STATUS" != "completed" ]]; then
   emit_result "accepted_without_snapshot" "delegated status is not completed" "$DELEGATED_STATUS" "$RECOMMENDED_NEXT_PHASE" "$RECOMMENDED_NEXT_SUBAGENT" "skipped" "$RESPONSE_SHA256" "$marker_validation_mode" "$marker_validation_passed" "${orchestrator_mode:-unspecified}" "$artifact_materialization_status" "$artifact_materialization_count"
   exit 0
-fi
-
-if [[ "$assigned_phase" == "specification" || "$assigned_phase" == "planning" || "$assigned_phase" == "task decomposition" ]]; then
-  bash "$script_dir/validate_artifact_markers.sh" --require-markers "$marker_path"
-  marker_validation_mode="required"
-  marker_validation_passed="true"
 fi
 
 if [[ "$cacheable_phase" != "true" ]]; then
