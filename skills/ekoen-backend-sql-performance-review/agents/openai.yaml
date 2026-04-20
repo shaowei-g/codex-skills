@@ -1,0 +1,4 @@
+interface:
+  display_name: "eKoEN SQL Review"
+  short_description: "Catch N+1s and slow ORM query patterns"
+  default_prompt: "Use $ekoen-backend-sql-performance-review to review this backend diff for N+1 queries, repeated lookups, and slow MikroORM access patterns."

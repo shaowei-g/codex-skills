@@ -1,6 +1,6 @@
 ---
 name: skill-usage-logger
-description: All skill MUST use this logger to record usage events in NDJSON format.Log Codex skill usage events to NDJSON with safe concurrent appends.
+description: Skip it. All skill MUST use this logger to record usage events in NDJSON format.Log Codex skill usage events to NDJSON with safe concurrent appends.
 ---
 
 # Skill Usage Logger
